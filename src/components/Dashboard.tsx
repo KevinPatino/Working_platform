@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../firebaseConfig';
 import { signOut } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+// --- 1. IMPORTAMOS doc y getDoc PARA TRAER EL NOMBRE ---
+import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import Calendar from './Calendar';
 import Toast from './Toast';
+import WorkerCalculator from './WorkerCalculator'; 
 
 interface DashboardProps {
   user: any;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ user }) => {
-  const [activeTab, setActiveTab] = useState<'form' | 'history'>('form');
+  const [activeTab, setActiveTab] = useState<'form' | 'history' | 'calculator'>('form');
+
+  // --- 2. NUEVO ESTADO PARA EL NOMBRE ---
+  const [userName, setUserName] = useState('Cargando...');
 
   // Estados del formulario
   const [location, setLocation] = useState('');
@@ -23,7 +28,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [myLogs, setMyLogs] = useState<any[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(true);
   
-  // --- NUEVOS ESTADOS PARA EL CANDADO DE SEGURIDAD ---
+  // Estados para el candado de seguridad
   const [hasLoggedToday, setHasLoggedToday] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -33,6 +38,23 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   const showNotification = (message: string) => {
     setToastMessage(message);
+  };
+
+  // --- 3. FUNCIÓN PARA BUSCAR EL NOMBRE DEL USUARIO ---
+  const fetchUserName = async () => {
+    try {
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      
+      if (userDocSnap.exists()) {
+        setUserName(userDocSnap.data().fullName);
+      } else {
+        setUserName(user.email); // Por si acaso falla, mostramos el correo
+      }
+    } catch (error) {
+      console.error("Error al obtener el nombre:", error);
+      setUserName(user.email);
+    }
   };
 
   const fetchMyLogs = async () => {
@@ -49,8 +71,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         const data = doc.data();
         logsData.push({ id: doc.id, ...data });
 
-        // --- VERIFICACIÓN DE FECHA ---
-        // Revisamos si el registro coincide con el día, mes y año de hoy
         if (data.timestamp) {
           const logDate = data.timestamp.toDate();
           if (
@@ -63,7 +83,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         }
       });
 
-      // Ordenamos para el calendario
       logsData.sort((a, b) => {
         const timeA = a.timestamp?.toMillis() || 0;
         const timeB = b.timestamp?.toMillis() || 0;
@@ -79,8 +98,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     }
   };
 
-  // Ahora ejecutamos la búsqueda en cuanto el usuario entra a la app
   useEffect(() => {
+    // --- 4. EJECUTAMOS AMBAS FUNCIONES AL ENTRAR ---
+    fetchUserName();
     fetchMyLogs();
   }, []);
 
@@ -106,9 +126,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       setTotalHours('');
       setComments('');
 
-      // --- ACTIVAMOS EL CANDADO INMEDIATAMENTE ---
       setHasLoggedToday(true);
-      // Actualizamos los datos en segundo plano para que el calendario tenga el nuevo registro
       fetchMyLogs(); 
 
     } catch (error: any) {
@@ -131,7 +149,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         <div className="p-6 border-b flex justify-between items-center bg-gray-800 text-white">
           <div>
             <h1 className="text-xl font-bold">Portal del Trabajador</h1>
-            <p className="text-xs text-gray-300">{user.email}</p>
+            {/* --- 5. REEMPLAZAMOS EL CORREO POR EL NOMBRE AQUÍ --- */}
+            <p className="text-sm text-blue-300 font-semibold mt-1">{userName}</p>
           </div>
           <button onClick={handleLogout} className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded text-sm font-semibold">Salir</button>
         </div>
@@ -139,25 +158,29 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         <div className="flex border-b">
           <button 
             onClick={() => setActiveTab('form')}
-            className={`flex-1 py-3 text-sm font-semibold text-center transition-colors ${activeTab === 'form' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:bg-gray-50'}`}
+            className={`flex-1 py-3 px-2 text-sm font-semibold text-center transition-colors ${activeTab === 'form' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:bg-gray-50'}`}
           >
-            Registrar Horas
+            Registrar
           </button>
           <button 
             onClick={() => setActiveTab('history')}
-            className={`flex-1 py-3 text-sm font-semibold text-center transition-colors ${activeTab === 'history' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:bg-gray-50'}`}
+            className={`flex-1 py-3 px-2 text-sm font-semibold text-center transition-colors ${activeTab === 'history' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:bg-gray-50'}`}
           >
-            Mi Calendario
+            Calendario
+          </button>
+          <button 
+            onClick={() => setActiveTab('calculator')}
+            className={`flex-1 py-3 px-2 text-sm font-semibold text-center transition-colors ${activeTab === 'calculator' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:bg-gray-50'}`}
+          >
+            Calculadora
           </button>
         </div>
 
         <div className="p-6">
-          {/* VISTA 1: FORMULARIO O MENSAJE DE ÉXITO */}
           {activeTab === 'form' && (
             loadingLogs ? (
               <p className="text-center text-gray-500 py-8 animate-pulse">Verificando tus registros de hoy...</p>
             ) : hasLoggedToday ? (
-              // --- EL NUEVO MENSAJE DE ÉXITO FIJO ---
               <div className="text-center py-10 px-4 bg-green-50 rounded-xl border border-green-200 shadow-inner animate-fade-in">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +196,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                 </p>
               </div>
             ) : (
-              // --- EL FORMULARIO NORMAL ---
               <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Lugar / Obra</label>
@@ -204,7 +226,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             )
           )}
 
-          {/* VISTA 2: CALENDARIO */}
           {activeTab === 'history' && (
             <div>
               {loadingLogs ? (
@@ -214,8 +235,18 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               )}
             </div>
           )}
-        </div>
 
+          {activeTab === 'calculator' && (
+            <div>
+              {loadingLogs ? (
+                <p className="text-center text-gray-500 py-8 animate-pulse">Cargando tus registros...</p>
+              ) : (
+                <WorkerCalculator logs={myLogs} />
+              )}
+            </div>
+          )}
+
+        </div>
       </div>
     </div>
   );

@@ -52,7 +52,7 @@ const Auth: React.FC = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-blue-600">
-          {isLogin ? 'Time Tracker Login' : 'Create Account'}
+          {isLogin ? 'Registro de Horas' : 'Crear cuenta'}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
