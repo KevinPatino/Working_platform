@@ -3,7 +3,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
-import AdminPanel from './components/AdminPanel'; // <-- Importamos el nuevo panel
+import AdminPanel from './components/AdminPanel'; 
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -32,7 +32,8 @@ function App() {
         <Auth />
       ) : user.email === ADMIN_EMAIL ? (
         // 2. Si el usuario es el jefe, mostramos la Tabla de Excel
-        <AdminPanel />
+        // ¡AQUÍ ESTÁ LA CORRECCIÓN! Le pasamos el user
+        <AdminPanel user={user} /> 
       ) : (
         // 3. Si es cualquier otro trabajador, mostramos el formulario de celular
         <Dashboard user={user} />
