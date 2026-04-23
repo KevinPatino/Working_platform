@@ -15,7 +15,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   
   const [allRegisteredUsers, setAllRegisteredUsers] = useState<any[]>([]);
-  const [usersMap, setUsersMap] = useState<Record<string, string>>({});
+//   const [usersMap, setUsersMap] = useState<Record<string, string>>({});
 
   const [selectedUser, setSelectedUser] = useState('Todos');
   const [startDate, setStartDate] = useState('');
