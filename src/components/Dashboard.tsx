@@ -81,7 +81,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
       setActiveTab('history');
     } catch (error: any) {
-      howNotification("Error: " + error.message);
+      showNotification("Error: " + error.message);
     }
   };
 
