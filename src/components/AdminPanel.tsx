@@ -49,7 +49,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
       // Orden Alfabético inicial
       usersList.sort((a, b) => a.fullName.localeCompare(b.fullName));
       setAllRegisteredUsers(usersList);
-      setUsersMap(map);
+    //   setUsersMap(map);
 
       const q = query(collection(db, 'timeLogs'));
       const querySnapshot = await getDocs(q);
