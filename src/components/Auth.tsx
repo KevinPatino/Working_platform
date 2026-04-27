@@ -58,8 +58,8 @@ const Auth: React.FC = () => {
           />
         </div>
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6 text-blue-600">
-          {isLogin ? 'Registro de Horas' : 'Crear cuenta'}
+        <h2 className="text-2xl font-bold text-center mb-6 text-green-500">
+          {isLogin ? '' : 'Crear cuenta'}
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -76,7 +76,7 @@ const Auth: React.FC = () => {
           <input 
             type="email" 
             placeholder="Email" 
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-200"
             onChange={(e) => setEmail(e.target.value)}
             required 
           />
@@ -84,14 +84,14 @@ const Auth: React.FC = () => {
           <input 
             type="password" 
             placeholder="Password" 
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-200"
             onChange={(e) => setPassword(e.target.value)}
             required={isLogin} // Solo requerido si no estamos reseteando
           />
           
           <button 
             type="submit" 
-            className="w-full bg-blue-600 hover:bg-blue-700 transition duration-200 text-white p-3 rounded-lg font-semibold"
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-green-500 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
           >
             {isLogin ? 'Log In' : 'Sign Up'}
           </button>
@@ -102,7 +102,7 @@ const Auth: React.FC = () => {
           <div className="text-center mt-3">
             <button 
               onClick={handleForgotPassword}
-              className="text-xs text-gray-500 hover:text-blue-600 underline"
+              className="text-xs text-gray-500 hover:text-green-600 underline"
             >
               Forgot your password?
             </button>
@@ -111,7 +111,7 @@ const Auth: React.FC = () => {
 
         <button 
           onClick={() => setIsLogin(!isLogin)}
-          className="w-full mt-4 text-sm text-gray-600 hover:text-blue-600 hover:underline"
+          className="w-full mt-4 text-sm text-gray-600 hover:text-green-600 hover:underline"
         >
           {isLogin ? "Don't have an account? Sign up here" : 'Already have an account? Log in'}
         </button>

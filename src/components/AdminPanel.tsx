@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebaseConfig';
-import { collection, getDocs, query } from 'firebase/firestore';
+// IMPORTAMOS 'where' PARA FILTRAR DESDE EL SERVIDOR
+import { collection, getDocs, query, addDoc, Timestamp, where } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import Toast from './Toast';
 
@@ -8,19 +9,99 @@ interface AdminPanelProps {
   user: any;
 }
 
+// ============================================================================
+// COMPONENTE: Formulario de Edición Minimalista
+// ============================================================================
+const InlineEditForm = ({ workerId, dateObj, onSave, onCancel, showNotification }: any) => {
+  const [location, setLocation] = useState('');
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
+  const [totalHours, setTotalHours] = useState('');
+  const [comments, setComments] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSave = async () => {
+    if (!location || !checkIn || !checkOut || !totalHours) {
+      showNotification("Por favor llena todos los campos de horas y ubicación.");
+      return;
+    }
+    setIsSubmitting(true);
+    await onSave(workerId, dateObj, { location, checkIn, checkOut, totalHours, comments });
+    setIsSubmitting(false);
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-blue-100 shadow-sm animate-fade-in w-full">
+      <div>
+        <label className="text-[10px] uppercase font-bold text-gray-400">Dirección</label>
+        <input type="text" value={location} onChange={e => setLocation(e.target.value)} className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Lugar de obra" />
+      </div>
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <label className="text-[10px] uppercase font-bold text-gray-400">Entrada</label>
+          <input type="time" value={checkIn} onChange={e => setCheckIn(e.target.value)} className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+        </div>
+        <div className="flex-1">
+          <label className="text-[10px] uppercase font-bold text-gray-400">Salida</label>
+          <input type="time" value={checkOut} onChange={e => setCheckOut(e.target.value)} className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" />
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <div className="w-16">
+          <label className="text-[10px] uppercase font-bold text-gray-400">Hrs</label>
+          <input type="number" step="0.5" value={totalHours} onChange={e => setTotalHours(e.target.value)} className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="0" />
+        </div>
+        <div className="flex-1">
+          <label className="text-[10px] uppercase font-bold text-gray-400">Nota</label>
+          <input type="text" value={comments} onChange={e => setComments(e.target.value)} className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors" placeholder="Opcional" />
+        </div>
+      </div>
+      
+      <div className="flex gap-2 items-end justify-end">
+        <button onClick={onCancel} className="p-2.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors" title="Cancelar">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+        <button onClick={handleSave} disabled={isSubmitting} className="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400 shadow-sm" title="Guardar">
+          {isSubmitting ? <span className="text-xs font-bold px-1">...</span> : <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>}
+        </button>
+      </div>
+    </div>
+  );
+};
+// ============================================================================
+
+const getLocalTodayString = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// --- NUEVA FUNCIÓN: Obtiene el primer día del mes actual ---
+const getFirstDayOfMonth = () => {
+  const d = new Date();
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
 const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'details'>('overview');
   const [allLogs, setAllLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   
   const [allRegisteredUsers, setAllRegisteredUsers] = useState<any[]>([]);
-//   const [usersMap, setUsersMap] = useState<Record<string, string>>({});
+  
+  // --- NUEVO ESTADO: Memoria de la fecha más antigua cargada ---
+  const [oldestLoadedDate, setOldestLoadedDate] = useState<Date>(getFirstDayOfMonth());
 
   const [selectedUser, setSelectedUser] = useState('Todos');
-  const [startDate, setStartDate] = useState('');
+  const [startDate, setStartDate] = useState(getLocalTodayString());
   const [endDate, setEndDate] = useState('');
-  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
+  
+  const [expandedRangeUserId, setExpandedRangeUserId] = useState<string | null>(null);
+  const [editingRowKey, setEditingRowKey] = useState<string | null>(null);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -30,72 +111,117 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     setToastMessage(message);
   };
 
-  const fetchAllLogs = async () => {
-    setLoading(true);
+  // --- SEPARAMOS LA CARGA DE USUARIOS ---
+  const loadUsers = async () => {
     try {
       const usersSnapshot = await getDocs(collection(db, 'users'));
       const usersList: any[] = [];
-      const map: Record<string, string> = {};
       
       usersSnapshot.forEach(doc => {
         const data = doc.data();
-        // --- MAGIA AQUÍ: Ignoramos al usuario actual (El Administrador) ---
         if (data.email !== user.email) {
-          map[doc.id] = data.fullName;
           usersList.push({ id: doc.id, fullName: data.fullName, email: data.email });
         }
       });
       
-      // Orden Alfabético inicial
       usersList.sort((a, b) => a.fullName.localeCompare(b.fullName));
       setAllRegisteredUsers(usersList);
-    //   setUsersMap(map);
+    } catch (error: any) {
+      showNotification("Error cargando usuarios: " + error.message);
+    }
+  };
 
-      const q = query(collection(db, 'timeLogs'));
+  // --- SEPARAMOS LA CARGA DE REGISTROS (Acepta fecha de inicio) ---
+  const loadLogs = async (fromDate: Date) => {
+    setLoading(true);
+    try {
+      // MAGIA AQUÍ: Solo traemos registros mayores o iguales a fromDate
+      const q = query(
+        collection(db, 'timeLogs'),
+        where('timestamp', '>=', Timestamp.fromDate(fromDate))
+      );
       const querySnapshot = await getDocs(q);
       
       const logsData: any[] = [];
-
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        // --- Ignoramos también si el admin metió horas por accidente alguna vez ---
         if (data.userEmail !== user.email) {
           logsData.push({ id: doc.id, ...data });
         }
       });
 
       setAllLogs(logsData);
+      setOldestLoadedDate(fromDate); // Actualizamos nuestra memoria
     } catch (error: any) {
-      showNotification("Error: " + error.message);
+      showNotification("Error cargando registros: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  // --- EFECTO 1: Al entrar por primera vez, cargamos el mes actual ---
   useEffect(() => {
-    fetchAllLogs();
+    const initData = async () => {
+      await loadUsers();
+      await loadLogs(getFirstDayOfMonth());
+    };
+    initData();
   }, []);
 
-  const toggleRow = (userId: string) => {
-    if (expandedUserId === userId) {
-      setExpandedUserId(null); 
-    } else {
-      setExpandedUserId(userId); 
+  // --- EFECTO 2: Vigía del Filtro "Desde" ---
+  useEffect(() => {
+    if (startDate) {
+      const selectedDate = new Date(startDate + 'T00:00:00');
+      // Si el usuario busca una fecha MÁS VIEJA de lo que tenemos en memoria...
+      if (selectedDate < oldestLoadedDate) {
+        // ...hacemos una nueva petición al servidor para traer la historia
+        loadLogs(selectedDate);
+      }
+    }
+  }, [startDate]);
+
+  const handleInlineSubmit = async (workerId: string, dateObj: Date, data: any) => {
+    try {
+      const targetWorker = allRegisteredUsers.find(w => w.id === workerId);
+      const [hours, minutes] = data.checkIn.split(':');
+      const finalDate = new Date(dateObj);
+      finalDate.setHours(Number(hours), Number(minutes), 0, 0);
+
+      await addDoc(collection(db, 'timeLogs'), {
+        userId: targetWorker.id,
+        userEmail: targetWorker.email,
+        location: data.location,
+        checkIn: data.checkIn,
+        checkOut: data.checkOut,
+        totalHours: Number(data.totalHours),
+        timestamp: Timestamp.fromDate(finalDate)
+      });
+      
+      showNotification('¡Registro añadido correctamente!');
+      setEditingRowKey(null);
+      
+      // Recargamos los datos respetando la profundidad histórica actual
+      loadLogs(oldestLoadedDate);
+    } catch (error: any) {
+      showNotification("Error al guardar: " + error.message);
     }
   };
 
-  const today = new Date();
-  const todayLogs = allLogs.filter(log => {
-    if (!log.timestamp) return false;
-    const logDate = log.timestamp.toDate();
-    return (
-      logDate.getDate() === today.getDate() &&
-      logDate.getMonth() === today.getMonth() &&
-      logDate.getFullYear() === today.getFullYear()
-    );
-  });
+  const toggleRangeRow = (userId: string) => {
+    setExpandedRangeUserId(expandedRangeUserId === userId ? null : userId);
+  };
 
-  // --- FILTRADO Y ORDEN ALFABÉTICO ESTRICTO ---
+  const getDatesInRange = (startStr: string, endStr: string) => {
+    const dates = [];
+    const current = new Date(startStr + 'T00:00:00');
+    const end = new Date(endStr + 'T00:00:00');
+    while (current <= end) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
+  };
+
   const filteredUsers = selectedUser === 'Todos' 
     ? allRegisteredUsers 
     : allRegisteredUsers.filter(worker => worker.id === selectedUser);
@@ -104,6 +230,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     a.fullName.localeCompare(b.fullName)
   );
 
+  const handleClearFilters = () => {
+    setSelectedUser('Todos');
+    setStartDate(getLocalTodayString());
+    setEndDate('');
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8 relative">
       {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
@@ -111,191 +245,80 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
       <div className="max-w-6xl mx-auto space-y-6">
         
         <div className="bg-gray-900 rounded-xl p-6 shadow-lg flex justify-between items-center text-white">
-          <h1 className="text-xl font-bold flex items-center gap-2">Admin Panel</h1>
+          <h1 className="text-xl font-bold">Panel de Control</h1>
           <button onClick={handleLogout} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-bold transition-colors">
             Cerrar Sesión
           </button>
         </div>
 
-        <div className="flex bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <button onClick={() => setActiveTab('overview')} className={`flex-1 py-4 text-sm font-bold text-center ${activeTab === 'overview' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600' : 'text-gray-500'}`}>
-            Registro del dia
-          </button>
-          <button onClick={() => setActiveTab('details')} className={`flex-1 py-4 text-sm font-bold text-center ${activeTab === 'details' ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-600' : 'text-gray-500'}`}>
-            Reportes e Historial
-          </button>
-        </div>
-
-        {/* PESTAÑA 1 */}
-        {activeTab === 'overview' && (
-          <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden animate-fade-in">
-            <div className="p-4 bg-gray-50 border-b">
-              <h2 className="font-bold text-gray-700">Estatus</h2>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider border-b">
-                  <tr>
-                    <th className="p-4">Trabajador</th>
-                    <th className="p-4">Estado</th>
-                    <th className="p-4">Lugar de Trabajo</th>
-                    <th className="p-4 text-center">Horas</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {loading ? (
-                    <tr><td colSpan={4} className="p-8 text-center text-gray-400 animate-pulse">Cargando base de datos...</td></tr>
-                  ) : [...allRegisteredUsers].sort((a,b) => a.fullName.localeCompare(b.fullName)).map(worker => {
-                    const logToday = todayLogs.find(l => l.userId === worker.id);
-                    const hasLogged = !!logToday;
-                    return (
-                      <tr key={worker.id} className="hover:bg-gray-50">
-                        <td className="p-4"><p className="font-bold text-gray-800 text-sm">{worker.fullName}</p></td>
-                        <td className="p-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${hasLogged ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                            {hasLogged ? 'Registrado' : 'Pendiente'}
-                          </span>
-                        </td>
-                        <td className="p-4 text-sm text-gray-600">{hasLogged ? logToday.location : '—'}</td>
-                        <td className="p-4 text-center font-bold text-sm text-blue-600">{hasLogged ? `${logToday.totalHours}h` : '0h'}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* PESTAÑA 2 */}
-        {activeTab === 'details' && (
-          <div className="space-y-6 animate-fade-in">
-            
-            <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 flex flex-col md:flex-row gap-4 items-end">
-              <div className="flex-1 w-full">
-                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">Trabajador</label>
-                <select 
-                  value={selectedUser} 
-                  onChange={(e) => { setSelectedUser(e.target.value); setExpandedUserId(null); }}
-                  className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
-                >
-                  <option value="Todos">Todos los trabajadores</option>
-                  {allRegisteredUsers.map(worker => (
-                    <option key={worker.id} value={worker.id}>{worker.fullName}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex-1 w-full">
-                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">Día Específico / Desde</label>
-                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <div className="flex-1 w-full">
-                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">Hasta (Opcional)</label>
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <button 
-                onClick={() => { setSelectedUser('Todos'); setStartDate(''); setEndDate(''); setExpandedUserId(null); }} 
-                className="w-full md:w-auto px-6 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+        <div className="space-y-6 animate-fade-in">
+          
+          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 flex flex-col md:flex-row gap-4 items-end">
+            <div className="flex-1 w-full">
+              <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">Trabajador</label>
+              <select 
+                value={selectedUser} 
+                onChange={(e) => { setSelectedUser(e.target.value); setExpandedRangeUserId(null); }}
+                className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
               >
-                Limpiar
-              </button>
+                <option value="Todos">Todos los trabajadores</option>
+                {allRegisteredUsers.map(worker => (
+                  <option key={worker.id} value={worker.id}>{worker.fullName}</option>
+                ))}
+              </select>
             </div>
 
-            <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
-              
-              {!startDate && !endDate && (
-                <div className="p-12 text-center flex flex-col items-center">
-                  <svg className="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                  <h3 className="text-lg font-bold text-gray-700">Selecciona una fecha</h3>
-                  <p className="text-sm text-gray-500 mt-1 max-w-md">Elige un día en "Desde" para ver el detalle de esa jornada, o selecciona también "Hasta" para sumar la nómina.</p>
+            <div className="flex-1 w-full">
+              <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">Día Específico / Desde</label>
+              <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+            <div className="flex-1 w-full">
+              <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">Hasta (Opcional)</label>
+              <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+            <button 
+              onClick={handleClearFilters} 
+              className="w-full md:w-auto px-6 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Limpiar
+            </button>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+            
+            {!startDate && (
+              <div className="p-12 text-center flex flex-col items-center">
+                <h3 className="text-lg font-bold text-gray-700">Selecciona una fecha</h3>
+                <p className="text-sm text-gray-500 mt-1 max-w-md">Elige un día en "Desde" para ver el detalle de esa jornada.</p>
+              </div>
+            )}
+
+            {startDate && (
+              <div className="overflow-x-auto">
+                <div className="p-4 bg-purple-50 border-b border-purple-100 text-purple-800 text-sm font-bold flex justify-between items-center">
+                  <span>
+                    Reporte: {new Date(startDate + 'T00:00:00').toLocaleDateString()} 
+                    {endDate && endDate !== startDate ? ` al ${new Date(endDate + 'T23:59:59').toLocaleDateString()}` : ''}
+                  </span>
+                  <span className="bg-purple-200 text-purple-900 px-3 py-1 rounded-full text-xs">Datos Activos</span>
                 </div>
-              )}
-
-              {startDate && !endDate && (
-                <div className="overflow-x-auto">
-                  <div className="p-4 bg-blue-50 border-b border-blue-100 text-blue-800 text-sm font-bold flex justify-between">
-                    <span>Reporte del día: {new Date(startDate + 'T00:00:00').toLocaleDateString()}</span>
-                    {selectedUser !== 'Todos' && <span className="text-blue-600">Filtrando por 1 trabajador</span>}
-                  </div>
-                  <table className="w-full text-left">
-                    <thead className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider border-b">
-                      <tr>
-                        <th className="p-4">Trabajador</th>
-                        <th className="p-4">Estado</th>
-                        <th className="p-4 text-center">Horas</th>
-                        <th className="p-4 text-right">Detalles</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {displayedUsers.map(worker => {
-                        const targetDate = new Date(startDate + 'T00:00:00');
-                        const logForDay = allLogs.find(log => {
-                          if (!log.timestamp) return false;
-                          const d = log.timestamp.toDate();
-                          return d.getDate() === targetDate.getDate() && d.getMonth() === targetDate.getMonth() && d.getFullYear() === targetDate.getFullYear() && log.userId === worker.id;
-                        });
-                        
-                        const hasLogged = !!logForDay;
-                        const isExpanded = expandedUserId === worker.id;
-
-                        return (
-                          <React.Fragment key={worker.id}>
-                            <tr onClick={() => hasLogged && toggleRow(worker.id)} className={`transition-colors ${hasLogged ? 'hover:bg-gray-50 cursor-pointer' : ''}`}>
-                              <td className="p-4 font-bold text-gray-800 text-sm">{worker.fullName}</td>
-                              <td className="p-4">
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${hasLogged ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                  {hasLogged ? 'Registrado' : 'Sin registro'}
-                                </span>
-                              </td>
-                              <td className="p-4 text-center font-bold text-sm text-blue-600">{hasLogged ? `${logForDay.totalHours}h` : '-'}</td>
-                              <td className="p-4 text-right">
-                                {hasLogged && (
-                                  <button className="text-gray-400 hover:text-blue-600 transition-transform duration-200" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                                    <svg className="w-5 h-5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                            {isExpanded && hasLogged && (
-                              <tr className="bg-gray-50 border-b border-gray-200">
-                                <td colSpan={4} className="p-0">
-                                  <div className="p-6 text-sm text-gray-700 grid grid-cols-1 md:grid-cols-3 gap-4 shadow-inner">
-                                    <div><p className="text-xs font-bold text-gray-400 uppercase">Obra / Ubicación</p><p className="font-semibold">{logForDay.location}</p></div>
-                                    <div><p className="text-xs font-bold text-gray-400 uppercase">Horario</p><p className="font-semibold">{logForDay.checkIn} - {logForDay.checkOut}</p></div>
-                                    <div><p className="text-xs font-bold text-gray-400 uppercase">Comentarios</p><p className="italic text-gray-600">"{logForDay.comments || 'Sin comentarios'}"</p></div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                      {displayedUsers.length === 0 && (
-                        <tr><td colSpan={4} className="p-8 text-center text-gray-500">No se encontraron trabajadores.</td></tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {startDate && endDate && (
-                <div className="overflow-x-auto">
-                  <div className="p-4 bg-purple-50 border-b border-purple-100 text-purple-800 text-sm font-bold flex justify-between items-center">
-                    <span>Resumen: {new Date(startDate + 'T00:00:00').toLocaleDateString()} al {new Date(endDate + 'T23:59:59').toLocaleDateString()}</span>
-                    <span className="bg-purple-200 text-purple-900 px-3 py-1 rounded-full text-xs">Modo Calculadora</span>
-                  </div>
+                
+                {loading ? (
+                  <div className="p-12 text-center text-gray-400 animate-pulse">Consultando Base de Datos...</div>
+                ) : (
                   <table className="w-full text-left">
                     <thead className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider border-b">
                       <tr>
                         <th className="p-4">Trabajador</th>
                         <th className="p-4 text-center">Horas Totales Acumuladas</th>
+                        <th className="p-4 text-right">Detalles</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {displayedUsers.map(worker => {
+                        const effectiveEndDate = endDate ? endDate : startDate;
                         const start = new Date(startDate + 'T00:00:00').getTime();
-                        const end = new Date(endDate + 'T23:59:59').getTime();
+                        const end = new Date(effectiveEndDate + 'T23:59:59').getTime();
                         
                         const userLogsInRange = allLogs.filter(log => {
                           if (!log.timestamp || log.userId !== worker.id) return false;
@@ -304,32 +327,136 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                         });
 
                         const totalWorkerHours = userLogsInRange.reduce((sum, log) => sum + (Number(log.totalHours) || 0), 0);
+                        const isExpanded = expandedRangeUserId === worker.id;
+                        const datesInRange = getDatesInRange(startDate, effectiveEndDate);
 
                         return (
-                          <tr key={worker.id} className="hover:bg-gray-50">
-                            <td className="p-4">
-                              <p className="font-bold text-gray-800 text-sm">{worker.fullName}</p>
-                              <p className="text-xs text-gray-400 text-purple-600">{userLogsInRange.length} días laborados</p>
-                            </td>
-                            <td className="p-4 text-center">
-                              <span className={`text-xl font-black ${totalWorkerHours > 0 ? 'text-purple-600' : 'text-gray-300'}`}>
-                                {totalWorkerHours}h
-                              </span>
-                            </td>
-                          </tr>
+                          <React.Fragment key={worker.id}>
+                            <tr onClick={() => toggleRangeRow(worker.id)} className="transition-colors hover:bg-purple-50/50 cursor-pointer">
+                              <td className="p-4">
+                                <p className="font-bold text-gray-800 text-sm">{worker.fullName}</p>
+                                <p className="text-xs text-purple-600">{userLogsInRange.length} de {datesInRange.length} dias</p>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className={`text-xl font-black ${totalWorkerHours > 0 ? 'text-purple-600' : 'text-gray-300'}`}>
+                                  {totalWorkerHours}h
+                                </span>
+                              </td>
+                              <td className="p-4 text-right">
+                                <button className="text-gray-400 hover:text-purple-600 transition-transform duration-200" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                                  ▼
+                                </button>
+                              </td>
+                            </tr>
+                            
+                            {isExpanded && (
+                              <tr className="bg-purple-50/30 border-b border-purple-100">
+                                <td colSpan={3} className="p-0">
+                                  <div className="p-4 md:p-6 shadow-inner">
+                                    <h4 className="text-sm font-bold text-purple-800 mb-3">Detallado</h4>
+                                    <div className="overflow-x-auto rounded-lg border border-purple-100">
+                                      <table className="w-full text-left text-sm bg-white">
+                                        <thead className="bg-purple-50 text-xs font-bold text-purple-600 uppercase border-b border-purple-100">
+                                          <tr>
+                                            <th className="p-3">Fecha</th>
+                                            <th className="p-3">Estado</th>
+                                            <th className="p-3">Dirección / Obra</th>
+                                            <th className="p-3 text-center">Horario</th>
+                                            <th className="p-3 text-center">Horas</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-purple-50">
+                                          {datesInRange.map((dateObj, index) => {
+                                            const logsForDay = userLogsInRange.filter(log => {
+                                              const logDate = log.timestamp.toDate();
+                                              return logDate.getDate() === dateObj.getDate() &&
+                                                     logDate.getMonth() === dateObj.getMonth() &&
+                                                     logDate.getFullYear() === dateObj.getFullYear();
+                                            });
+
+                                            const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+                                            const rowKey = `${worker.id}-${dateObj.getTime()}`;
+                                            const isEditingThisRow = editingRowKey === rowKey;
+
+                                            if (logsForDay.length > 0) {
+                                              return logsForDay.map(log => (
+                                                <tr key={log.id} className="hover:bg-gray-50">
+                                                  <td className="p-3">
+                                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? 'bg-yellow-200 text-yellow-800 shadow-sm' : 'text-gray-700'}`}>
+                                                      {dateObj.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+                                                    </span>
+                                                  </td>
+                                                  <td className="p-3"><span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">Laborado</span></td>
+                                                  <td className="p-3 text-gray-700">{log.location}</td>
+                                                  <td className="p-3 text-center text-gray-600">{log.checkIn} - {log.checkOut}</td>
+                                                  <td className="p-3 text-center font-bold text-purple-700">{log.totalHours}h</td>
+                                                </tr>
+                                              ));
+                                            } else if (isEditingThisRow) {
+                                              return (
+                                                <tr key={`edit-${index}`} className="bg-blue-50/50">
+                                                  <td className="p-3 align-top">
+                                                    <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
+                                                      {dateObj.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+                                                    </span>
+                                                  </td>
+                                                  <td colSpan={4} className="p-3">
+                                                    <InlineEditForm 
+                                                      workerId={worker.id} 
+                                                      dateObj={dateObj} 
+                                                      onSave={handleInlineSubmit} 
+                                                      onCancel={() => setEditingRowKey(null)}
+                                                      showNotification={showNotification}
+                                                    />
+                                                  </td>
+                                                </tr>
+                                              );
+                                            } else {
+                                              return (
+                                                <tr key={`missing-${index}`} className="bg-red-50/40 hover:bg-red-50 transition-colors group">
+                                                  <td className="p-3">
+                                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? 'bg-yellow-200 text-yellow-800 shadow-sm' : 'text-red-800'}`}>
+                                                      {dateObj.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: '2-digit' })}
+                                                    </span>
+                                                  </td>
+                                                  <td className="p-3"><span className="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full">Sin Registro</span></td>
+                                                  <td className="p-3 text-red-400 italic" colSpan={2}>
+                                                    
+                                                  </td>
+                                                  <td className="p-3 text-center">
+                                                    <button 
+                                                      onClick={() => setEditingRowKey(rowKey)}
+                                                      className="p-1.5 bg-white border border-red-200 text-red-500 rounded hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 shadow-sm"
+                                                      title="Añadir horas faltantes"
+                                                    >
+                                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                    </button>
+                                                  </td>
+                                                </tr>
+                                              );
+                                            }
+                                          })}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
                         );
                       })}
                       {displayedUsers.length === 0 && (
-                        <tr><td colSpan={2} className="p-8 text-center text-gray-500">No se encontraron trabajadores.</td></tr>
+                        <tr><td colSpan={3} className="p-8 text-center text-gray-500">No se encontraron trabajadores.</td></tr>
                       )}
                     </tbody>
                   </table>
-                </div>
-              )}
+                )}
+              </div>
+            )}
 
-            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
