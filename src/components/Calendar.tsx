@@ -24,7 +24,6 @@ const Calendar: React.FC<CalendarProps> = ({ logs }) => {
     setSelectedLog(null);
   };
 
-  // --- NUEVAS FUNCIONES PARA LOS DESPLEGABLES ---
   const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newMonth = parseInt(e.target.value, 10);
     setCurrentMonth(new Date(currentYearValue, newMonth, 1));
@@ -58,19 +57,16 @@ const Calendar: React.FC<CalendarProps> = ({ logs }) => {
     }
   };
 
-  const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   
-  // Generamos un arreglo de años (ej. desde 2024 hasta 2030)
   const years = Array.from({ length: 7 }, (_, i) => 2024 + i);
 
   return (
     <div className="animate-fade-in">
-      {/* --- ENCABEZADO MODIFICADO CON SELECTS --- */}
       <div className="flex justify-between items-center mb-4 bg-gray-50 p-2 rounded-lg border">
         <button onClick={prevMonth} className="px-3 py-1 text-gray-600 hover:bg-gray-300 rounded font-bold transition-colors">&lt;</button>
         
         <div className="flex space-x-2">
-          {/* Desplegable de Meses */}
           <select 
             value={currentMonthValue}
             onChange={handleMonthChange}
@@ -81,7 +77,6 @@ const Calendar: React.FC<CalendarProps> = ({ logs }) => {
             ))}
           </select>
 
-          {/* Desplegable de Años */}
           <select 
             value={currentYearValue}
             onChange={handleYearChange}
@@ -96,14 +91,12 @@ const Calendar: React.FC<CalendarProps> = ({ logs }) => {
         <button onClick={nextMonth} className="px-3 py-1 text-gray-600 hover:bg-gray-300 rounded font-bold transition-colors">&gt;</button>
       </div>
 
-      {/* Días de la semana */}
       <div className="grid grid-cols-7 gap-1 text-center mb-2">
-        {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(day => (
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
           <div key={day} className="text-xs font-bold text-gray-500">{day}</div>
         ))}
       </div>
 
-      {/* Cuadrícula de días */}
       <div className="grid grid-cols-7 gap-1">
         {Array.from({ length: firstDayOfMonth }).map((_, i) => (
           <div key={`empty-${i}`} className="p-2"></div>
@@ -132,31 +125,30 @@ const Calendar: React.FC<CalendarProps> = ({ logs }) => {
         })}
       </div>
 
-      {/* Detalles del día seleccionado */}
       {selectedLog && (
         <div className="mt-6 p-4 border-l-4 border-blue-600 bg-blue-50 rounded-r-lg shadow-sm relative animate-fade-in">
           <button 
             onClick={() => setSelectedLog(null)}
             className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors"
-            title="Cerrar detalles"
+            title="Close details"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
 
-          <h3 className="font-bold text-gray-800 text-lg mb-2 pr-6">Detalles del Registro</h3>
+          <h3 className="font-bold text-gray-800 text-lg mb-2 pr-6">Log Details</h3>
           <div className="grid grid-cols-2 gap-2 text-sm">
-            <p className="text-gray-600">Obra:</p>
+            <p className="text-gray-600">Location:</p>
             <p className="font-semibold">{selectedLog.location}</p>
-            <p className="text-gray-600">Horario:</p>
+            <p className="text-gray-600">Schedule:</p>
             <p className="font-semibold">{selectedLog.checkIn} - {selectedLog.checkOut}</p>
-            <p className="text-gray-600">Total de Horas:</p>
+            <p className="text-gray-600">Total Hours:</p>
             <p className="font-semibold text-blue-700">{selectedLog.totalHours} hrs</p>
           </div>
           {selectedLog.comments && (
             <div className="mt-3 pt-3 border-t border-blue-200">
-              <p className="text-xs text-gray-500 uppercase tracking-wide">Comentarios</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Comments</p>
               <p className="text-sm italic text-gray-700 mt-1">"{selectedLog.comments}"</p>
             </div>
           )}

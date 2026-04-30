@@ -9,8 +9,7 @@ function App() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // DEBES CAMBIAR ESTE CORREO POR EL TUYO DE ADMINISTRADOR
-  const ADMIN_EMAIL = "admin@empresa.com"; 
+  const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -24,18 +23,13 @@ function App() {
     return <div className="min-h-screen flex items-center justify-center bg-gray-100">Loading...</div>;
   }
 
-  // Lógica de navegación:
   return (
     <div className="min-h-screen bg-gray-100">
       {!user ? (
-        // 1. Si no hay usuario, mostramos el Login
         <Auth />
       ) : user.email === ADMIN_EMAIL ? (
-        // 2. Si el usuario es el jefe, mostramos la Tabla de Excel
-        // ¡AQUÍ ESTÁ LA CORRECCIÓN! Le pasamos el user
         <AdminPanel user={user} /> 
       ) : (
-        // 3. Si es cualquier otro trabajador, mostramos el formulario de celular
         <Dashboard user={user} />
       )}
     </div>

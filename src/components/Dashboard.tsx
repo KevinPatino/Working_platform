@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../firebaseConfig';
 import { signOut } from 'firebase/auth';
-// --- 1. IMPORTAMOS doc y getDoc PARA TRAER EL NOMBRE ---
 import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import Calendar from './Calendar';
 import Toast from './Toast';
@@ -13,22 +12,17 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<'form' | 'history' | 'calculator'>('form');
+  const [userName, setUserName] = useState('Loading...');
 
-  // --- 2. NUEVO ESTADO PARA EL NOMBRE ---
-  const [userName, setUserName] = useState('Cargando...');
-
-  // Estados del formulario
   const [location, setLocation] = useState('');
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [totalHours, setTotalHours] = useState('');
   const [comments, setComments] = useState('');
 
-  // Estados de datos
   const [myLogs, setMyLogs] = useState<any[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(true);
   
-  // Estados para el candado de seguridad
   const [hasLoggedToday, setHasLoggedToday] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -40,7 +34,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     setToastMessage(message);
   };
 
-  // --- 3. FUNCIÓN PARA BUSCAR EL NOMBRE DEL USUARIO ---
   const fetchUserName = async () => {
     try {
       const userDocRef = doc(db, 'users', user.uid);
@@ -49,10 +42,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       if (userDocSnap.exists()) {
         setUserName(userDocSnap.data().fullName);
       } else {
-        setUserName(user.email); // Por si acaso falla, mostramos el correo
+        setUserName(user.email);
       }
     } catch (error) {
-      console.error("Error al obtener el nombre:", error);
+      console.error("Error fetching name:", error);
       setUserName(user.email);
     }
   };
@@ -92,14 +85,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       setHasLoggedToday(foundLogToday);
       setMyLogs(logsData);
     } catch (error: any) {
-      console.error("Error al cargar historial: ", error);
+      console.error("Error loading history: ", error);
     } finally {
       setLoadingLogs(false);
     }
   };
 
   useEffect(() => {
-    // --- 4. EJECUTAMOS AMBAS FUNCIONES AL ENTRAR ---
     fetchUserName();
     fetchMyLogs();
   }, []);
@@ -118,7 +110,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         timestamp: serverTimestamp()
       });
       
-      showNotification('¡Registro guardado con éxito! ✅');
+      showNotification('Log saved successfully! ✅');
       
       setLocation('');
       setCheckIn('');
@@ -148,11 +140,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         
         <div className="p-6 border-b flex justify-between items-center bg-gray-800 text-white">
           <div>
-            <h1 className="text-xl font-bold">Portal del Trabajador</h1>
-            {/* --- 5. REEMPLAZAMOS EL CORREO POR EL NOMBRE AQUÍ --- */}
+            <h1 className="text-xl font-bold">Worker Portal</h1>
             <p className="text-sm text-blue-300 font-semibold mt-1">{userName}</p>
           </div>
-          <button onClick={handleLogout} className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded text-sm font-semibold">Salir</button>
+          <button onClick={handleLogout} className="px-3 py-1 bg-red-500 hover:bg-red-600 rounded text-sm font-semibold">Log Out</button>
         </div>
 
         <div className="flex border-b">
@@ -160,26 +151,26 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
             onClick={() => setActiveTab('form')}
             className={`flex-1 py-3 px-2 text-sm font-semibold text-center transition-colors ${activeTab === 'form' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:bg-gray-50'}`}
           >
-            Registrar
+            Log Hours
           </button>
           <button 
             onClick={() => setActiveTab('history')}
             className={`flex-1 py-3 px-2 text-sm font-semibold text-center transition-colors ${activeTab === 'history' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:bg-gray-50'}`}
           >
-            Calendario
+            Calendar
           </button>
           <button 
             onClick={() => setActiveTab('calculator')}
             className={`flex-1 py-3 px-2 text-sm font-semibold text-center transition-colors ${activeTab === 'calculator' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:bg-gray-50'}`}
           >
-            Calculadora
+            Calculator
           </button>
         </div>
 
         <div className="p-6">
           {activeTab === 'form' && (
             loadingLogs ? (
-              <p className="text-center text-gray-500 py-8 animate-pulse">Verificando tus registros de hoy...</p>
+              <p className="text-center text-gray-500 py-8 animate-pulse">Checking your logs for today...</p>
             ) : hasLoggedToday ? (
               <div className="text-center py-10 px-4 bg-green-50 rounded-xl border border-green-200 shadow-inner animate-fade-in">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -187,40 +178,40 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-green-800 mb-2">¡Jornada Registrada!</h2>
+                <h2 className="text-2xl font-bold text-green-800 mb-2">Shift Logged!</h2>
                 <p className="text-gray-600 mb-4">
-                  Gracias por registrar tus horas el día de hoy. Tu información ya está segura en el sistema.
+                  Thank you for logging your hours today. Your information is now secure in the system.
                 </p>
                 <p className="text-sm font-semibold text-gray-500 bg-white inline-block px-4 py-2 rounded-full shadow-sm border border-gray-100">
-                  Vuelve mañana para tu siguiente registro
+                  Come back tomorrow for your next log
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Lugar / Obra</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location / Job Site</label>
                   <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Entrada</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Check In</label>
                     <input type="time" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Salida</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Check Out</label>
                     <input type="time" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Horas Totales</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Total Hours</label>
                   <input type="number" step="0.5" value={totalHours} onChange={(e) => setTotalHours(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Comentarios</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Comments</label>
                   <textarea value={comments} onChange={(e) => setComments(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" rows={2} />
                 </div>
                 <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg mt-4 transition-colors">
-                  Enviar Registro
+                  Submit Log
                 </button>
               </form>
             )
@@ -229,7 +220,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           {activeTab === 'history' && (
             <div>
               {loadingLogs ? (
-                <p className="text-center text-gray-500 py-8 animate-pulse">Cargando tu calendario...</p>
+                <p className="text-center text-gray-500 py-8 animate-pulse">Loading your calendar...</p>
               ) : (
                 <Calendar logs={myLogs} /> 
               )}
@@ -239,7 +230,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
           {activeTab === 'calculator' && (
             <div>
               {loadingLogs ? (
-                <p className="text-center text-gray-500 py-8 animate-pulse">Cargando tus registros...</p>
+                <p className="text-center text-gray-500 py-8 animate-pulse">Loading your logs...</p>
               ) : (
                 <WorkerCalculator logs={myLogs} />
               )}

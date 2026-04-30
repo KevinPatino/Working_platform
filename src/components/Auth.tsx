@@ -1,40 +1,23 @@
 import React, { useState } from 'react';
-import { auth, db } from '../firebaseConfig';
+import { auth } from '../firebaseConfig';
 import { 
-  createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
-  sendPasswordResetEmail // <-- Importamos esta función
+  sendPasswordResetEmail 
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
 
 const Auth: React.FC = () => {
-  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-      } else {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        await setDoc(doc(db, "users", user.uid), {
-          uid: user.uid,
-          fullName: fullName,
-          email: email,
-          timestamp: new Date()
-        });
-        alert("Account created successfully!"); 
-      }
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
       alert("Error: " + error.message);
     }
   };
 
-  // Nueva función para recuperar contraseña
   const handleForgotPassword = async () => {
     if (!email) {
       alert("Please enter your email first so we can send you a reset link.");
@@ -51,70 +34,63 @@ const Auth: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
       <div className="text-center mb-8 animate-fade-in">
-          <img
-            src="/logo.png"
-            alt="Logo de la Empresa"
-            className="mx-auto h-36 w-auto object-contain mb-4"
-          />
-        </div>
+        <img
+          src="/logo.png"
+          alt="Company Logo"
+          className="mx-auto h-36 w-auto object-contain mb-4"
+        />
+      </div>
+      
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6 text-[#8cc641]">
-          {isLogin ? '' : 'Crear cuenta'}
+          Log In
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <input 
-              type="text" 
-              placeholder="Full Name" 
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onChange={(e) => setFullName(e.target.value)}
-              required 
-            />
-          )}
-          
           <input 
             type="email" 
+            name="email"
+            autoComplete="username"
             placeholder="Email" 
             className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c7e99b]"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
             required 
           />
           
           <input 
             type="password" 
+            name="password"
+            autoComplete="current-password"
             placeholder="Password" 
             className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c7e99b]"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required={isLogin} // Solo requerido si no estamos reseteando
+            required 
           />
           
           <button 
             type="submit" 
             className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#8cc641] hover:bg-[#5e8e1f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
           >
-            {isLogin ? 'Log In' : 'Sign Up'}
+            Log In
           </button>
         </form>
 
-        {/* Enlace para Olvidé mi contraseña */}
-        {isLogin && (
-          <div className="text-center mt-3">
-            <button 
-              onClick={handleForgotPassword}
-              className="text-xs text-gray-500 hover:text-[#8cc641] underline"
-            >
-              Forgot your password?
-            </button>
-          </div>
-        )}
+        <div className="text-center mt-6">
+          <button 
+            onClick={handleForgotPassword}
+            className="text-xs text-gray-500 hover:text-[#8cc641] underline"
+          >
+            Forgot your password?
+          </button>
+        </div>
 
-        <button 
-          onClick={() => setIsLogin(!isLogin)}
-          className="w-full mt-4 text-sm text-gray-600 hover:text-[#8cc641] hover:underline"
-        >
-          {isLogin ? "Don't have an account? Sign up here" : 'Already have an account? Log in'}
-        </button>
+        <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+          <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">
+            Internal Access Only
+          </p>
+        </div>
       </div>
     </div>
   );
