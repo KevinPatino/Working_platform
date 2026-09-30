@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../firebaseConfig';
 import { signOut } from 'firebase/auth';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { collection, setDoc, serverTimestamp, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import Calendar from './Calendar';
 import Toast from './Toast';
 import WorkerCalculator from './WorkerCalculator'; 
@@ -24,6 +24,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [loadingLogs, setLoadingLogs] = useState(true);
   
   const [hasLoggedToday, setHasLoggedToday] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const handleLogout = async () => {
@@ -32,6 +33,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   const showNotification = (message: string) => {
     setToastMessage(message);
+  };
+
+  const getLocalDateString = (d: Date = new Date()) => {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   const fetchUserName = async () => {
@@ -98,8 +106,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
     try {
-      await addDoc(collection(db, 'timeLogs'), {
+      const todayStr = getLocalDateString();
+      const docId = `${user.uid}_${todayStr}`;
+      const logDocRef = doc(db, 'timeLogs', docId);
+
+      await setDoc(logDocRef, {
         userId: user.uid,
         userEmail: user.email,
         location: location,
@@ -107,8 +122,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
         checkOut: checkOut,
         totalHours: Number(totalHours),
         comments: comments,
-        timestamp: serverTimestamp()
-      });
+        timestamp: serverTimestamp(),
+        dateStr: todayStr
+      }, { merge: true });
       
       showNotification('Log saved successfully! ✅');
       
@@ -123,6 +139,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
 
     } catch (error: any) {
       showNotification("Error: " + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -210,8 +228,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Comments</label>
                   <textarea value={comments} onChange={(e) => setComments(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" rows={2} />
                 </div>
-                <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg mt-4 transition-colors">
-                  Submit Log
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold py-3 px-4 rounded-lg mt-4 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Saving...' : 'Submit Log'}
                 </button>
               </form>
             )
