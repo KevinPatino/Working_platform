@@ -14,7 +14,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<'form' | 'history' | 'calculator'>('form');
   const [userName, setUserName] = useState('Loading...');
 
+  // Ubicación principal y adicionales (hasta 2 extras, máx. 3 en total)
   const [location, setLocation] = useState('');
+  const [extraLocations, setExtraLocations] = useState<string[]>([]);
+
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [totalHours, setTotalHours] = useState('');
@@ -104,6 +107,23 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
     fetchMyLogs();
   }, []);
 
+  // Manejo de ubicaciones extras (máx. 2 extras = 3 en total)
+  const handleAddLocation = () => {
+    if (extraLocations.length < 2) {
+      setExtraLocations([...extraLocations, '']);
+    }
+  };
+
+  const handleExtraLocationChange = (index: number, val: string) => {
+    const updated = [...extraLocations];
+    updated[index] = val;
+    setExtraLocations(updated);
+  };
+
+  const handleRemoveExtraLocation = (index: number) => {
+    setExtraLocations(extraLocations.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -114,10 +134,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       const docId = `${user.uid}_${todayStr}`;
       const logDocRef = doc(db, 'timeLogs', docId);
 
+      // Limpieza y preparación de la lista de sitios
+      const cleanMain = location.trim();
+      const cleanExtras = extraLocations.map(l => l.trim()).filter(Boolean);
+      const allLocations = [cleanMain, ...cleanExtras];
+      const combinedLocation = allLocations.join(' / ');
+
       await setDoc(logDocRef, {
         userId: user.uid,
         userEmail: user.email,
-        location: location,
+        location: combinedLocation,     // Compatible con toda la app actual
+        locations: allLocations,       // Preparado para consultas futuras con array-contains
         checkIn: checkIn,
         checkOut: checkOut,
         totalHours: Number(totalHours),
@@ -129,6 +156,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       showNotification('Log saved successfully! ✅');
       
       setLocation('');
+      setExtraLocations([]);
       setCheckIn('');
       setCheckOut('');
       setTotalHours('');
@@ -208,8 +236,48 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
               <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Location / Job Site</label>
-                  <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" required />
+                  <input 
+                    type="text" 
+                    value={location} 
+                    onChange={(e) => setLocation(e.target.value)} 
+                    placeholder="Primary job site" 
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+                    required 
+                  />
+
+                  {/* Sitios de trabajo adicionales (hasta 2) */}
+                  {extraLocations.map((extraLoc, index) => (
+                    <div key={index} className="mt-2 flex gap-2 animate-fade-in">
+                      <input 
+                        type="text" 
+                        value={extraLoc} 
+                        onChange={(e) => handleExtraLocationChange(index, e.target.value)} 
+                        placeholder={`Additional job site ${index + 2}`} 
+                        className="flex-1 p-3 border border-blue-200 bg-blue-50/30 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExtraLocation(index)}
+                        className="px-3 py-2 bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        title="Remove site"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+
+                  {extraLocations.length < 2 && (
+                    <button
+                      type="button"
+                      onClick={handleAddLocation}
+                      className="mt-2 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      + Add another job site
+                    </button>
+                  )}
                 </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Check In</label>
