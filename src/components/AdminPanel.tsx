@@ -115,7 +115,7 @@ const InlineEditForm = ({
       <div className="flex gap-2 items-end justify-end">
         <button
           onClick={onCancel}
-          className="p-2.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors"
+          className="p-2.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
           title="Cancel"
         >
           <svg
@@ -135,7 +135,7 @@ const InlineEditForm = ({
         <button
           onClick={handleSave}
           disabled={isSubmitting}
-          className="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400 shadow-sm"
+          className="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400 shadow-sm cursor-pointer disabled:cursor-not-allowed"
           title="Save"
         >
           {isSubmitting ? (
@@ -176,6 +176,52 @@ const getFirstDayOfMonth = () => {
   return d;
 };
 
+// Formateador visual para el rango de la quincena (ej: "Sep 14 - Sep 27, 2026")
+const formatPeriodLegend = (startStr: string, endStr: string) => {
+  if (!startStr || !endStr) return "";
+  const s = new Date(startStr + "T00:00:00");
+  const e = new Date(endStr + "T00:00:00");
+  const sMonth = s.toLocaleDateString("en-US", { month: "short" });
+  const eMonth = e.toLocaleDateString("en-US", { month: "short" });
+  const sDay = s.getDate();
+  const eDay = e.getDate();
+  const year = e.getFullYear();
+
+  if (sMonth === eMonth) {
+    return `${sMonth} ${sDay} – ${eDay}, ${year}`;
+  }
+  return `${sMonth} ${sDay} – ${eMonth} ${eDay}, ${year}`;
+};
+
+// Configuración y cálculo base bisemanal (14 días)
+const ANCHOR_DATE = new Date(2026, 7, 31); // Lunes 31 de agosto de 2026
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const CYCLE_DAYS = 14;
+
+const getBaseCycleIndex = () => {
+  const now = new Date();
+  const todayAtMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.floor((todayAtMidnight.getTime() - ANCHOR_DATE.getTime()) / MS_PER_DAY);
+  return Math.floor(diffDays / CYCLE_DAYS);
+};
+
+const getPeriodRangeByIndex = (cycleIndex: number) => {
+  const currentStart = new Date(ANCHOR_DATE.getTime() + cycleIndex * CYCLE_DAYS * MS_PER_DAY);
+  const currentEnd = new Date(ANCHOR_DATE.getTime() + (cycleIndex * CYCLE_DAYS + 13) * MS_PER_DAY);
+
+  const formatDate = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  return {
+    start: formatDate(currentStart),
+    end: formatDate(currentEnd),
+  };
+};
+
 const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   const [allLogs, setAllLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -190,6 +236,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     null,
   );
   const [editingRowKey, setEditingRowKey] = useState<string | null>(null);
+
+  // Control del índice de quincena para navegación (< y >)
+  const [activeCycleIndex, setActiveCycleIndex] = useState<number>(getBaseCycleIndex());
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -332,13 +381,66 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     a.fullName.localeCompare(b.fullName),
   );
 
+  // Manejadores de navegación de periodos
+  const handleSelectToday = () => {
+    setStartDate(getLocalTodayString());
+    setEndDate("");
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+  };
+
+  const handleSelectPeriodToPay = () => {
+    const payIndex = getBaseCycleIndex() - 1;
+    setActiveCycleIndex(payIndex);
+    const range = getPeriodRangeByIndex(payIndex);
+    setStartDate(range.start);
+    setEndDate(range.end);
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+  };
+
+  const handleSelectCurrentPeriod = () => {
+    const baseIndex = getBaseCycleIndex();
+    setActiveCycleIndex(baseIndex);
+    const range = getPeriodRangeByIndex(baseIndex);
+    setStartDate(range.start);
+    setEndDate(range.end);
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+  };
+
+  const handlePrevPeriod = () => {
+    const newIndex = activeCycleIndex - 1;
+    setActiveCycleIndex(newIndex);
+    const range = getPeriodRangeByIndex(newIndex);
+    setStartDate(range.start);
+    setEndDate(range.end);
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+  };
+
+  const handleNextPeriod = () => {
+    const newIndex = activeCycleIndex + 1;
+    setActiveCycleIndex(newIndex);
+    const range = getPeriodRangeByIndex(newIndex);
+    setStartDate(range.start);
+    setEndDate(range.end);
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+  };
+
   const handleClearFilters = () => {
     setSelectedUser("All");
     setStartDate(getLocalTodayString());
     setEndDate("");
     setExpandedRangeUserId(null);
     setEditingRowKey(null);
+    setActiveCycleIndex(getBaseCycleIndex());
   };
+
+  const isTodayActive =
+    startDate === getLocalTodayString() && (!endDate || endDate === startDate);
+  const isPeriodActive = Boolean(endDate && endDate !== startDate);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8 relative">
@@ -351,63 +453,137 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
           <h1 className="text-xl font-bold">Admin Dashboard</h1>
           <button
             onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-bold transition-colors"
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-bold transition-colors cursor-pointer"
           >
             Log Out
           </button>
         </div>
 
         <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 flex flex-col md:flex-row gap-4 items-end">
-            <div className="flex-1 w-full">
-              <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
-                Worker
-              </label>
-              <select
-                value={selectedUser}
-                onChange={(e) => {
-                  setSelectedUser(e.target.value);
-                  setExpandedRangeUserId(null);
-                }}
-                className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
-              >
-                <option value="All">All workers</option>
-                {allRegisteredUsers.map((worker) => (
-                  <option key={worker.id} value={worker.id}>
-                    {worker.fullName}
-                  </option>
-                ))}
-              </select>
+          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 space-y-4">
+            
+            {/* Barra de accesos rápidos con leyenda de fechas */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  Quick View:
+                </span>
+                <button
+                  type="button"
+                  onClick={handleSelectToday}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
+                    isTodayActive
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                      : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                  }`}
+                >
+                  📍 Today
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-1">
+                  Pay Periods:
+                </span>
+                
+                {/* Botón Quincena Anterior (<) */}
+                <button
+                  type="button"
+                  onClick={handlePrevPeriod}
+                  className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+                  title="Previous Pay Period"
+                >
+                  ◀
+                </button>
+
+                {/* Leyenda visible de la quincena actual seleccionada */}
+                {isPeriodActive && (
+                  <span className="text-xs font-extrabold text-purple-900 bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200 tracking-wide shadow-xs">
+                    📅 {formatPeriodLegend(startDate, endDate)}
+                  </span>
+                )}
+
+                {/* Quincena por Pagar (Corte terminado) */}
+                <button
+                  type="button"
+                  onClick={handleSelectPeriodToPay}
+                  className="px-3 py-1.5 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition-colors cursor-pointer"
+                >
+                  💰 Period to Pay
+                </button>
+
+                {/* Quincena en Curso */}
+                <button
+                  type="button"
+                  onClick={handleSelectCurrentPeriod}
+                  className="px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors cursor-pointer"
+                >
+                  📅 Current Period
+                </button>
+
+                {/* Botón Quincena Siguiente (>) */}
+                <button
+                  type="button"
+                  onClick={handleNextPeriod}
+                  className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+                  title="Next Pay Period"
+                >
+                  ▶
+                </button>
+              </div>
             </div>
 
-            <div className="flex-1 w-full">
-              <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
-                Specific Day / From
-              </label>
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
+            <div className="flex flex-col md:flex-row gap-4 items-end">
+              <div className="flex-1 w-full">
+                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                  Worker
+                </label>
+                <select
+                  value={selectedUser}
+                  onChange={(e) => {
+                    setSelectedUser(e.target.value);
+                    setExpandedRangeUserId(null);
+                  }}
+                  className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                >
+                  <option value="All">All workers</option>
+                  {allRegisteredUsers.map((worker) => (
+                    <option key={worker.id} value={worker.id}>
+                      {worker.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex-1 w-full">
+                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                  Specific Day / From
+                </label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <div className="flex-1 w-full">
+                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                  To (Optional)
+                </label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+              <button
+                onClick={handleClearFilters}
+                className="w-full md:w-auto px-6 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+              >
+                Clear
+              </button>
             </div>
-            <div className="flex-1 w-full">
-              <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
-                To (Optional)
-              </label>
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-            </div>
-            <button
-              onClick={handleClearFilters}
-              className="w-full md:w-auto px-6 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
-            >
-              Clear
-            </button>
           </div>
 
           <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
@@ -505,7 +681,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                               </td>
                               <td className="p-4 text-right">
                                 <button
-                                  className="text-gray-400 hover:text-purple-600 transition-transform duration-200"
+                                  className="text-gray-400 hover:text-purple-600 transition-transform duration-200 cursor-pointer"
                                   style={{
                                     transform: isExpanded
                                       ? "rotate(180deg)"
