@@ -24,20 +24,45 @@ const InlineEditForm = ({
   showNotification,
 }: any) => {
   const [location, setLocation] = useState("");
+  const [extraLocations, setExtraLocations] = useState<string[]>([]);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [totalHours, setTotalHours] = useState("");
   const [comments, setComments] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const handleAddLocation = () => {
+    if (extraLocations.length < 2) {
+      setExtraLocations([...extraLocations, ""]);
+    }
+  };
+
+  const handleExtraLocationChange = (index: number, val: string) => {
+    const updated = [...extraLocations];
+    updated[index] = val;
+    setExtraLocations(updated);
+  };
+
+  const handleRemoveExtraLocation = (index: number) => {
+    setExtraLocations(extraLocations.filter((_, i) => i !== index));
+  };
+
   const handleSave = async () => {
-    if (!location || !checkIn || !checkOut || !totalHours) {
+    const cleanMain = location.trim();
+    const cleanExtras = extraLocations.map((l) => l.trim()).filter(Boolean);
+
+    if (!cleanMain || !checkIn || !checkOut || !totalHours) {
       showNotification("Please fill in all time and location fields.");
       return;
     }
+
+    const allLocations = [cleanMain, ...cleanExtras];
+    const combinedLocation = allLocations.join(" / ");
+
     setIsSubmitting(true);
     await onSave(workerId, dateObj, {
-      location,
+      location: combinedLocation,
+      locations: allLocations,
       checkIn,
       checkOut,
       totalHours,
@@ -47,8 +72,9 @@ const InlineEditForm = ({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-blue-100 shadow-sm animate-fade-in w-full">
-      <div>
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-blue-100 shadow-sm animate-fade-in w-full items-start">
+      {/* Ubicaciones de trabajo (principal y hasta 2 extras) */}
+      <div className="flex flex-col gap-1.5">
         <label className="text-[10px] uppercase font-bold text-gray-400">
           Location
         </label>
@@ -57,9 +83,41 @@ const InlineEditForm = ({
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-          placeholder="Job site"
+          placeholder="Primary job site"
         />
+
+        {extraLocations.map((extraLoc, index) => (
+          <div key={index} className="flex gap-1 animate-fade-in">
+            <input
+              type="text"
+              value={extraLoc}
+              onChange={(e) => handleExtraLocationChange(index, e.target.value)}
+              placeholder={`Additional job site ${index + 2}`}
+              className="flex-1 p-2 border border-blue-200 bg-blue-50/30 rounded-lg text-xs outline-none focus:border-blue-500"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => handleRemoveExtraLocation(index)}
+              className="px-2 py-1 bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded text-xs font-bold transition-colors cursor-pointer"
+              title="Remove site"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+
+        {extraLocations.length < 2 && (
+          <button
+            type="button"
+            onClick={handleAddLocation}
+            className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors text-left cursor-pointer mt-0.5"
+          >
+            + Add another job site
+          </button>
+        )}
       </div>
+
       <div className="flex gap-2">
         <div className="flex-1">
           <label className="text-[10px] uppercase font-bold text-gray-400">
@@ -84,6 +142,7 @@ const InlineEditForm = ({
           />
         </div>
       </div>
+
       <div className="flex gap-2">
         <div className="w-16">
           <label className="text-[10px] uppercase font-bold text-gray-400">
@@ -112,7 +171,7 @@ const InlineEditForm = ({
         </div>
       </div>
 
-      <div className="flex gap-2 items-end justify-end">
+      <div className="flex gap-2 items-center justify-end md:mt-4">
         <button
           onClick={onCancel}
           className="p-2.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
@@ -176,7 +235,7 @@ const getFirstDayOfMonth = () => {
   return d;
 };
 
-// Formateador visual para el rango de la quincena (ej: "Sep 14 - Sep 27, 2026")
+// Formateador visual para el rango de la quincena (ej: "Sep 14 – Sep 27, 2026")
 const formatPeriodLegend = (startStr: string, endStr: string) => {
   if (!startStr || !endStr) return "";
   const s = new Date(startStr + "T00:00:00");
@@ -237,7 +296,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   );
   const [editingRowKey, setEditingRowKey] = useState<string | null>(null);
 
-  // Control del índice de quincena para navegación (< y >)
   const [activeCycleIndex, setActiveCycleIndex] = useState<number>(getBaseCycleIndex());
 
   const handleLogout = async () => {
@@ -339,6 +397,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
           userId: targetWorker.id,
           userEmail: targetWorker.email,
           location: data.location,
+          locations: data.locations || [data.location],
           checkIn: data.checkIn,
           checkOut: data.checkOut,
           totalHours: Number(data.totalHours),
@@ -381,7 +440,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     a.fullName.localeCompare(b.fullName),
   );
 
-  // Manejadores de navegación de periodos
   const handleSelectToday = () => {
     setStartDate(getLocalTodayString());
     setEndDate("");
@@ -503,7 +561,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                   </span>
                 )}
 
-                {/* Quincena por Pagar (Corte terminado) */}
+                {/* Quincena por Pagar */}
                 <button
                   type="button"
                   onClick={handleSelectPeriodToPay}
