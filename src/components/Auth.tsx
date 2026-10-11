@@ -4,6 +4,7 @@ import {
   signInWithEmailAndPassword, 
   sendPasswordResetEmail 
 } from 'firebase/auth';
+import { currentTenant } from '../config/tenant.config';
 
 const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -35,14 +36,14 @@ const Auth: React.FC = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
       <div className="text-center mb-8 animate-fade-in">
         <img
-          src="/logo.png"
-          alt="Company Logo"
+          src={currentTenant.company.logoUrl}
+          alt={`${currentTenant.company.name} Logo`}
           className="mx-auto h-36 w-auto object-contain mb-4"
         />
       </div>
       
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center mb-6 text-[#8cc641]">
+        <h2 className="text-2xl font-bold text-center mb-6 text-brand">
           Log In
         </h2>
         
@@ -52,7 +53,7 @@ const Auth: React.FC = () => {
             name="email"
             autoComplete="username"
             placeholder="Email" 
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c7e99b]"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required 
@@ -63,7 +64,7 @@ const Auth: React.FC = () => {
             name="password"
             autoComplete="current-password"
             placeholder="Password" 
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c7e99b]"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required 
@@ -71,7 +72,7 @@ const Auth: React.FC = () => {
           
           <button 
             type="submit" 
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-[#8cc641] hover:bg-[#5e8e1f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-brand hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand transition-colors cursor-pointer"
           >
             Log In
           </button>
@@ -80,7 +81,7 @@ const Auth: React.FC = () => {
         <div className="text-center mt-6">
           <button 
             onClick={handleForgotPassword}
-            className="text-xs text-gray-500 hover:text-[#8cc641] underline"
+            className="text-xs text-gray-500 hover:text-brand underline cursor-pointer"
           >
             Forgot your password?
           </button>
@@ -88,7 +89,7 @@ const Auth: React.FC = () => {
 
         <div className="mt-8 pt-6 border-t border-gray-100 text-center">
           <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">
-            Internal Access Only
+            {currentTenant.company.shortName} • Internal Access Only
           </p>
         </div>
       </div>
