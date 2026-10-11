@@ -13,6 +13,7 @@ import { signOut } from "firebase/auth";
 import Toast from "./Toast";
 import PhotoModal from "./PhotoModal";
 import MapLink from "./MapLink";
+import ToolboxAuditor from "./ToolBoxAuditor";
 
 interface AdminPanelProps {
   user: any;
@@ -294,6 +295,7 @@ const getPeriodRangeByIndex = (cycleIndex: number) => {
 };
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
+  const [activeTab, setActiveTab] = useState<'payroll' | 'safety'>('payroll');
   const [allLogs, setAllLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -526,6 +528,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
       )}
 
       <div className="max-w-6xl mx-auto space-y-6">
+        
+        {/* Cabecera Principal */}
         <div className="bg-gray-900 rounded-xl p-6 shadow-lg flex justify-between items-center text-white">
           <h1 className="text-xl font-bold">Admin Dashboard</h1>
           <button
@@ -536,259 +540,286 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
           </button>
         </div>
 
-        <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 space-y-4">
-            {/* Barra de accesos rápidos con leyenda de fechas */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                  Quick View:
-                </span>
-                <button
-                  type="button"
-                  onClick={handleSelectToday}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
-                    isTodayActive
-                      ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                      : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-                  }`}
-                >
-                  📍 Today
-                </button>
-              </div>
+        {/* Selector de Pestañas: Nómina vs Charlas de Seguridad */}
+        <div className="flex gap-2 p-1 bg-gray-200/80 rounded-xl w-fit">
+          <button
+            type="button"
+            onClick={() => setActiveTab('payroll')}
+            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+              activeTab === 'payroll'
+                ? 'bg-white text-gray-900 shadow-xs'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            ⏱️ Hours & Payroll
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('safety')}
+            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+              activeTab === 'safety'
+                ? 'bg-white text-purple-900 shadow-xs'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            🛡️ Safety & Toolbox Meetings
+          </button>
+        </div>
 
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-1">
-                  Pay Periods:
-                </span>
-
-                {/* Botón Quincena Anterior (<) */}
-                <button
-                  type="button"
-                  onClick={handlePrevPeriod}
-                  className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
-                  title="Previous Pay Period"
-                >
-                  ◀
-                </button>
-
-                {/* Leyenda visible de la quincena actual seleccionada */}
-                {isPeriodActive && (
-                  <span className="text-xs font-extrabold text-purple-900 bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200 tracking-wide shadow-xs">
-                    📅 {formatPeriodLegend(startDate, endDate)}
+        {/* PESTAÑA 1: Horas y Nómina */}
+        {activeTab === 'payroll' && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 space-y-4">
+              {/* Barra de accesos rápidos con leyenda de fechas */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Quick View:
                   </span>
-                )}
-
-                {/* Quincena por Pagar */}
-                <button
-                  type="button"
-                  onClick={handleSelectPeriodToPay}
-                  className="px-3 py-1.5 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition-colors cursor-pointer"
-                >
-                  💰 Period to Pay
-                </button>
-
-                {/* Quincena en Curso */}
-                <button
-                  type="button"
-                  onClick={handleSelectCurrentPeriod}
-                  className="px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors cursor-pointer"
-                >
-                  📅 Current Period
-                </button>
-
-                {/* Botón Quincena Siguiente (>) */}
-                <button
-                  type="button"
-                  onClick={handleNextPeriod}
-                  className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
-                  title="Next Pay Period"
-                >
-                  ▶
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-4 items-end">
-              <div className="flex-1 w-full">
-                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
-                  Worker
-                </label>
-                <select
-                  value={selectedUser}
-                  onChange={(e) => {
-                    setSelectedUser(e.target.value);
-                    setExpandedRangeUserId(null);
-                  }}
-                  className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
-                >
-                  <option value="All">All workers</option>
-                  {allRegisteredUsers.map((worker) => (
-                    <option key={worker.id} value={worker.id}>
-                      {worker.fullName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex-1 w-full">
-                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
-                  Specific Day / From
-                </label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-              <div className="flex-1 w-full">
-                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
-                  To (Optional)
-                </label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
-              <button
-                onClick={handleClearFilters}
-                className="w-full md:w-auto px-6 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
-              >
-                Clear
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
-            {!startDate && (
-              <div className="p-12 text-center flex flex-col items-center">
-                <h3 className="text-lg font-bold text-gray-700">
-                  Select a date
-                </h3>
-                <p className="text-sm text-gray-500 mt-1 max-w-md">
-                  Choose a 'From' date to view the details for that period.
-                </p>
-              </div>
-            )}
-
-            {startDate && (
-              <div className="overflow-x-auto">
-                <div className="p-4 bg-purple-50 border-b border-purple-100 text-purple-800 text-sm font-bold flex justify-between items-center">
-                  <span>
-                    Report:{" "}
-                    {new Date(startDate + "T00:00:00").toLocaleDateString(
-                      "en-US",
-                    )}
-                    {endDate && endDate !== startDate
-                      ? ` to ${new Date(endDate + "T23:59:59").toLocaleDateString("en-US")}`
-                      : ""}
-                  </span>
-                  <span className="bg-purple-200 text-purple-900 px-3 py-1 rounded-full text-xs">
-                    Active Data
-                  </span>
+                  <button
+                    type="button"
+                    onClick={handleSelectToday}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
+                      isTodayActive
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                        : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                    }`}
+                  >
+                    📍 Today
+                  </button>
                 </div>
 
-                {loading ? (
-                  <div className="p-12 text-center text-gray-400 animate-pulse">
-                    Querying Database...
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-1">
+                    Pay Periods:
+                  </span>
+
+                  {/* Botón Quincena Anterior (<) */}
+                  <button
+                    type="button"
+                    onClick={handlePrevPeriod}
+                    className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+                    title="Previous Pay Period"
+                  >
+                    ◀
+                  </button>
+
+                  {/* Leyenda visible de la quincena actual seleccionada */}
+                  {isPeriodActive && (
+                    <span className="text-xs font-extrabold text-purple-900 bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200 tracking-wide shadow-xs">
+                      📅 {formatPeriodLegend(startDate, endDate)}
+                    </span>
+                  )}
+
+                  {/* Quincena por Pagar */}
+                  <button
+                    type="button"
+                    onClick={handleSelectPeriodToPay}
+                    className="px-3 py-1.5 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition-colors cursor-pointer"
+                  >
+                    💰 Period to Pay
+                  </button>
+
+                  {/* Quincena en Curso */}
+                  <button
+                    type="button"
+                    onClick={handleSelectCurrentPeriod}
+                    className="px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors cursor-pointer"
+                  >
+                    📅 Current Period
+                  </button>
+
+                  {/* Botón Quincena Siguiente (>) */}
+                  <button
+                    type="button"
+                    onClick={handleNextPeriod}
+                    className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+                    title="Next Pay Period"
+                  >
+                    ▶
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-4 items-end">
+                <div className="flex-1 w-full">
+                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                    Worker
+                  </label>
+                  <select
+                    value={selectedUser}
+                    onChange={(e) => {
+                      setSelectedUser(e.target.value);
+                      setExpandedRangeUserId(null);
+                    }}
+                    className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                  >
+                    <option value="All">All workers</option>
+                    {allRegisteredUsers.map((worker) => (
+                      <option key={worker.id} value={worker.id}>
+                        {worker.fullName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex-1 w-full">
+                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                    Specific Day / From
+                  </label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div className="flex-1 w-full">
+                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                    To (Optional)
+                  </label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <button
+                  onClick={handleClearFilters}
+                  className="w-full md:w-auto px-6 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+              {!startDate && (
+                <div className="p-12 text-center flex flex-col items-center">
+                  <h3 className="text-lg font-bold text-gray-700">
+                    Select a date
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1 max-w-md">
+                    Choose a 'From' date to view the details for that period.
+                  </p>
+                </div>
+              )}
+
+              {startDate && (
+                <div className="overflow-x-auto">
+                  <div className="p-4 bg-purple-50 border-b border-purple-100 text-purple-800 text-sm font-bold flex justify-between items-center">
+                    <span>
+                      Report:{" "}
+                      {new Date(startDate + "T00:00:00").toLocaleDateString(
+                        "en-US",
+                      )}
+                      {endDate && endDate !== startDate
+                        ? ` to ${new Date(endDate + "T23:59:59").toLocaleDateString("en-US")}`
+                        : ""}
+                    </span>
+                    <span className="bg-purple-200 text-purple-900 px-3 py-1 rounded-full text-xs">
+                      Active Data
+                    </span>
                   </div>
-                ) : (
-                  <table className="w-full text-left">
-                    <thead className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider border-b">
-                      <tr>
-                        <th className="p-4">Worker</th>
-                        <th className="p-4 text-center">
-                          Total Accumulated Hours
-                        </th>
-                        <th className="p-4 text-right">Details</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {displayedUsers.map((worker) => {
-                        const effectiveEndDate = endDate ? endDate : startDate;
-                        const start = new Date(
-                          startDate + "T00:00:00",
-                        ).getTime();
-                        const end = new Date(
-                          effectiveEndDate + "T23:59:59",
-                        ).getTime();
 
-                        const userLogsInRange = allLogs.filter((log) => {
-                          if (!log.timestamp || log.userId !== worker.id)
-                            return false;
-                          const logTime = log.timestamp.toDate().getTime();
-                          return logTime >= start && logTime <= end;
-                        });
+                  {loading ? (
+                    <div className="p-12 text-center text-gray-400 animate-pulse">
+                      Querying Database...
+                    </div>
+                  ) : (
+                    <table className="w-full text-left">
+                      <thead className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider border-b">
+                        <tr>
+                          <th className="p-4">Worker</th>
+                          <th className="p-4 text-center">
+                            Total Accumulated Hours
+                          </th>
+                          <th className="p-4 text-right">Details</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {displayedUsers.map((worker) => {
+                          const effectiveEndDate = endDate ? endDate : startDate;
+                          const start = new Date(
+                            startDate + "T00:00:00",
+                          ).getTime();
+                          const end = new Date(
+                            effectiveEndDate + "T23:59:59",
+                          ).getTime();
 
-                        const totalWorkerHours = userLogsInRange.reduce(
-                          (sum, log) => sum + (Number(log.totalHours) || 0),
-                          0,
-                        );
+                          const userLogsInRange = allLogs.filter((log) => {
+                            if (!log.timestamp || log.userId !== worker.id)
+                              return false;
+                            const logTime = log.timestamp.toDate().getTime();
+                            return logTime >= start && logTime <= end;
+                          });
 
-                        // Contar el total de fotos del trabajador en el rango seleccionado
-                        const totalWorkerPhotos = userLogsInRange.reduce(
-                          (sum, log) =>
-                            sum +
-                            (log.photos && Array.isArray(log.photos)
-                              ? log.photos.length
-                              : 0),
-                          0,
-                        );
+                          const totalWorkerHours = userLogsInRange.reduce(
+                            (sum, log) => sum + (Number(log.totalHours) || 0),
+                            0,
+                          );
 
-                        const isExpanded = expandedRangeUserId === worker.id;
-                        const datesInRange = getDatesInRange(
-                          startDate,
-                          effectiveEndDate,
-                        );
+                          const totalWorkerPhotos = userLogsInRange.reduce(
+                            (sum, log) =>
+                              sum +
+                              (log.photos && Array.isArray(log.photos)
+                                ? log.photos.length
+                                : 0),
+                            0,
+                          );
 
-                        return (
-                          <React.Fragment key={worker.id}>
-                            <tr
-                              onClick={() => toggleRangeRow(worker.id)}
-                              className="transition-colors hover:bg-purple-50/50 cursor-pointer"
-                            >
-                              <td className="p-4">
-                                <p className="font-bold text-gray-800 text-sm">
-                                  {worker.fullName}
-                                </p>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <p className="text-xs text-purple-600">
-                                    {userLogsInRange.length} of{" "}
-                                    {datesInRange.length} days
+                          const isExpanded = expandedRangeUserId === worker.id;
+                          const datesInRange = getDatesInRange(
+                            startDate,
+                            effectiveEndDate,
+                          );
+
+                          return (
+                            <React.Fragment key={worker.id}>
+                              <tr
+                                onClick={() => toggleRangeRow(worker.id)}
+                                className="transition-colors hover:bg-purple-50/50 cursor-pointer"
+                              >
+                                <td className="p-4">
+                                  <p className="font-bold text-gray-800 text-sm">
+                                    {worker.fullName}
                                   </p>
-                                  {totalWorkerPhotos > 0 && (
-                                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                                      📷 {totalWorkerPhotos}
-                                    </span>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="p-4 text-center">
-                                <span
-                                  className={`text-xl font-black ${totalWorkerHours > 0 ? "text-purple-600" : "text-gray-300"}`}
-                                >
-                                  {totalWorkerHours}h
-                                </span>
-                              </td>
-                              <td className="p-4 text-right">
-                                <button
-                                  className="text-gray-400 hover:text-purple-600 transition-transform duration-200 cursor-pointer"
-                                  style={{
-                                    transform: isExpanded
-                                      ? "rotate(180deg)"
-                                      : "rotate(0deg)",
-                                  }}
-                                >
-                                  ▼
-                                </button>
-                              </td>
-                            </tr>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <p className="text-xs text-purple-600">
+                                      {userLogsInRange.length} of{" "}
+                                      {datesInRange.length} days
+                                    </p>
+                                    {totalWorkerPhotos > 0 && (
+                                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                        📷 {totalWorkerPhotos}
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="p-4 text-center">
+                                  <span
+                                    className={`text-xl font-black ${totalWorkerHours > 0 ? "text-purple-600" : "text-gray-300"}`}
+                                  >
+                                    {totalWorkerHours}h
+                                  </span>
+                                </td>
+                                <td className="p-4 text-right">
+                                  <button
+                                    className="text-gray-400 hover:text-purple-600 transition-transform duration-200 cursor-pointer"
+                                    style={{
+                                      transform: isExpanded
+                                        ? "rotate(180deg)"
+                                        : "rotate(0deg)",
+                                    }}
+                                  >
+                                    ▼
+                                  </button>
+                                </td>
+                              </tr>
 
-                            {isExpanded && (
-                              <tr className="bg-purple-50/30 border-b border-purple-100">
+                              {isExpanded && (
+                                <tr className="bg-purple-50/30 border-b border-purple-100">
                                 <td colSpan={3} className="p-0">
                                   <div className="p-4 md:p-6 shadow-inner">
                                     <h4 className="text-sm font-bold text-purple-800 mb-3">
@@ -1042,6 +1073,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
             )}
           </div>
         </div>
+        )}
+
+        {/* PESTAÑA 2: Charlas de Seguridad (Toolbox Meetings) */}
+        {activeTab === 'safety' && (
+          <div className="animate-fade-in">
+            <ToolboxAuditor />
+          </div>
+        )}
+
       </div>
 
       {/* Visor Modal de Evidencias Fotográficas */}

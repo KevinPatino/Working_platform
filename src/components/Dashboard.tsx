@@ -15,6 +15,7 @@ import Toast from './Toast';
 import Calendar from './Calendar';
 import PhotoEvidenceUploader from './PhotoEvidence';
 import LocationInput from './LocationInput';
+import ToolboxMeetingModal from './ToolBoxMeetingModal';
 
 interface DashboardProps {
   user: any;
@@ -90,6 +91,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
   const [totalHours, setTotalHours] = useState('');
   const [comments, setComments] = useState('');
   const [evidencePhotos, setEvidencePhotos] = useState<string[]>([]);
+
+  // Estado del modal de Toolbox Meeting
+  const [isToolboxOpen, setIsToolboxOpen] = useState(false);
 
   // Navegación de periodos
   const [activeCycleIndex, setActiveCycleIndex] = useState<number>(getBaseCycleIndex());
@@ -186,7 +190,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
 
   // Control estricto de entrada para horas: solo números y punto decimal
   const handleTotalHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value.replace(',', '.'); // Soporta teclado numérico con coma
+    const val = e.target.value.replace(',', '.');
     if (val === '' || /^\d*\.?\d*$/.test(val)) {
       setTotalHours(val);
     }
@@ -226,7 +230,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
         checkOut,
         totalHours: parsedHours,
         comments: comments.trim(),
-        photos: evidencePhotos, // <-- Guarda las fotos subidas por el teamlead
+        photos: evidencePhotos,
         dateStr: todayStr,
         timestamp: Timestamp.now(),
       });
@@ -238,7 +242,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
       setCheckOut('');
       setTotalHours('');
       setComments('');
-      setEvidencePhotos([]); // <-- Limpia el estado de las fotos
+      setEvidencePhotos([]);
       await fetchMyLogs();
     } catch (err: any) {
       showNotification('Error saving log: ' + err.message);
@@ -321,6 +325,27 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
           </button>
         </div>
 
+        {/* Acceso a Toolbox Meeting exclusivo para Team Lead */}
+        {role === 'teamlead' && (
+          <div className="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-4 sm:p-5 rounded-xl shadow-md flex items-center justify-between gap-4 animate-fade-in">
+            <div>
+              <span className="px-2 py-0.5 text-[10px] uppercase font-black tracking-wider bg-purple-700/60 text-purple-200 rounded border border-purple-400/30">
+                Safety First
+              </span>
+              <h3 className="text-sm sm:text-base font-bold mt-1">Daily Safety Briefing</h3>
+              <p className="text-xs text-purple-200 mt-0.5">Start daily toolbox meeting & capture crew signatures.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsToolboxOpen(true)}
+              className="px-4 py-2.5 bg-white text-purple-950 hover:bg-purple-50 rounded-lg text-xs font-black shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
+            >
+              <span>📋</span>
+              <span>Open Toolbox</span>
+            </button>
+          </div>
+        )}
+
         {/* Sección de Registro Diario de Horas */}
         <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
           <h2 className="text-lg font-bold text-gray-800 mb-4">Daily Time Entry</h2>
@@ -340,12 +365,12 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                   value={mainLocation}
                   onChange={(val) => setMainLocation(val)}
                   placeholder="Search job site address..."
-                  className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                  className="p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
                   required
                 />
 
                 {extraLocations.map((extraLoc, index) => (
-                  <div key={index} className="flex gap-2 mt-2">
+                  <div key={index} className="flex gap-2 mt-2 items-center">
                     <LocationInput
                       value={extraLoc}
                       onChange={(val) => handleExtraLocationChange(index, val)}
@@ -357,7 +382,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                     <button
                       type="button"
                       onClick={() => handleRemoveExtraLocation(index)}
-                      className="px-3 bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-lg text-sm font-bold transition-colors cursor-pointer"
+                      className="px-3.5 py-3 bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-lg text-sm font-bold transition-colors cursor-pointer self-stretch flex items-center justify-center"
                       title="Remove site"
                     >
                       ✕
@@ -376,7 +401,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                 )}
               </div>
 
-              {/* Fila con Check In, Check Out y Total Hours editable con teclado numérico */}
+              {/* Fila con Check In, Check Out y Total Hours */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
@@ -586,6 +611,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
         </div>
 
       </div>
+
+      {/* Modal de Toolbox Meeting */}
+      <ToolboxMeetingModal
+        isOpen={isToolboxOpen}
+        onClose={() => setIsToolboxOpen(false)}
+        currentUser={user}
+        showNotification={showNotification}
+      />
     </div>
   );
 };
