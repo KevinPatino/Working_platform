@@ -14,6 +14,7 @@ import {
 import Toast from './Toast';
 import Calendar from './Calendar';
 import PhotoEvidenceUploader from './PhotoEvidence';
+import LocationInput from './LocationInput';
 
 interface DashboardProps {
   user: any;
@@ -335,22 +336,20 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                 <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
                   Primary Job Site
                 </label>
-                <input
-                  type="text"
+                <LocationInput
                   value={mainLocation}
-                  onChange={(e) => setMainLocation(e.target.value)}
-                  placeholder=""
+                  onChange={(val) => setMainLocation(val)}
+                  placeholder="Search job site address..."
                   className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
                   required
                 />
 
                 {extraLocations.map((extraLoc, index) => (
                   <div key={index} className="flex gap-2 mt-2">
-                    <input
-                      type="text"
+                    <LocationInput
                       value={extraLoc}
-                      onChange={(e) => handleExtraLocationChange(index, e.target.value)}
-                      placeholder=""
+                      onChange={(val) => handleExtraLocationChange(index, val)}
+                      placeholder={`Additional job site ${index + 2}`}
                       className="flex-1 p-3 border border-blue-200 bg-blue-50/30 rounded-lg text-sm outline-none focus:border-blue-500"
                       required
                     />
@@ -576,7 +575,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                 <Calendar 
                   logs={myLogs}
                   role={role}
-                  onLogUpdated={fetchMyLogs} />
+                  onLogUpdated={fetchMyLogs}
+                />
               </div>
 
             </div>

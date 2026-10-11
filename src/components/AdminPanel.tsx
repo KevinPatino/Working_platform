@@ -12,6 +12,7 @@ import {
 import { signOut } from "firebase/auth";
 import Toast from "./Toast";
 import PhotoModal from "./PhotoModal";
+import MapLink from "./MapLink";
 
 interface AdminPanelProps {
   user: any;
@@ -260,14 +261,24 @@ const CYCLE_DAYS = 14;
 
 const getBaseCycleIndex = () => {
   const now = new Date();
-  const todayAtMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diffDays = Math.floor((todayAtMidnight.getTime() - ANCHOR_DATE.getTime()) / MS_PER_DAY);
+  const todayAtMidnight = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
+  const diffDays = Math.floor(
+    (todayAtMidnight.getTime() - ANCHOR_DATE.getTime()) / MS_PER_DAY,
+  );
   return Math.floor(diffDays / CYCLE_DAYS);
 };
 
 const getPeriodRangeByIndex = (cycleIndex: number) => {
-  const currentStart = new Date(ANCHOR_DATE.getTime() + cycleIndex * CYCLE_DAYS * MS_PER_DAY);
-  const currentEnd = new Date(ANCHOR_DATE.getTime() + (cycleIndex * CYCLE_DAYS + 13) * MS_PER_DAY);
+  const currentStart = new Date(
+    ANCHOR_DATE.getTime() + cycleIndex * CYCLE_DAYS * MS_PER_DAY,
+  );
+  const currentEnd = new Date(
+    ANCHOR_DATE.getTime() + (cycleIndex * CYCLE_DAYS + 13) * MS_PER_DAY,
+  );
 
   const formatDate = (d: Date) => {
     const y = d.getFullYear();
@@ -297,10 +308,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   );
   const [editingRowKey, setEditingRowKey] = useState<string | null>(null);
 
-  const [activeCycleIndex, setActiveCycleIndex] = useState<number>(getBaseCycleIndex());
+  const [activeCycleIndex, setActiveCycleIndex] =
+    useState<number>(getBaseCycleIndex());
 
   // Estados para el visor modal de fotos de evidencias
-  const [activeEvidencePhotos, setActiveEvidencePhotos] = useState<string[] | null>(null);
+  const [activeEvidencePhotos, setActiveEvidencePhotos] = useState<
+    string[] | null
+  >(null);
   const [evidenceModalTitle, setEvidenceModalTitle] = useState<string>("");
 
   const handleLogout = async () => {
@@ -524,7 +538,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
 
         <div className="space-y-6 animate-fade-in">
           <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 space-y-4">
-            
             {/* Barra de accesos rápidos con leyenda de fechas */}
             <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
               <div className="flex items-center gap-2">
@@ -548,7 +561,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-1">
                   Pay Periods:
                 </span>
-                
+
                 {/* Botón Quincena Anterior (<) */}
                 <button
                   type="button"
@@ -718,7 +731,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                         // Contar el total de fotos del trabajador en el rango seleccionado
                         const totalWorkerPhotos = userLogsInRange.reduce(
                           (sum, log) =>
-                            sum + (log.photos && Array.isArray(log.photos) ? log.photos.length : 0),
+                            sum +
+                            (log.photos && Array.isArray(log.photos)
+                              ? log.photos.length
+                              : 0),
                           0,
                         );
 
@@ -740,7 +756,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                 </p>
                                 <div className="flex items-center gap-2 mt-0.5">
                                   <p className="text-xs text-purple-600">
-                                    {userLogsInRange.length} of {datesInRange.length} days
+                                    {userLogsInRange.length} of{" "}
+                                    {datesInRange.length} days
                                   </p>
                                   {totalWorkerPhotos > 0 && (
                                     <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
@@ -855,7 +872,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                         </span>
                                                       </td>
                                                       <td className="p-3 text-gray-700">
-                                                        {log.location}
+                                                        <MapLink
+                                                          location={
+                                                            log.location
+                                                          }
+                                                        />
                                                       </td>
                                                       <td className="p-3 text-center text-gray-600">
                                                         {log.checkIn} -{" "}
@@ -870,19 +891,28 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                             type="button"
                                                             onClick={(e) => {
                                                               e.stopPropagation();
-                                                              setActiveEvidencePhotos(log.photos);
+                                                              setActiveEvidencePhotos(
+                                                                log.photos,
+                                                              );
                                                               setEvidenceModalTitle(
-                                                                `Evidence: ${worker.fullName} • ${dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`
+                                                                `Evidence: ${worker.fullName} • ${dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
                                                               );
                                                             }}
                                                             className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
                                                             title="View site photos"
                                                           >
                                                             <span>📷</span>
-                                                            <span>{log.photos.length}</span>
+                                                            <span>
+                                                              {
+                                                                log.photos
+                                                                  .length
+                                                              }
+                                                            </span>
                                                           </button>
                                                         ) : (
-                                                          <span className="text-gray-300 text-xs">—</span>
+                                                          <span className="text-gray-300 text-xs">
+                                                            —
+                                                          </span>
                                                         )}
                                                       </td>
                                                     </tr>
