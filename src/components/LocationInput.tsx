@@ -12,6 +12,7 @@ interface LocationInputProps {
   onChange: (value: string, metadata?: LocationMetadata) => void;
   placeholder?: string;
   className?: string;
+  wrapperClassName?: string;
   required?: boolean;
 }
 
@@ -26,6 +27,7 @@ const LocationInput: React.FC<LocationInputProps> = ({
   onChange,
   placeholder = 'Search job site address...',
   className = '',
+  wrapperClassName = 'w-full',
   required = false,
 }) => {
   const [predictions, setPredictions] = useState<any[]>([]);
@@ -34,7 +36,6 @@ const LocationInput: React.FC<LocationInputProps> = ({
   const sessionTokenRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 1. Cargar el script moderno de Google Maps con soporte para Places (New)
   useEffect(() => {
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (!apiKey) return;
@@ -59,7 +60,6 @@ const LocationInput: React.FC<LocationInputProps> = ({
     }
   }, []);
 
-  // 2. Cerrar el menú desplegable si se hace clic fuera del componente
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -70,7 +70,6 @@ const LocationInput: React.FC<LocationInputProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 3. Consultar sugerencias con debouncing al escribir
   useEffect(() => {
     if (!isApiReady || !value || value.trim().length < 2) {
       setPredictions([]);
@@ -89,7 +88,7 @@ const LocationInput: React.FC<LocationInputProps> = ({
 
         const request = {
           input: value,
-          includedRegionCodes: ['ca'], // Prioriza obras en Canadá
+          includedRegionCodes: ['ca'],
           sessionToken: sessionTokenRef.current,
         };
 
@@ -106,7 +105,6 @@ const LocationInput: React.FC<LocationInputProps> = ({
     return () => clearTimeout(timeoutId);
   }, [value, isApiReady]);
 
-  // 4. Procesar el lugar seleccionado y extraer detalles (coordenadas y dirección formal)
   const handleSelectPrediction = async (suggestion: any) => {
     try {
       setShowDropdown(false);
@@ -127,7 +125,6 @@ const LocationInput: React.FC<LocationInputProps> = ({
       const lng = place.location ? place.location.lng() : undefined;
       const placeId = place.id || prediction.placeId;
 
-      // Renovar el session token para la siguiente búsqueda
       sessionTokenRef.current = null;
 
       onChange(formattedAddress, {
@@ -144,7 +141,7 @@ const LocationInput: React.FC<LocationInputProps> = ({
   };
 
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div ref={containerRef} className={`relative ${wrapperClassName}`}>
       <input
         type="text"
         value={value}
@@ -156,12 +153,11 @@ const LocationInput: React.FC<LocationInputProps> = ({
           if (predictions.length > 0) setShowDropdown(true);
         }}
         placeholder={placeholder}
-        className={className}
+        className={`w-full ${className}`}
         required={required}
         autoComplete="off"
       />
 
-      {/* Lista desplegable flotante de resultados sugeridos */}
       {showDropdown && predictions.length > 0 && (
         <ul className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 text-left">
           {predictions.map((item, idx) => {

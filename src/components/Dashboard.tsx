@@ -350,7 +350,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                       value={extraLoc}
                       onChange={(val) => handleExtraLocationChange(index, val)}
                       placeholder={`Additional job site ${index + 2}`}
-                      className="flex-1 p-3 border border-blue-200 bg-blue-50/30 rounded-lg text-sm outline-none focus:border-blue-500"
+                      wrapperClassName="flex-1"
+                      className="p-3 border border-blue-200 bg-blue-50/30 rounded-lg text-sm outline-none focus:border-blue-500"
                       required
                     />
                     <button

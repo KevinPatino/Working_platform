@@ -3,6 +3,7 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import PhotoEvidenceUploader from './PhotoEvidence';
 import PhotoModal from './PhotoModal';
+import MapLink from './MapLink';
 
 interface CalendarProps {
   logs: any[]; 
@@ -204,7 +205,7 @@ const Calendar: React.FC<CalendarProps> = ({ logs, role = 'worker', onLogUpdated
 
           <div className="grid grid-cols-2 gap-2 text-xs">
             <p className="text-gray-500 font-medium">Location:</p>
-            <p className="font-semibold text-gray-800">{selectedLog.location}</p>
+            <MapLink location={selectedLog.location} compact />
             <p className="text-gray-500 font-medium">Schedule:</p>
             <p className="font-semibold text-gray-800">{selectedLog.checkIn} - {selectedLog.checkOut}</p>
             <p className="text-gray-500 font-medium">Total Hours:</p>
