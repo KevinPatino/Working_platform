@@ -1,12 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import PhotoEvidenceUploader from './PhotoEvidence';
+import PhotoModal from './PhotoModal';
 
 interface CalendarProps {
   logs: any[]; 
+  role?: string;
+  onLogUpdated?: () => void;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ logs }) => {
+const Calendar: React.FC<CalendarProps> = ({ logs, role = 'worker', onLogUpdated }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedLog, setSelectedLog] = useState<any>(null);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const [isUpdatingPhotos, setIsUpdatingPhotos] = useState(false);
+
+  // Mantener sincronizado el registro seleccionado cuando cambien los logs
+  useEffect(() => {
+    if (selectedLog) {
+      const updated = logs.find((l) => l.id === selectedLog.id);
+      if (updated) setSelectedLog(updated);
+    }
+  }, [logs]);
 
   const currentYearValue = currentMonth.getFullYear();
   const currentMonthValue = currentMonth.getMonth();
@@ -54,6 +70,25 @@ const Calendar: React.FC<CalendarProps> = ({ logs }) => {
       setSelectedLog(null);
     } else {
       setSelectedLog(log);
+    }
+  };
+
+  // Guardar fotos añadidas o eliminadas directamente en Firestore
+  const handlePhotosChange = async (updatedPhotos: string[]) => {
+    if (!selectedLog) return;
+    setIsUpdatingPhotos(true);
+    try {
+      const logRef = doc(db, 'timeLogs', selectedLog.id);
+      await updateDoc(logRef, { photos: updatedPhotos });
+      
+      setSelectedLog((prev: any) => ({ ...prev, photos: updatedPhotos }));
+      if (onLogUpdated) {
+        onLogUpdated();
+      }
+    } catch (error) {
+      console.error('Error updating photos in log:', error);
+    } finally {
+      setIsUpdatingPhotos(false);
     }
   };
 
@@ -151,7 +186,7 @@ const Calendar: React.FC<CalendarProps> = ({ logs }) => {
 
       {/* Tarjeta de Detalle del Registro Seleccionado */}
       {selectedLog && (
-        <div className="mt-4 p-4 border-l-4 border-blue-600 bg-blue-50/60 rounded-r-xl shadow-xs relative animate-fade-in border border-blue-100">
+        <div className="mt-4 p-4 border-l-4 border-blue-600 bg-blue-50/60 rounded-r-xl shadow-xs relative animate-fade-in border border-blue-100 space-y-3">
           <button 
             type="button"
             onClick={() => setSelectedLog(null)} 
@@ -163,9 +198,10 @@ const Calendar: React.FC<CalendarProps> = ({ logs }) => {
             </svg>
           </button>
 
-          <h3 className="font-bold text-gray-800 text-sm mb-2 pr-6">
+          <h3 className="font-bold text-gray-800 text-sm pr-6">
             Log Details
           </h3>
+
           <div className="grid grid-cols-2 gap-2 text-xs">
             <p className="text-gray-500 font-medium">Location:</p>
             <p className="font-semibold text-gray-800">{selectedLog.location}</p>
@@ -174,14 +210,86 @@ const Calendar: React.FC<CalendarProps> = ({ logs }) => {
             <p className="text-gray-500 font-medium">Total Hours:</p>
             <p className="font-black text-blue-700">{selectedLog.totalHours} hrs</p>
           </div>
+
           {selectedLog.comments && (
-            <div className="mt-3 pt-2.5 border-t border-blue-200">
+            <div className="pt-2 border-t border-blue-200">
               <p className="text-[10px] text-gray-500 uppercase tracking-wide font-bold">Comments</p>
               <p className="text-xs italic text-gray-700 mt-0.5">"{selectedLog.comments}"</p>
             </div>
           )}
+
+          {/* Gestión de Evidencias Fotográficas */}
+          {role === 'teamlead' ? (
+            <div className="pt-3 border-t border-blue-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
+                  Site Evidence Photos
+                </span>
+                {selectedLog.photos && selectedLog.photos.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsPhotoModalOpen(true)}
+                    className="text-xs font-bold text-blue-700 hover:text-blue-900 transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <span>View Gallery ↗</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Uploader para ver miniaturas existentes y subir más fotos */}
+              <PhotoEvidenceUploader
+                docId={selectedLog.id}
+                photos={selectedLog.photos || []}
+                onPhotosChange={handlePhotosChange}
+              />
+
+              {isUpdatingPhotos && (
+                <p className="text-[11px] text-blue-600 font-semibold animate-pulse">
+                  Syncing photos...
+                </p>
+              )}
+            </div>
+          ) : (
+            /* Modo solo lectura si es Worker y el turno tiene fotos */
+            selectedLog.photos && selectedLog.photos.length > 0 && (
+              <div className="pt-3 border-t border-blue-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
+                    Site Evidence
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsPhotoModalOpen(true)}
+                    className="text-xs font-bold text-blue-700 hover:text-blue-900 transition-colors cursor-pointer"
+                  >
+                    View Photos ({selectedLog.photos.length}) ↗
+                  </button>
+                </div>
+
+                <div className="flex gap-2 overflow-x-auto py-1">
+                  {selectedLog.photos.map((url: string, idx: number) => (
+                    <img
+                      key={idx}
+                      src={url}
+                      alt={`Evidence ${idx + 1}`}
+                      onClick={() => setIsPhotoModalOpen(true)}
+                      className="w-14 h-14 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                    />
+                  ))}
+                </div>
+              </div>
+            )
+          )}
         </div>
       )}
+
+      {/* Visor Modal en pantalla completa */}
+      <PhotoModal
+        isOpen={isPhotoModalOpen}
+        onClose={() => setIsPhotoModalOpen(false)}
+        photos={selectedLog?.photos || []}
+        title={`Evidence • ${selectedLog?.location || 'Job Site'}`}
+      />
     </div>
   );
 };

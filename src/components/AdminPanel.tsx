@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import Toast from "./Toast";
+import PhotoModal from "./PhotoModal";
 
 interface AdminPanelProps {
   user: any;
@@ -297,6 +298,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   const [editingRowKey, setEditingRowKey] = useState<string | null>(null);
 
   const [activeCycleIndex, setActiveCycleIndex] = useState<number>(getBaseCycleIndex());
+
+  // Estados para el visor modal de fotos de evidencias
+  const [activeEvidencePhotos, setActiveEvidencePhotos] = useState<string[] | null>(null);
+  const [evidenceModalTitle, setEvidenceModalTitle] = useState<string>("");
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -709,6 +714,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                           (sum, log) => sum + (Number(log.totalHours) || 0),
                           0,
                         );
+
+                        // Contar el total de fotos del trabajador en el rango seleccionado
+                        const totalWorkerPhotos = userLogsInRange.reduce(
+                          (sum, log) =>
+                            sum + (log.photos && Array.isArray(log.photos) ? log.photos.length : 0),
+                          0,
+                        );
+
                         const isExpanded = expandedRangeUserId === worker.id;
                         const datesInRange = getDatesInRange(
                           startDate,
@@ -725,10 +738,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                 <p className="font-bold text-gray-800 text-sm">
                                   {worker.fullName}
                                 </p>
-                                <p className="text-xs text-purple-600">
-                                  {userLogsInRange.length} of{" "}
-                                  {datesInRange.length} days
-                                </p>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <p className="text-xs text-purple-600">
+                                    {userLogsInRange.length} of {datesInRange.length} days
+                                  </p>
+                                  {totalWorkerPhotos > 0 && (
+                                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                      📷 {totalWorkerPhotos}
+                                    </span>
+                                  )}
+                                </div>
                               </td>
                               <td className="p-4 text-center">
                                 <span
@@ -773,6 +792,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                             <th className="p-3 text-center">
                                               Hours
                                             </th>
+                                            <th className="p-3 text-center">
+                                              Evidence
+                                            </th>
                                           </tr>
                                         </thead>
                                         <tbody className="divide-y divide-purple-50">
@@ -802,42 +824,70 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                 editingRowKey === rowKey;
 
                                               if (logsForDay.length > 0) {
-                                                return logsForDay.map((log) => (
-                                                  <tr
-                                                    key={log.id}
-                                                    className="hover:bg-gray-50"
-                                                  >
-                                                    <td className="p-3">
-                                                      <span
-                                                        className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-gray-700"}`}
-                                                      >
-                                                        {dateObj.toLocaleDateString(
-                                                          "en-US",
-                                                          {
-                                                            weekday: "short",
-                                                            day: "2-digit",
-                                                            month: "short",
-                                                          },
+                                                return logsForDay.map((log) => {
+                                                  const hasPhotos =
+                                                    log.photos &&
+                                                    Array.isArray(log.photos) &&
+                                                    log.photos.length > 0;
+
+                                                  return (
+                                                    <tr
+                                                      key={log.id}
+                                                      className="hover:bg-gray-50"
+                                                    >
+                                                      <td className="p-3">
+                                                        <span
+                                                          className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-gray-700"}`}
+                                                        >
+                                                          {dateObj.toLocaleDateString(
+                                                            "en-US",
+                                                            {
+                                                              weekday: "short",
+                                                              day: "2-digit",
+                                                              month: "short",
+                                                            },
+                                                          )}
+                                                        </span>
+                                                      </td>
+                                                      <td className="p-3">
+                                                        <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
+                                                          Worked
+                                                        </span>
+                                                      </td>
+                                                      <td className="p-3 text-gray-700">
+                                                        {log.location}
+                                                      </td>
+                                                      <td className="p-3 text-center text-gray-600">
+                                                        {log.checkIn} -{" "}
+                                                        {log.checkOut}
+                                                      </td>
+                                                      <td className="p-3 text-center font-bold text-purple-700">
+                                                        {log.totalHours}h
+                                                      </td>
+                                                      <td className="p-3 text-center">
+                                                        {hasPhotos ? (
+                                                          <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                              e.stopPropagation();
+                                                              setActiveEvidencePhotos(log.photos);
+                                                              setEvidenceModalTitle(
+                                                                `Evidence: ${worker.fullName} • ${dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`
+                                                              );
+                                                            }}
+                                                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                                                            title="View site photos"
+                                                          >
+                                                            <span>📷</span>
+                                                            <span>{log.photos.length}</span>
+                                                          </button>
+                                                        ) : (
+                                                          <span className="text-gray-300 text-xs">—</span>
                                                         )}
-                                                      </span>
-                                                    </td>
-                                                    <td className="p-3">
-                                                      <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
-                                                        Worked
-                                                      </span>
-                                                    </td>
-                                                    <td className="p-3 text-gray-700">
-                                                      {log.location}
-                                                    </td>
-                                                    <td className="p-3 text-center text-gray-600">
-                                                      {log.checkIn} -{" "}
-                                                      {log.checkOut}
-                                                    </td>
-                                                    <td className="p-3 text-center font-bold text-purple-700">
-                                                      {log.totalHours}h
-                                                    </td>
-                                                  </tr>
-                                                ));
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                });
                                               } else if (isEditingThisRow) {
                                                 return (
                                                   <tr
@@ -857,7 +907,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                       </span>
                                                     </td>
                                                     <td
-                                                      colSpan={4}
+                                                      colSpan={5}
                                                       className="p-3"
                                                     >
                                                       <InlineEditForm
@@ -903,7 +953,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                     </td>
                                                     <td
                                                       className="p-3 text-red-400 italic"
-                                                      colSpan={2}
+                                                      colSpan={3}
                                                     ></td>
                                                     <td className="p-3 text-center">
                                                       <button
@@ -963,6 +1013,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
           </div>
         </div>
       </div>
+
+      {/* Visor Modal de Evidencias Fotográficas */}
+      <PhotoModal
+        isOpen={activeEvidencePhotos !== null}
+        onClose={() => setActiveEvidencePhotos(null)}
+        photos={activeEvidencePhotos || []}
+        title={evidenceModalTitle}
+      />
     </div>
   );
 };

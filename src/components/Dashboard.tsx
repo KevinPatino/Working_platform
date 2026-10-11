@@ -13,6 +13,7 @@ import {
 } from 'firebase/firestore';
 import Toast from './Toast';
 import Calendar from './Calendar';
+import PhotoEvidenceUploader from './PhotoEvidence';
 
 interface DashboardProps {
   user: any;
@@ -87,6 +88,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
   const [checkOut, setCheckOut] = useState('');
   const [totalHours, setTotalHours] = useState('');
   const [comments, setComments] = useState('');
+  const [evidencePhotos, setEvidencePhotos] = useState<string[]>([]);
 
   // Navegación de periodos
   const [activeCycleIndex, setActiveCycleIndex] = useState<number>(getBaseCycleIndex());
@@ -223,6 +225,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
         checkOut,
         totalHours: parsedHours,
         comments: comments.trim(),
+        photos: evidencePhotos, // <-- Guarda las fotos subidas por el teamlead
         dateStr: todayStr,
         timestamp: Timestamp.now(),
       });
@@ -234,6 +237,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
       setCheckOut('');
       setTotalHours('');
       setComments('');
+      setEvidencePhotos([]); // <-- Limpia el estado de las fotos
       await fetchMyLogs();
     } catch (err: any) {
       showNotification('Error saving log: ' + err.message);
@@ -428,6 +432,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                 />
               </div>
 
+              {/* Módulo de Evidencias Fotográficas: solo para Team Leads */}
+              {role === 'teamlead' && (
+                <div className="pt-2 border-t border-gray-100">
+                  <PhotoEvidenceUploader
+                    docId={`${user.uid}_${getLocalTodayString()}`}
+                    photos={evidencePhotos}
+                    onPhotosChange={setEvidencePhotos}
+                  />
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={submitting}
@@ -558,7 +573,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                 <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                   Monthly Logs Calendar
                 </h4>
-                <Calendar logs={myLogs} />
+                <Calendar 
+                  logs={myLogs}
+                  role={role}
+                  onLogUpdated={fetchMyLogs} />
               </div>
 
             </div>
