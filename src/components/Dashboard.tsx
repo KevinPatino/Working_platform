@@ -79,7 +79,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
   const [userName, setUserName] = useState('');
   const [hasLoggedToday, setHasLoggedToday] = useState(false);
   const [myLogs, setMyLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -130,7 +130,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
 
   // Consultar registros del trabajador
   const fetchMyLogs = async () => {
-    setLoading(true);
+    // setLoading(true);
     try {
       const q = query(
         collection(db, 'timeLogs'),
@@ -163,7 +163,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
     } catch (error: any) {
       showNotification('Error loading logs: ' + error.message);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
