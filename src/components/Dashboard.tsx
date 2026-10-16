@@ -17,70 +17,25 @@ import PhotoEvidenceUploader from './PhotoEvidence';
 import LocationInput from './LocationInput';
 import ToolboxMeetingModal from './ToolBoxMeetingModal';
 
+// <-- NUEVO: Importamos las funciones centralizadas de nómina
+// (Nota: Si tu payroll.ts está en src/config/payroll.ts, cambia '../utils/payroll' por '../config/payroll')
+import { 
+  getBaseCycleIndex, 
+  getPeriodRangeByIndex, 
+  formatPeriodLegend, 
+  getLocalTodayString 
+} from '../utils/payroll';
+
 interface DashboardProps {
   user: any;
   role?: 'worker' | 'teamlead' | string;
 }
-
-// Configuración de nómina bisemanal
-const ANCHOR_DATE = new Date(2026, 7, 31);
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const CYCLE_DAYS = 14;
-
-const getBaseCycleIndex = () => {
-  const now = new Date();
-  const todayAtMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diffDays = Math.floor((todayAtMidnight.getTime() - ANCHOR_DATE.getTime()) / MS_PER_DAY);
-  return Math.floor(diffDays / CYCLE_DAYS);
-};
-
-const getPeriodRangeByIndex = (cycleIndex: number) => {
-  const currentStart = new Date(ANCHOR_DATE.getTime() + cycleIndex * CYCLE_DAYS * MS_PER_DAY);
-  const currentEnd = new Date(ANCHOR_DATE.getTime() + (cycleIndex * CYCLE_DAYS + 13) * MS_PER_DAY);
-
-  const formatDate = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  };
-
-  return {
-    start: formatDate(currentStart),
-    end: formatDate(currentEnd),
-  };
-};
-
-const formatPeriodLegend = (startStr: string, endStr: string) => {
-  if (!startStr || !endStr) return "";
-  const s = new Date(startStr + "T00:00:00");
-  const e = new Date(endStr + "T00:00:00");
-  const sMonth = s.toLocaleDateString("en-US", { month: "short" });
-  const eMonth = e.toLocaleDateString("en-US", { month: "short" });
-  const sDay = s.getDate();
-  const eDay = e.getDate();
-  const year = e.getFullYear();
-
-  if (sMonth === eMonth) {
-    return `${sMonth} ${sDay} – ${eDay}, ${year}`;
-  }
-  return `${sMonth} ${sDay} – ${eMonth} ${eDay}, ${year}`;
-};
-
-const getLocalTodayString = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
 
 const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
   const [userName, setUserName] = useState('');
   const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
   const [hasLoggedToday, setHasLoggedToday] = useState(false);
   const [myLogs, setMyLogs] = useState<any[]>([]);
-  // const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -112,14 +67,14 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
     setToastMessage(msg);
   };
 
-  // Cargar nombre del usuario
+  // Cargar nombre del usuario y su companyId
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           const data = userDoc.data();
-          setUserName(userDoc.data().fullName || user.email);
+          setUserName(data.fullName || user.email);
           setUserCompanyId(data.companyId || null);
         } else {
           setUserName(user.email);
@@ -131,13 +86,16 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
     fetchUserData();
   }, [user]);
 
-  // Consultar registros del trabajador
+  // Consultar registros del trabajador (filtrando estrictamente por usuario y empresa)
   const fetchMyLogs = async () => {
-    // setLoading(true);
+    // <-- CORRECCIÓN 1: Si aún no ha cargado el companyId desde Firebase, esperamos
+    if (!userCompanyId) return;
+
     try {
       const q = query(
         collection(db, 'timeLogs'),
-        where('userId', '==', user.uid)
+        where('userId', '==', user.uid),
+        where('companyId', '==', userCompanyId)
       );
       const querySnapshot = await getDocs(q);
       const logs: any[] = [];
@@ -165,14 +123,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
       setHasLoggedToday(foundToday);
     } catch (error: any) {
       showNotification('Error loading logs: ' + error.message);
-    } finally {
-      // setLoading(false);
     }
   };
 
+  // <-- CORRECCIÓN 2: Se ejecuta automáticamente en cuanto userCompanyId termina de cargar
   useEffect(() => {
-    fetchMyLogs();
-  }, [user]);
+    if (userCompanyId) {
+      fetchMyLogs();
+    }
+  }, [user, userCompanyId]);
 
   // Manejo de obras múltiples
   const handleAddLocation = () => {
@@ -202,6 +161,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
   // Guardar turno del día
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // <-- CORRECCIÓN 3: Bloqueo preventivo si no hay empresa asignada
+    if (!userCompanyId) {
+      showNotification('Error: Your account is not linked to a company.');
+      return;
+    }
+
     const cleanMain = mainLocation.trim();
     const cleanExtras = extraLocations.map((l) => l.trim()).filter(Boolean);
     const cleanHours = totalHours.trim();
@@ -227,6 +193,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
       await setDoc(doc(db, 'timeLogs', docId), {
         userId: user.uid,
         userEmail: user.email,
+        companyId: userCompanyId, // <-- CORRECCIÓN 4: Ahora sí guardamos el companyId en Firestore
         location: combinedLocation,
         locations: allLocations,
         checkIn,
@@ -514,7 +481,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                 type="button"
                 onClick={handleNextPeriod}
                 className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
-                title="Next Pay Period"
               >
                 ▶
               </button>

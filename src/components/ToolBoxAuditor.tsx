@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore'; // <-- NUEVO: Importar 'where'
 import MapLink from './MapLink';
 
 interface Attendee {
@@ -11,6 +11,7 @@ interface Attendee {
 
 interface ToolboxMeeting {
   id: string;
+  companyId?: string; // <-- NUEVO: Añadido companyId a la interfaz
   dateStr: string;
   jobSite: string;
   topic: string;
@@ -23,7 +24,13 @@ interface ToolboxMeeting {
   createdAt?: any;
 }
 
-const ToolboxAuditor: React.FC = () => {
+// <-- NUEVO: Interfaz para recibir el companyId desde AdminPanel
+interface ToolboxAuditorProps {
+  companyId: string | null;
+}
+
+// <-- MODIFICADO: El componente ahora recibe companyId
+const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
   const [meetings, setMeetings] = useState<ToolboxMeeting[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedMeeting, setSelectedMeeting] = useState<ToolboxMeeting | null>(null);
@@ -33,15 +40,32 @@ const ToolboxAuditor: React.FC = () => {
   const [dateFilter, setDateFilter] = useState('');
   const [leadFilter, setLeadFilter] = useState('all');
 
+  // <-- MODIFICADO: Filtrar por companyId
   const fetchMeetings = async () => {
+    if (!companyId) return; // Si no hay empresa, no hacemos nada
+
     setLoading(true);
     try {
-      const q = query(collection(db, 'toolboxMeetings'), orderBy('createdAt', 'desc'));
+      // Solo traemos las actas de ESTA empresa
+      const q = query(
+        collection(db, 'toolboxMeetings'), 
+        where('companyId', '==', companyId)
+      );
       const snapshot = await getDocs(q);
+      
       const data: ToolboxMeeting[] = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...(doc.data() as Omit<ToolboxMeeting, 'id'>),
       }));
+
+      // Ordenamos las más recientes primero en JavaScript 
+      // (evita tener que crear índices compuestos extra en Firebase)
+      data.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return timeB - timeA;
+      });
+      
       setMeetings(data);
     } catch (err) {
       console.error('Error fetching toolbox meetings:', err);
@@ -50,9 +74,10 @@ const ToolboxAuditor: React.FC = () => {
     }
   };
 
+  // <-- MODIFICADO: Añadir companyId como dependencia del useEffect
   useEffect(() => {
     fetchMeetings();
-  }, []);
+  }, [companyId]);
 
   // Lista única de Team Leads que han realizado charlas para el filtro
   const uniqueLeads = Array.from(

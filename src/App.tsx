@@ -5,6 +5,7 @@ import { auth, db } from './firebaseConfig';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
 import AdminPanel from './components/AdminPanel'; 
+import { applyTenantTheme, currentTenant } from './config/tenant.config';
 
 export type UserRole = 'admin' | 'teamlead' | 'worker';
 
@@ -26,6 +27,32 @@ function App() {
           if (userDocSnap.exists()) {
             const data = userDocSnap.data();
             
+            // <-- NUEVO BLOQUE: Descargamos la config de su empresa
+            if (data.companyId) {
+              const companyDoc = await getDoc(doc(db, 'companies', data.companyId));
+              if (companyDoc.exists()) {
+                const companyData = companyDoc.data();
+                
+                // Construimos el objeto de configuración con los datos de Firebase
+                const tenantConfig = {
+                  ...currentTenant, // Mantenemos la base
+                  company: {
+                    name: companyData.name || currentTenant.company.name,
+                    shortName: companyData.shortName || currentTenant.company.shortName,
+                    logoUrl: companyData.logoUrl || currentTenant.company.logoUrl,
+                  },
+                  // Si tuvieras colores en Firebase, los inyectarías aquí
+                };
+                
+                // Aplicamos los colores
+                applyTenantTheme(tenantConfig);
+                
+                // Opcional: Actualizamos el título de la pestaña del navegador
+                document.title = companyData.shortName || 'Working Platform';
+              }
+            }
+            // <-- FIN DEL NUEVO BLOQUE
+
             if (currentUser.email === ADMIN_EMAIL || data.role === 'admin') {
               setUserRole('admin');
             } else if (data.role === 'teamlead') {
@@ -43,6 +70,7 @@ function App() {
       } else {
         setUser(null);
         setUserRole('worker');
+        applyTenantTheme(currentTenant); // Resetea al tema por defecto si cierra sesión
       }
       setLoading(false);
     });

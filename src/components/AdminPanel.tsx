@@ -8,17 +8,26 @@ import {
   doc,
   Timestamp,
   where,
+  getDoc, // <-- NUEVO: Importar getDoc
 } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import Toast from "./Toast";
 import PhotoModal from "./PhotoModal";
 import MapLink from "./MapLink";
 import ToolboxAuditor from "./ToolBoxAuditor";
+// <-- NUEVO: Importamos desde payroll.ts
+import { 
+  getBaseCycleIndex, 
+  getPeriodRangeByIndex, 
+  formatPeriodLegend, 
+  getLocalTodayString 
+} from '../utils/payroll';
 
 interface AdminPanelProps {
   user: any;
 }
 
+// ... (El componente InlineEditForm se mantiene igual)
 const InlineEditForm = ({
   workerId,
   dateObj,
@@ -223,13 +232,6 @@ const InlineEditForm = ({
   );
 };
 
-const getLocalTodayString = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
 
 const getFirstDayOfMonth = () => {
   const d = new Date();
@@ -238,64 +240,10 @@ const getFirstDayOfMonth = () => {
   return d;
 };
 
-// Formateador visual para el rango de la quincena (ej: "Sep 14 – Sep 27, 2026")
-const formatPeriodLegend = (startStr: string, endStr: string) => {
-  if (!startStr || !endStr) return "";
-  const s = new Date(startStr + "T00:00:00");
-  const e = new Date(endStr + "T00:00:00");
-  const sMonth = s.toLocaleDateString("en-US", { month: "short" });
-  const eMonth = e.toLocaleDateString("en-US", { month: "short" });
-  const sDay = s.getDate();
-  const eDay = e.getDate();
-  const year = e.getFullYear();
-
-  if (sMonth === eMonth) {
-    return `${sMonth} ${sDay} – ${eDay}, ${year}`;
-  }
-  return `${sMonth} ${sDay} – ${eMonth} ${eDay}, ${year}`;
-};
-
-// Configuración y cálculo base bisemanal (14 días)
-const ANCHOR_DATE = new Date(2026, 7, 31); // Lunes 31 de agosto de 2026
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const CYCLE_DAYS = 14;
-
-const getBaseCycleIndex = () => {
-  const now = new Date();
-  const todayAtMidnight = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-  );
-  const diffDays = Math.floor(
-    (todayAtMidnight.getTime() - ANCHOR_DATE.getTime()) / MS_PER_DAY,
-  );
-  return Math.floor(diffDays / CYCLE_DAYS);
-};
-
-const getPeriodRangeByIndex = (cycleIndex: number) => {
-  const currentStart = new Date(
-    ANCHOR_DATE.getTime() + cycleIndex * CYCLE_DAYS * MS_PER_DAY,
-  );
-  const currentEnd = new Date(
-    ANCHOR_DATE.getTime() + (cycleIndex * CYCLE_DAYS + 13) * MS_PER_DAY,
-  );
-
-  const formatDate = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  };
-
-  return {
-    start: formatDate(currentStart),
-    end: formatDate(currentEnd),
-  };
-};
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<'payroll' | 'safety'>('payroll');
+  const [adminCompanyId, setAdminCompanyId] = useState<string | null>(null); // <-- NUEVO ESTADO
   const [allLogs, setAllLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -327,9 +275,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     setToastMessage(message);
   };
 
-  const loadUsers = async () => {
+  // <-- CAMBIO: Se agrega el companyId al filtro
+  const loadUsers = async (companyId: string) => {
     try {
-      const usersSnapshot = await getDocs(collection(db, "users"));
+      const q = query(collection(db, "users"), where("companyId", "==", companyId)); // <-- CAMBIO
+      const usersSnapshot = await getDocs(q);
       const usersList: any[] = [];
 
       usersSnapshot.forEach((doc) => {
@@ -350,11 +300,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     }
   };
 
-  const loadLogs = async (fromDate: Date) => {
+  // <-- CAMBIO: Se agrega el companyId al filtro
+  const loadLogs = async (fromDate: Date, companyId: string) => {
     setLoading(true);
     try {
       const q = query(
         collection(db, "timeLogs"),
+        where("companyId", "==", companyId), // <-- CAMBIO
         where("timestamp", ">=", Timestamp.fromDate(fromDate)),
       );
       const querySnapshot = await getDocs(q);
@@ -376,22 +328,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     }
   };
 
+  // <-- CAMBIO: Obtener el companyId antes de cargar datos
   useEffect(() => {
     const initData = async () => {
-      await loadUsers();
-      await loadLogs(getFirstDayOfMonth());
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        const companyId = userDoc.data().companyId;
+        setAdminCompanyId(companyId);
+        
+        if (companyId) {
+          await loadUsers(companyId);
+          await loadLogs(getFirstDayOfMonth(), companyId);
+        }
+      }
     };
     initData();
-  }, []);
+  }, [user]);
 
+  // <-- CAMBIO: Se agrega adminCompanyId como dependencia
   useEffect(() => {
-    if (startDate) {
+    if (startDate && adminCompanyId) {
       const selectedDate = new Date(startDate + "T00:00:00");
       if (selectedDate < oldestLoadedDate) {
-        loadLogs(selectedDate);
+        loadLogs(selectedDate, adminCompanyId);
       }
     }
-  }, [startDate]);
+  }, [startDate, adminCompanyId]);
 
   const handleInlineSubmit = async (
     workerId: string,
@@ -417,6 +379,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
         {
           userId: targetWorker.id,
           userEmail: targetWorker.email,
+          companyId: adminCompanyId, // <-- NUEVO: Se inyecta la compañía
           location: data.location,
           locations: data.locations || [data.location],
           checkIn: data.checkIn,
@@ -431,7 +394,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
 
       showNotification("Log added successfully!");
       setEditingRowKey(null);
-      loadLogs(oldestLoadedDate);
+      loadLogs(oldestLoadedDate, adminCompanyId!); // <-- CAMBIO: Pasar el companyId
     } catch (error: any) {
       showNotification("Error saving: " + error.message);
     }
@@ -1078,7 +1041,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
         {/* PESTAÑA 2: Charlas de Seguridad (Toolbox Meetings) */}
         {activeTab === 'safety' && (
           <div className="animate-fade-in">
-            <ToolboxAuditor />
+            {/* <-- CAMBIO: Pasar adminCompanyId a ToolboxAuditor */}
+            <ToolboxAuditor companyId={adminCompanyId} />
           </div>
         )}
 
