@@ -14,6 +14,7 @@ interface ToolboxMeetingModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentUser: any;
+  userCompanyId: string | null;
   showNotification: (msg: string) => void;
 }
 
@@ -39,6 +40,7 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
   isOpen,
   onClose,
   currentUser,
+  userCompanyId,
   showNotification,
 }) => {
   const [jobSite, setJobSite] = useState('');
@@ -105,6 +107,7 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
       const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
       await addDoc(collection(db, 'toolboxMeetings'), {
+        companyId: userCompanyId,
         dateStr,
         jobSite: jobSite.trim(),
         topic,

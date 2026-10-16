@@ -77,6 +77,7 @@ const getLocalTodayString = () => {
 
 const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
   const [userName, setUserName] = useState('');
+  const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
   const [hasLoggedToday, setHasLoggedToday] = useState(false);
   const [myLogs, setMyLogs] = useState<any[]>([]);
   // const [loading, setLoading] = useState(true);
@@ -117,7 +118,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
       try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
+          const data = userDoc.data();
           setUserName(userDoc.data().fullName || user.email);
+          setUserCompanyId(data.companyId || null);
         } else {
           setUserName(user.email);
         }
@@ -617,6 +620,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
         isOpen={isToolboxOpen}
         onClose={() => setIsToolboxOpen(false)}
         currentUser={user}
+        userCompanyId={userCompanyId}
         showNotification={showNotification}
       />
     </div>

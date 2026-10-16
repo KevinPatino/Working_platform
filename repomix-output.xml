@@ -1,0 +1,4563 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+public/
+  favicon.svg
+  icons.svg
+  logo.png
+  manifest.json
+src/
+  assets/
+    hero.png
+    react.svg
+    vite.svg
+  components/
+    AdminPanel.tsx
+    Auth.tsx
+    Calendar.tsx
+    Dashboard.tsx
+    LocationInput.tsx
+    MapLink.tsx
+    PhotoEvidence.tsx
+    PhotoModal.tsx
+    SignaturePad.tsx
+    Toast.tsx
+    ToolBoxAuditor.tsx
+    ToolBoxMeetingModal.tsx
+    WorkerCalculator.tsx
+  config/
+    tenant.config.ts
+  utils/
+    imageCompressor.ts
+  App.css
+  App.tsx
+  firebaseConfig.ts
+  index.css
+  main.tsx
+.gitignore
+eslint.config.js
+index.html
+package.json
+postcss.config.js
+README.md
+tailwind.config.js
+tsconfig.app.json
+tsconfig.json
+tsconfig.node.json
+vite.config.ts
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="public/favicon.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="46" fill="none" viewBox="0 0 48 46"><path fill="#863bff" d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z" style="fill:#863bff;fill:color(display-p3 .5252 .23 1);fill-opacity:1"/><mask id="a" width="48" height="46" x="0" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M25.842 44.938c-.664.844-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.183c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.498 0-3.579-1.842-3.579H1.133c-.92 0-1.456-1.04-.92-1.787L9.91.473c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.578 1.842 3.578h11.377c.943 0 1.473 1.088.89 1.832L25.843 44.94z" style="fill:#000;fill-opacity:1"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#ede6ff" rx="5.508" ry="14.704" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -4.47 31.516)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#ede6ff" rx="10.399" ry="29.851" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -39.328 7.883)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#7e14ff" rx="5.508" ry="30.487" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -25.913 -14.639)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -32.644 -3.334)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -34.34 30.47)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#ede6ff" rx="14.072" ry="22.078" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="rotate(93.35 24.506 48.493)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx=".387" cy="8.972" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(39.51 .387 8.972)"/></g><g filter="url(#k)"><ellipse cx="47.523" cy="-6.092" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 47.523 -6.092)"/></g><g filter="url(#l)"><ellipse cx="41.412" cy="6.333" fill="#47bfff" rx="5.971" ry="9.665" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 41.412 6.333)"/></g><g filter="url(#m)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#n)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#o)"><ellipse cx="35.651" cy="29.907" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 35.651 29.907)"/></g><g filter="url(#p)"><ellipse cx="38.418" cy="32.4" fill="#47bfff" rx="5.971" ry="15.297" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 38.418 32.4)"/></g></g><defs><filter id="b" width="60.045" height="41.654" x="-19.77" y="16.149" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-54.613" y="-7.533" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-49.64" y="2.03" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-45.045" y="20.029" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-43.513" y="21.178" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="15.756" y="-17.901" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-27.636" y="-22.853" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="20.116" y="-38.415" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="24.641" y="-11.323" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="8.244" y="-2.416" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="18.713" y="10.588" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter></defs></svg>
+</file>
+
+<file path="public/icons.svg">
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="bluesky-icon" viewBox="0 0 16 17">
+    <g clip-path="url(#bluesky-clip)"><path fill="#08060d" d="M7.75 7.735c-.693-1.348-2.58-3.86-4.334-5.097-1.68-1.187-2.32-.981-2.74-.79C.188 2.065.1 2.812.1 3.251s.241 3.602.398 4.13c.52 1.744 2.367 2.333 4.07 2.145-2.495.37-4.71 1.278-1.805 4.512 3.196 3.309 4.38-.71 4.987-2.746.608 2.036 1.307 5.91 4.93 2.746 2.72-2.746.747-4.143-1.747-4.512 1.702.189 3.55-.4 4.07-2.145.156-.528.397-3.691.397-4.13s-.088-1.186-.575-1.406c-.42-.19-1.06-.395-2.741.79-1.755 1.24-3.64 3.752-4.334 5.099"/></g>
+    <defs><clipPath id="bluesky-clip"><path fill="#fff" d="M.1.85h15.3v15.3H.1z"/></clipPath></defs>
+  </symbol>
+  <symbol id="discord-icon" viewBox="0 0 20 19">
+    <path fill="#08060d" d="M16.224 3.768a14.5 14.5 0 0 0-3.67-1.153c-.158.286-.343.67-.47.976a13.5 13.5 0 0 0-4.067 0c-.128-.306-.317-.69-.476-.976A14.4 14.4 0 0 0 3.868 3.77C1.546 7.28.916 10.703 1.231 14.077a14.7 14.7 0 0 0 4.5 2.306q.545-.748.965-1.587a9.5 9.5 0 0 1-1.518-.74q.191-.14.372-.293c2.927 1.369 6.107 1.369 8.999 0q.183.152.372.294-.723.437-1.52.74.418.838.963 1.588a14.6 14.6 0 0 0 4.504-2.308c.37-3.911-.63-7.302-2.644-10.309m-9.13 8.234c-.878 0-1.599-.82-1.599-1.82 0-.998.705-1.82 1.6-1.82.894 0 1.614.82 1.599 1.82.001 1-.705 1.82-1.6 1.82m5.91 0c-.878 0-1.599-.82-1.599-1.82 0-.998.705-1.82 1.6-1.82.893 0 1.614.82 1.599 1.82 0 1-.706 1.82-1.6 1.82"/>
+  </symbol>
+  <symbol id="documentation-icon" viewBox="0 0 21 20">
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="m15.5 13.333 1.533 1.322c.645.555.967.833.967 1.178s-.322.623-.967 1.179L15.5 18.333m-3.333-5-1.534 1.322c-.644.555-.966.833-.966 1.178s.322.623.966 1.179l1.534 1.321"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M17.167 10.836v-4.32c0-1.41 0-2.117-.224-2.68-.359-.906-1.118-1.621-2.08-1.96-.599-.21-1.349-.21-2.848-.21-2.623 0-3.935 0-4.983.369-1.684.591-3.013 1.842-3.641 3.428C3 6.449 3 7.684 3 10.154v2.122c0 2.558 0 3.838.706 4.726q.306.383.713.671c.76.536 1.79.64 3.581.66"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M3 10a2.78 2.78 0 0 1 2.778-2.778c.555 0 1.209.097 1.748-.047.48-.129.854-.503.982-.982.145-.54.048-1.194.048-1.749a2.78 2.78 0 0 1 2.777-2.777"/>
+  </symbol>
+  <symbol id="github-icon" viewBox="0 0 19 19">
+    <path fill="#08060d" fill-rule="evenodd" d="M9.356 1.85C5.05 1.85 1.57 5.356 1.57 9.694a7.84 7.84 0 0 0 5.324 7.44c.387.079.528-.168.528-.376 0-.182-.013-.805-.013-1.454-2.165.467-2.616-.935-2.616-.935-.349-.91-.864-1.143-.864-1.143-.71-.48.051-.48.051-.48.787.051 1.2.805 1.2.805.695 1.194 1.817.857 2.268.649.064-.507.27-.857.49-1.052-1.728-.182-3.545-.857-3.545-3.87 0-.857.31-1.558.8-2.104-.078-.195-.349-1 .077-2.078 0 0 .657-.208 2.14.805a7.5 7.5 0 0 1 1.946-.26c.657 0 1.328.092 1.946.26 1.483-1.013 2.14-.805 2.14-.805.426 1.078.155 1.883.078 2.078.502.546.799 1.247.799 2.104 0 3.013-1.818 3.675-3.558 3.87.284.247.528.714.528 1.454 0 1.052-.012 1.896-.012 2.156 0 .208.142.455.528.377a7.84 7.84 0 0 0 5.324-7.441c.013-4.338-3.48-7.844-7.773-7.844" clip-rule="evenodd"/>
+  </symbol>
+  <symbol id="social-icon" viewBox="0 0 20 20">
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M12.5 6.667a4.167 4.167 0 1 0-8.334 0 4.167 4.167 0 0 0 8.334 0"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M2.5 16.667a5.833 5.833 0 0 1 8.75-5.053m3.837.474.513 1.035c.07.144.257.282.414.309l.93.155c.596.1.736.536.307.965l-.723.73a.64.64 0 0 0-.152.531l.207.903c.164.715-.213.991-.84.618l-.872-.52a.63.63 0 0 0-.577 0l-.872.52c-.624.373-1.003.094-.84-.618l.207-.903a.64.64 0 0 0-.152-.532l-.723-.729c-.426-.43-.289-.864.306-.964l.93-.156a.64.64 0 0 0 .412-.31l.513-1.034c.28-.562.735-.562 1.012 0"/>
+  </symbol>
+  <symbol id="x-icon" viewBox="0 0 19 19">
+    <path fill="#08060d" fill-rule="evenodd" d="M1.893 1.98c.052.072 1.245 1.769 2.653 3.77l2.892 4.114c.183.261.333.48.333.486s-.068.089-.152.183l-.522.593-.765.867-3.597 4.087c-.375.426-.734.834-.798.905a1 1 0 0 0-.118.148c0 .01.236.017.664.017h.663l.729-.83c.4-.457.796-.906.879-.999a692 692 0 0 0 1.794-2.038c.034-.037.301-.34.594-.675l.551-.624.345-.392a7 7 0 0 1 .34-.374c.006 0 .93 1.306 2.052 2.903l2.084 2.965.045.063h2.275c1.87 0 2.273-.003 2.266-.021-.008-.02-1.098-1.572-3.894-5.547-2.013-2.862-2.28-3.246-2.273-3.266.008-.019.282-.332 2.085-2.38l2-2.274 1.567-1.782c.022-.028-.016-.03-.65-.03h-.674l-.3.342a871 871 0 0 1-1.782 2.025c-.067.075-.405.458-.75.852a100 100 0 0 1-.803.91c-.148.172-.299.344-.99 1.127-.304.343-.32.358-.345.327-.015-.019-.904-1.282-1.976-2.808L6.365 1.85H1.8zm1.782.91 8.078 11.294c.772 1.08 1.413 1.973 1.425 1.984.016.017.241.02 1.05.017l1.03-.004-2.694-3.766L7.796 5.75 5.722 2.852l-1.039-.004-1.039-.004z" clip-rule="evenodd"/>
+  </symbol>
+</svg>
+</file>
+
+<file path="src/assets/react.svg">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+</file>
+
+<file path="src/assets/vite.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="77" height="47" fill="none" aria-labelledby="vite-logo-title" viewBox="0 0 77 47"><title id="vite-logo-title">Vite</title><style>.parenthesis{fill:#000}@media (prefers-color-scheme:dark){.parenthesis{fill:#fff}}</style><path fill="#9135ff" d="M40.151 45.71c-.663.844-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.493c-.92 0-1.457-1.04-.92-1.788l7.479-10.471c1.07-1.498 0-3.578-1.842-3.578H15.443c-.92 0-1.456-1.04-.92-1.788l9.696-13.576c.213-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.472c-1.07 1.497 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.087.89 1.83L40.153 45.712z"/><mask id="a" width="48" height="47" x="14" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M40.047 45.71c-.663.843-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.389c-.92 0-1.457-1.04-.92-1.788l7.479-10.472c1.07-1.497 0-3.578-1.842-3.578H15.34c-.92 0-1.456-1.04-.92-1.788l9.696-13.575c.213-.297.556-.474.92-.474H53.93c.92 0 1.456 1.04.92 1.788L47.37 13.03c-1.07 1.498 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.088.89 1.831L40.049 45.712z"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#eee6ff" rx="5.508" ry="14.704" transform="rotate(269.814 20.96 11.29)scale(-1 1)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#eee6ff" rx="10.399" ry="29.851" transform="rotate(89.814 -16.902 -8.275)scale(1 -1)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#8900ff" rx="5.508" ry="30.487" transform="rotate(89.814 -19.197 -7.127)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.928 4.177)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.738 5.52)scale(1 -1)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#eee6ff" rx="14.072" ry="22.078" transform="rotate(93.35 31.245 55.578)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx="14.592" cy="9.743" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(39.51 14.592 9.743)"/></g><g filter="url(#k)"><ellipse cx="61.728" cy="-5.321" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 61.728 -5.32)"/></g><g filter="url(#l)"><ellipse cx="55.618" cy="7.104" fill="#00c2ff" rx="5.971" ry="9.665" transform="rotate(37.892 55.618 7.104)"/></g><g filter="url(#m)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#n)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#o)"><ellipse cx="49.857" cy="30.678" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 49.857 30.678)"/></g><g filter="url(#p)"><ellipse cx="52.623" cy="33.171" fill="#00c2ff" rx="5.971" ry="15.297" transform="rotate(37.892 52.623 33.17)"/></g></g><path d="M6.919 0c-9.198 13.166-9.252 33.575 0 46.789h6.215c-9.25-13.214-9.196-33.623 0-46.789zm62.424 0h-6.215c9.198 13.166 9.252 33.575 0 46.789h6.215c9.25-13.214 9.196-33.623 0-46.789" class="parenthesis"/><defs><filter id="b" width="60.045" height="41.654" x="-5.564" y="16.92" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-40.407" y="-6.762" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-35.435" y="2.801" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-30.84" y="20.8" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-29.307" y="21.949" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="29.961" y="-17.13" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-13.43" y="-22.082" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="34.321" y="-37.644" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="38.847" y="-10.552" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="22.45" y="-1.645" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="32.919" y="11.36" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter></defs></svg>
+</file>
+
+<file path="src/components/PhotoEvidence.tsx">
+import React, { useState } from 'react';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '../firebaseConfig';
+import { compressImage } from '../utils/imageCompressor';
+
+interface PhotoEvidenceUploaderProps {
+  docId: string; // Identificador del turno diario (ej: uid_2026-10-10)
+  photos: string[]; // Lista actual de URLs de fotos
+  onPhotosChange: (updatedUrls: string[]) => void;
+}
+
+const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
+  docId,
+  photos,
+  onPhotosChange,
+}) => {
+  const [uploading, setUploading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    setErrorMessage(null);
+
+    const uploadedUrls: string[] = [];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        // 1. Compresión en el cliente
+        const compressedBlob = await compressImage(file, 1200, 0.75);
+
+        // 2. Definir ruta en Firebase Storage: evidences/{docId}/{timestamp}_{nombre}
+        const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        const storageRef = ref(storage, `evidences/${docId}/${fileName}`);
+
+        // 3. Subir el Blob comprimido
+        const snapshot = await uploadBytes(storageRef, compressedBlob, {
+          contentType: 'image/jpeg',
+        });
+
+        // 4. Obtener URL de descarga
+        const downloadUrl = await getDownloadURL(snapshot.ref);
+        uploadedUrls.push(downloadUrl);
+      }
+
+      onPhotosChange([...photos, ...uploadedUrls]);
+    } catch (err: any) {
+      console.error('Error al subir fotos:', err);
+      setErrorMessage('Failed to upload one or more images. Check connection.');
+    } finally {
+      setUploading(false);
+      // Limpiar input para permitir subir la misma foto si se desea
+      e.target.value = '';
+    }
+  };
+
+  const handleRemovePhoto = (urlToRemove: string) => {
+    onPhotosChange(photos.filter((url) => url !== urlToRemove));
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">
+          Job Site Evidence (Photos)
+        </label>
+        <span className="text-[11px] text-gray-400 font-medium">
+          {photos.length} uploaded
+        </span>
+      </div>
+
+      {/* Galería de miniaturas */}
+      {photos.length > 0 && (
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          {photos.map((url, idx) => (
+            <div
+              key={idx}
+              className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50 shadow-xs"
+            >
+              <img
+                src={url}
+                alt={`Evidence ${idx + 1}`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <button
+                type="button"
+                onClick={() => handleRemovePhoto(url)}
+                className="absolute top-1 right-1 bg-red-600/90 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold hover:bg-red-700 transition-colors shadow-sm cursor-pointer"
+                title="Remove photo"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Botón de subida y cámara */}
+      <div>
+        <label
+          className={`flex items-center justify-center gap-2 p-3 border-2 border-dashed rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+            uploading
+              ? 'border-gray-300 bg-gray-50 text-gray-400 cursor-not-allowed'
+              : 'border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-700 hover:border-blue-400'
+          }`}
+        >
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            capture="environment"
+            disabled={uploading}
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          {uploading ? (
+            <>
+              <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <span>Compressing & Uploading...</span>
+            </>
+          ) : (
+            <>
+              <span className="text-base">📷</span>
+              <span>Take Photo or Upload Evidence</span>
+            </>
+          )}
+        </label>
+      </div>
+
+      {errorMessage && (
+        <p className="text-xs text-red-600 font-semibold mt-1">{errorMessage}</p>
+      )}
+    </div>
+  );
+};
+
+export default PhotoEvidenceUploader;
+</file>
+
+<file path="src/components/PhotoModal.tsx">
+import React, { useState } from 'react';
+
+interface PhotoModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  photos: string[];
+  title?: string;
+}
+
+const PhotoModal: React.FC<PhotoModalProps> = ({
+  isOpen,
+  onClose,
+  photos,
+  title = 'Site Evidence',
+}) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (!isOpen || photos.length === 0) return null;
+
+  const currentPhoto = photos[currentIndex];
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % photos.length);
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev - 1 + photos.length) % photos.length);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 animate-fade-in">
+      <div 
+        className="bg-gray-900 border border-gray-800 rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Cabecera del modal */}
+        <div className="flex justify-between items-center px-5 py-4 border-b border-gray-800 text-white">
+          <div>
+            <h3 className="font-bold text-base">{title}</h3>
+            <p className="text-xs text-gray-400">
+              Photo {currentIndex + 1} of {photos.length}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-400 hover:text-white text-lg font-bold p-1 rounded-lg transition-colors cursor-pointer"
+            title="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Visor principal de la imagen */}
+        <div className="relative flex-1 bg-black flex items-center justify-center min-h-[320px] max-h-[60vh] overflow-hidden select-none">
+          <img
+            src={currentPhoto}
+            alt={`Evidence ${currentIndex + 1}`}
+            className="max-h-full max-w-full object-contain"
+          />
+
+          {photos.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={handlePrev}
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-gray-900/70 hover:bg-gray-900 text-white p-2.5 rounded-full transition-colors cursor-pointer"
+                title="Previous photo"
+              >
+                ◀
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-gray-900/70 hover:bg-gray-900 text-white p-2.5 rounded-full transition-colors cursor-pointer"
+                title="Next photo"
+              >
+                ▶
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Pie con miniaturas y botón de ver en pestaña nueva */}
+        <div className="p-4 border-t border-gray-800 flex items-center justify-between gap-4 bg-gray-900/90">
+          <div className="flex gap-2 overflow-x-auto py-1">
+            {photos.map((url, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setCurrentIndex(idx)}
+                className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                  idx === currentIndex
+                    ? 'border-blue-500 scale-105 shadow-md'
+                    : 'border-transparent opacity-60 hover:opacity-100'
+                }`}
+              >
+                <img
+                  src={url}
+                  alt={`Thumb ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+
+          <a
+            href={currentPhoto}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-lg shrink-0 transition-colors"
+          >
+            Open Full Size ↗
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default PhotoModal;
+</file>
+
+<file path="src/components/SignaturePad.tsx">
+import React, { useRef, useState, useEffect } from 'react';
+
+interface SignaturePadProps {
+  workerName: string;
+  onSave: (signatureDataUrl: string) => void;
+  onCancel: () => void;
+}
+
+const SignaturePad: React.FC<SignaturePadProps> = ({ workerName, onSave, onCancel }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [hasDrawn, setHasDrawn] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Escala para pantallas de alta densidad (Retina / OLED móviles) para evitar trazos borrosos
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * ratio;
+    canvas.height = rect.height * ratio;
+    ctx.scale(ratio, ratio);
+
+    ctx.strokeStyle = '#0f172a'; // slate-900
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+  }, []);
+
+  const getCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
+    const rect = canvas.getBoundingClientRect();
+
+    if ('touches' in e && e.touches.length > 0) {
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top,
+      };
+    } else if ('clientX' in e) {
+      return {
+        x: (e as React.MouseEvent).clientX - rect.left,
+        y: (e as React.MouseEvent).clientY - rect.top,
+      };
+    }
+    return { x: 0, y: 0 };
+  };
+
+  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const { x, y } = getCoordinates(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+    setHasDrawn(true);
+  };
+
+  const draw = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const { x, y } = getCoordinates(e);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
+  const handleClear = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    ctx.clearRect(0, 0, canvas.width / ratio, canvas.height / ratio);
+    setHasDrawn(false);
+  };
+
+  const handleConfirm = () => {
+    if (!hasDrawn || !canvasRef.current) return;
+    const dataUrl = canvasRef.current.toDataURL('image/png');
+    onSave(dataUrl);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
+      <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-gray-100 space-y-4">
+        <div>
+          <h4 className="text-base font-bold text-gray-800">
+            Sign Safety Acknowledgment
+          </h4>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Worker: <span className="font-bold text-blue-600">{workerName}</span>
+          </p>
+        </div>
+
+        {/* touch-none evita que el navegador haga scroll de la página mientras el usuario firma con el dedo */}
+        <div className="border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/50 relative overflow-hidden">
+          <canvas
+            ref={canvasRef}
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
+            onTouchStart={startDrawing}
+            onTouchMove={draw}
+            onTouchEnd={stopDrawing}
+            className="w-full h-44 cursor-crosshair touch-none"
+          />
+          <div className="absolute bottom-2 left-3 pointer-events-none text-[10px] uppercase font-bold text-gray-400">
+            Sign inside this box ✍️
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-2 pt-2">
+          <button
+            type="button"
+            onClick={handleClear}
+            className="px-3.5 py-2 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+          >
+            Clear
+          </button>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-3.5 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={!hasDrawn}
+              className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 rounded-lg transition-colors shadow-xs cursor-pointer disabled:cursor-not-allowed"
+            >
+              Save Signature
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SignaturePad;
+</file>
+
+<file path="src/components/ToolBoxAuditor.tsx">
+import React, { useState, useEffect } from 'react';
+import { db } from '../firebaseConfig';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import MapLink from './MapLink';
+
+interface Attendee {
+  workerName: string;
+  signature: string;
+  signedAt: string;
+}
+
+interface ToolboxMeeting {
+  id: string;
+  dateStr: string;
+  jobSite: string;
+  topic: string;
+  hazards: string[];
+  notes?: string;
+  leadId: string;
+  leadName?: string;
+  leadEmail?: string;
+  attendees: Attendee[];
+  createdAt?: any;
+}
+
+const ToolboxAuditor: React.FC = () => {
+  const [meetings, setMeetings] = useState<ToolboxMeeting[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedMeeting, setSelectedMeeting] = useState<ToolboxMeeting | null>(null);
+
+  // Filtros de búsqueda
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+  const [leadFilter, setLeadFilter] = useState('all');
+
+  const fetchMeetings = async () => {
+    setLoading(true);
+    try {
+      const q = query(collection(db, 'toolboxMeetings'), orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+      const data: ToolboxMeeting[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<ToolboxMeeting, 'id'>),
+      }));
+      setMeetings(data);
+    } catch (err) {
+      console.error('Error fetching toolbox meetings:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMeetings();
+  }, []);
+
+  // Lista única de Team Leads que han realizado charlas para el filtro
+  const uniqueLeads = Array.from(
+    new Set(meetings.map((m) => m.leadName || m.leadEmail || 'Unknown'))
+  );
+
+  // Filtrado reactivo multidimensional
+  const filteredMeetings = meetings.filter((m) => {
+    // 1. Filtro por fecha exacta
+    if (dateFilter && m.dateStr !== dateFilter) {
+      return false;
+    }
+
+    // 2. Filtro por Team Lead
+    if (leadFilter !== 'all') {
+      const leadIdentifier = m.leadName || m.leadEmail || 'Unknown';
+      if (leadIdentifier !== leadFilter) return false;
+    }
+
+    // 3. Filtro por texto libre: busca en la obra, tema, notas o si algún firmante coincide
+    if (searchQuery.trim()) {
+      const queryLower = searchQuery.toLowerCase();
+      const matchSite = m.jobSite.toLowerCase().includes(queryLower);
+      const matchTopic = m.topic.toLowerCase().includes(queryLower);
+      const matchNotes = m.notes?.toLowerCase().includes(queryLower) || false;
+      const matchWorker = m.attendees?.some((att) =>
+        att.workerName.toLowerCase().includes(queryLower)
+      );
+
+      return matchSite || matchTopic || matchNotes || matchWorker;
+    }
+
+    return true;
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Barra de Filtros */}
+      <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="w-full md:flex-1">
+          <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+            Search Site, Topic, or Worker
+          </label>
+          <div className="relative">
+            <span className="absolute left-3.5 top-3 text-gray-400">🔍</span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Filter by address or worker name..."
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500 focus:bg-white transition-all"
+            />
+          </div>
+        </div>
+
+        <div className="flex w-full md:w-auto gap-3 items-center">
+          <div>
+            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+              Date
+            </label>
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+              Conducted By (Lead)
+            </label>
+            <select
+              value={leadFilter}
+              onChange={(e) => setLeadFilter(e.target.value)}
+              className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500 cursor-pointer"
+            >
+              <option value="all">All Team Leads</option>
+              {uniqueLeads.map((lead, idx) => (
+                <option key={idx} value={lead}>
+                  {lead}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {(searchQuery || dateFilter || leadFilter !== 'all') && (
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setDateFilter('');
+                setLeadFilter('all');
+              }}
+              className="self-end px-3 py-2.5 text-xs font-bold text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Lista de Reuniones */}
+      {loading ? (
+        <div className="bg-white p-12 rounded-2xl shadow-sm text-center text-sm font-semibold text-gray-400">
+          Loading safety compliance records...
+        </div>
+      ) : filteredMeetings.length === 0 ? (
+        <div className="bg-white p-12 rounded-2xl shadow-sm text-center">
+          <p className="text-3xl mb-2">📋</p>
+          <h4 className="text-sm font-bold text-gray-700">No Toolbox Meetings Found</h4>
+          <p className="text-xs text-gray-400 mt-1">
+            {meetings.length === 0
+              ? 'No safety briefings have been submitted yet.'
+              : 'Try adjusting your filters.'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredMeetings.map((meeting) => (
+            <div
+              key={meeting.id}
+              onClick={() => setSelectedMeeting(meeting)}
+              className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 rounded-md border border-purple-200/50">
+                    {meeting.dateStr}
+                  </span>
+                  <span className="text-xs font-bold text-gray-500">
+                    👤 {meeting.leadName || meeting.leadEmail}
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 leading-snug">
+                    {meeting.topic}
+                  </h4>
+                  <div className="mt-1">
+                    <MapLink location={meeting.jobSite} />
+                  </div>
+                </div>
+
+                {/* Tags de Peligros Discutidos */}
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {meeting.hazards.slice(0, 3).map((h, i) => (
+                    <span
+                      key={i}
+                      className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium"
+                    >
+                      {h.split('(')[0].trim()}
+                    </span>
+                  ))}
+                  {meeting.hazards.length > 3 && (
+                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-[10px] font-bold">
+                      +{meeting.hazards.length - 3} more
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Pie de tarjeta con contador de firmas */}
+              <div className="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                  {meeting.attendees?.length || 0} Workers Signed
+                </span>
+                <span className="text-xs font-bold text-purple-600 hover:underline">
+                  View Signatures & Details →
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal Detallado de Auditoría e Inspección de Firmas */}
+      {selectedMeeting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 p-6 space-y-6 my-auto animate-fade-in">
+            {/* Header del Modal */}
+            <div className="flex items-start justify-between pb-4 border-b border-gray-100">
+              <div>
+                <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md">
+                  Safety Meeting Report
+                </span>
+                <h3 className="text-lg font-bold text-gray-900 mt-1">
+                  {selectedMeeting.topic}
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Conducted by <span className="font-bold text-gray-800">{selectedMeeting.leadName || selectedMeeting.leadEmail}</span> on <span className="font-bold text-gray-800">{selectedMeeting.dateStr}</span>
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedMeeting(null)}
+                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Ubicación */}
+            <div>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                Job Site
+              </p>
+              <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                <MapLink location={selectedMeeting.jobSite} />
+              </div>
+            </div>
+
+            {/* Peligros y Medidas */}
+            <div>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                Hazards & Safety Controls Discussed
+              </p>
+              <div className="space-y-1.5 bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+                {selectedMeeting.hazards.map((h, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-xs text-gray-700">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span>{h}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Notas específicas */}
+            {selectedMeeting.notes && (
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                  Supervisor Notes
+                </p>
+                <div className="p-3 bg-yellow-50/60 rounded-xl border border-yellow-200 text-xs text-yellow-900">
+                  {selectedMeeting.notes}
+                </div>
+              </div>
+            )}
+
+            {/* Firmas Táctiles de los Operarios */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                  Crew Signatures ({selectedMeeting.attendees?.length || 0})
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                {selectedMeeting.attendees?.map((att, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-gray-900 truncate">
+                        {att.workerName}
+                      </p>
+                      <p className="text-[10px] text-gray-400">
+                        Signed at {att.signedAt}
+                      </p>
+                    </div>
+                    <img
+                      src={att.signature}
+                      alt={`Signature of ${att.workerName}`}
+                      className="h-10 w-24 object-contain bg-white border border-gray-200 rounded-lg p-0.5"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Acciones */}
+            <div className="flex justify-end pt-3 border-t border-gray-100">
+              <button
+                onClick={() => setSelectedMeeting(null)}
+                className="px-5 py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                Close Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ToolboxAuditor;
+</file>
+
+<file path="src/components/ToolBoxMeetingModal.tsx">
+import React, { useState } from 'react';
+import { db } from '../firebaseConfig';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import LocationInput from './LocationInput';
+import SignaturePad from './SignaturePad';
+
+interface Attendee {
+  workerName: string;
+  signature: string; // Base64 Data URL
+  signedAt: string;
+}
+
+interface ToolboxMeetingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  currentUser: any;
+  showNotification: (msg: string) => void;
+}
+
+const COMMON_HAZARDS = [
+  'PPE Inspection (Hard hat, hi-vis, steel toes, eye protection)',
+  'Demolition Falling Debris & Exclusion Zones',
+  'Silica Dust & Respirator Compliance',
+  'Slips, Trips & Good Housekeeping',
+  'Power Tools & Extension Cord Inspections',
+  'Overhead Hazards & Scaffolding Stability',
+  'Utility Locates (Power, Gas, Water) Verified',
+];
+
+const COMMON_TOPICS = [
+  'Daily Site Safety Orientation & Hazards Review',
+  'Interior Demolition & Structural Precautions',
+  'Dust Suppression & Ventilation Protocols',
+  'Material Handling & Ergonomics',
+  'Emergency Action Plan & Evacuation Routes',
+];
+
+const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
+  isOpen,
+  onClose,
+  currentUser,
+  showNotification,
+}) => {
+  const [jobSite, setJobSite] = useState('');
+  const [topic, setTopic] = useState(COMMON_TOPICS[0]);
+  const [selectedHazards, setSelectedHazards] = useState<string[]>([
+    COMMON_HAZARDS[0],
+    COMMON_HAZARDS[1],
+  ]);
+  const [notes, setNotes] = useState('');
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const [currentWorkerName, setCurrentWorkerName] = useState('');
+  const [signingWorkerName, setSigningWorkerName] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  if (!isOpen) return null;
+
+  const toggleHazard = (hazard: string) => {
+    setSelectedHazards((prev) =>
+      prev.includes(hazard) ? prev.filter((h) => h !== hazard) : [...prev, hazard]
+    );
+  };
+
+  const handleStartSigning = () => {
+    const cleanName = currentWorkerName.trim();
+    if (!cleanName) {
+      showNotification('Please enter a worker name to sign.');
+      return;
+    }
+    setSigningWorkerName(cleanName);
+  };
+
+  const handleSaveSignature = (signatureDataUrl: string) => {
+    if (!signingWorkerName) return;
+
+    const newAttendee: Attendee = {
+      workerName: signingWorkerName,
+      signature: signatureDataUrl,
+      signedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setAttendees((prev) => [...prev, newAttendee]);
+    setSigningWorkerName(null);
+    setCurrentWorkerName('');
+  };
+
+  const handleRemoveAttendee = (index: number) => {
+    setAttendees((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!jobSite.trim()) {
+      showNotification('Please provide the job site location.');
+      return;
+    }
+    if (attendees.length === 0) {
+      showNotification('At least one worker must sign the meeting acknowledgment.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      await addDoc(collection(db, 'toolboxMeetings'), {
+        dateStr,
+        jobSite: jobSite.trim(),
+        topic,
+        hazards: selectedHazards,
+        notes: notes.trim(),
+        leadId: currentUser.uid,
+        leadEmail: currentUser.email,
+        leadName: currentUser.displayName || currentUser.email,
+        attendees,
+        createdAt: Timestamp.now(),
+      });
+
+      showNotification('Toolbox Meeting saved successfully!');
+      onClose();
+    } catch (err: any) {
+      showNotification('Error saving Toolbox Meeting: ' + err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6 overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 p-5 sm:p-7 space-y-5 animate-fade-in my-auto">
+        
+        {/* Encabezado */}
+        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div>
+            <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md">
+              Safety Compliance
+            </span>
+            <h3 className="text-lg font-bold text-gray-800 mt-1">
+              Daily Toolbox Talk & Safety Meeting
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Ubicación de la Obra (con autocompletado de Places) */}
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+              Job Site Location
+            </label>
+            <LocationInput
+              value={jobSite}
+              onChange={(val) => setJobSite(val)}
+              placeholder="Search or type site address..."
+              className="p-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+              required
+            />
+          </div>
+
+          {/* Tema de Seguridad */}
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+              Safety Topic
+            </label>
+            <select
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+            >
+              {COMMON_TOPICS.map((t, idx) => (
+                <option key={idx} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Lista de Peligros y Controles */}
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+              Hazards & Controls Discussed
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
+              {COMMON_HAZARDS.map((h, idx) => {
+                const isChecked = selectedHazards.includes(h);
+                return (
+                  <label
+                    key={idx}
+                    className="flex items-start gap-2 cursor-pointer text-xs font-medium text-gray-700 select-none"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => toggleHazard(h)}
+                      className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span>{h}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Notas Adicionales */}
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+              Specific Controls & Notes (Optional)
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
+              placeholder="E.g., Water mist active for dust suppression; 2nd floor hole covered and marked..."
+              className="w-full p-3 border border-gray-300 rounded-lg text-xs bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+            />
+          </div>
+
+          {/* Lista y Captura de Firmas */}
+          <div className="pt-3 border-t border-gray-100 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                Crew Signatures ({attendees.length} Signed)
+              </label>
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={currentWorkerName}
+                onChange={(e) => setCurrentWorkerName(e.target.value)}
+                placeholder="Worker full name..."
+                className="flex-1 p-2.5 border border-gray-300 rounded-lg text-xs bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleStartSigning}
+                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+              >
+                <span>✍️</span>
+                <span>Sign</span>
+              </button>
+            </div>
+
+            {/* Listado de los que ya firmaron */}
+            {attendees.length > 0 && (
+              <div className="divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden bg-white max-h-48 overflow-y-auto">
+                {attendees.map((att, index) => (
+                  <div key={index} className="p-2.5 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <img
+                        src={att.signature}
+                        alt="Signature"
+                        className="h-7 w-20 object-contain border border-gray-200 rounded bg-gray-50"
+                      />
+                      <div className="truncate">
+                        <p className="text-xs font-bold text-gray-800 truncate">
+                          {att.workerName}
+                        </p>
+                        <p className="text-[10px] text-gray-400">
+                          Signed at {att.signedAt}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAttendee(index)}
+                      className="text-gray-400 hover:text-red-500 p-1 text-xs font-bold transition-colors cursor-pointer"
+                      title="Remove"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Botones de Envío */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2.5 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm disabled:bg-emerald-400 cursor-pointer disabled:cursor-not-allowed"
+            >
+              {submitting ? 'Saving...' : 'Save & Submit Toolbox Meeting'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Modal flotante de captura de firma */}
+      {signingWorkerName && (
+        <SignaturePad
+          workerName={signingWorkerName}
+          onSave={handleSaveSignature}
+          onCancel={() => setSigningWorkerName(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default ToolboxMeetingModal;
+</file>
+
+<file path="src/config/tenant.config.ts">
+export interface TenantConfig {
+  company: {
+    name: string;
+    shortName: string;
+    logoUrl: string;
+  };
+  colors: {
+    primary: string;
+    primaryHover: string;
+    // Resaltado de quincenas y reportes
+    accent: string;
+    accentLight: string;
+    // Estados del personal
+    success: string;
+    successLight: string;
+    danger: string;
+    dangerLight: string;
+    warning: string;
+    warningLight: string;
+  };
+  payroll: {
+    anchorDate: string;
+    cycleDays: number;
+  };
+}
+
+export const currentTenant: TenantConfig = {
+  company: {
+    name: "Western Trades Work Platform",
+    shortName: "Western Trades",
+    logoUrl: "/logo.png",
+  },
+  colors: {
+    // Marca principal
+    primary: "#8cc641",
+    primaryHover: "#6ea62a",
+
+    // Acento para quincenas y reportes (actualmente morado)
+    accent: "#9333ea",
+    accentLight: "#faf5ff",
+
+    // Estados
+    success: "#16a34a",       // Verde de "Worked" y "Today"
+    successLight: "#dcfce7",
+    danger: "#dc2626",        // Rojo de "No Log" y "Log Out"
+    dangerLight: "#fee2e2",
+    warning: "#ca8a04",       // Fines de semana
+    warningLight: "#fef9c3",
+  },
+  payroll: {
+    anchorDate: "2026-08-31",
+    cycleDays: 14,
+  },
+};
+
+export const applyTenantTheme = (tenant: TenantConfig = currentTenant) => {
+  if (typeof document !== "undefined") {
+    const root = document.documentElement;
+    root.style.setProperty("--color-brand-primary", tenant.colors.primary);
+    root.style.setProperty("--color-brand-hover", tenant.colors.primaryHover);
+    root.style.setProperty("--color-brand-accent", tenant.colors.accent);
+    root.style.setProperty("--color-brand-accent-light", tenant.colors.accentLight);
+    root.style.setProperty("--color-status-success", tenant.colors.success);
+    root.style.setProperty("--color-status-success-light", tenant.colors.successLight);
+    root.style.setProperty("--color-status-danger", tenant.colors.danger);
+    root.style.setProperty("--color-status-danger-light", tenant.colors.dangerLight);
+    root.style.setProperty("--color-status-warning", tenant.colors.warning);
+    root.style.setProperty("--color-status-warning-light", tenant.colors.warningLight);
+  }
+};
+
+applyTenantTheme();
+</file>
+
+<file path="src/utils/imageCompressor.ts">
+/**
+ * Comprime y redimensiona una imagen en el navegador del cliente antes de subirla
+ * @param file Archivo de imagen original seleccionado por el usuario
+ * @param maxWidth Ancho máximo permitido en píxeles (por defecto 1200)
+ * @param quality Calidad de compresión JPEG entre 0 y 1 (por defecto 0.75)
+ */
+export const compressImage = (
+  file: File,
+  maxWidth = 1200,
+  quality = 0.75
+): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        // Escalar manteniendo proporción si excede el ancho máximo
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('No se pudo inicializar el lienzo para compresión'));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Error al comprimir la imagen'));
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+
+      img.onerror = (err) => reject(err);
+    };
+
+    reader.onerror = (err) => reject(err);
+  });
+};
+</file>
+
+<file path="src/main.tsx">
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+</file>
+
+<file path="eslint.config.js">
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import tseslint from 'typescript-eslint'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+  },
+])
+</file>
+
+<file path="postcss.config.js">
+export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+</file>
+
+<file path="README.md">
+# React + TypeScript + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
+
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
+</file>
+
+<file path="tsconfig.app.json">
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "types": ["vite/client"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"]
+}
+</file>
+
+<file path="tsconfig.json">
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
+</file>
+
+<file path="tsconfig.node.json">
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023"],
+    "module": "esnext",
+    "types": ["node"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["vite.config.ts"]
+}
+</file>
+
+<file path="src/components/LocationInput.tsx">
+import React, { useEffect, useRef, useState } from 'react';
+
+export interface LocationMetadata {
+  address: string;
+  lat?: number;
+  lng?: number;
+  placeId?: string;
+}
+
+interface LocationInputProps {
+  value: string;
+  onChange: (value: string, metadata?: LocationMetadata) => void;
+  placeholder?: string;
+  className?: string;
+  wrapperClassName?: string;
+  required?: boolean;
+}
+
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
+const LocationInput: React.FC<LocationInputProps> = ({
+  value,
+  onChange,
+  placeholder = 'Search job site address...',
+  className = '',
+  wrapperClassName = 'w-full',
+  required = false,
+}) => {
+  const [predictions, setPredictions] = useState<any[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [isApiReady, setIsApiReady] = useState(false);
+  const sessionTokenRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) return;
+
+    if (window.google?.maps?.importLibrary) {
+      setIsApiReady(true);
+      return;
+    }
+
+    const scriptId = 'google-maps-new-script';
+    let script = document.getElementById(scriptId) as HTMLScriptElement;
+
+    if (!script) {
+      script = document.createElement('script');
+      script.id = scriptId;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&v=weekly&libraries=places`;
+      script.async = true;
+      script.onload = () => setIsApiReady(true);
+      document.head.appendChild(script);
+    } else {
+      script.addEventListener('load', () => setIsApiReady(true));
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!isApiReady || !value || value.trim().length < 2) {
+      setPredictions([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const { AutocompleteSuggestion, AutocompleteSessionToken } =
+          await window.google.maps.importLibrary('places');
+
+        if (!sessionTokenRef.current) {
+          sessionTokenRef.current = new AutocompleteSessionToken();
+        }
+
+        const request = {
+          input: value,
+          includedRegionCodes: ['ca'],
+          sessionToken: sessionTokenRef.current,
+        };
+
+        const response = await AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
+        if (response && response.suggestions) {
+          setPredictions(response.suggestions);
+          setShowDropdown(response.suggestions.length > 0);
+        }
+      } catch (err) {
+        console.warn('Error buscando sugerencias:', err);
+      }
+    }, 250);
+
+    return () => clearTimeout(timeoutId);
+  }, [value, isApiReady]);
+
+  const handleSelectPrediction = async (suggestion: any) => {
+    try {
+      setShowDropdown(false);
+      const prediction = suggestion.placePrediction;
+      const place = prediction.toPlace();
+
+      await place.fetchFields({
+        fields: ['displayName', 'formattedAddress', 'location', 'id'],
+      });
+
+      const formattedAddress =
+        place.formattedAddress ||
+        place.displayName ||
+        prediction.text?.toString() ||
+        value;
+
+      const lat = place.location ? place.location.lat() : undefined;
+      const lng = place.location ? place.location.lng() : undefined;
+      const placeId = place.id || prediction.placeId;
+
+      sessionTokenRef.current = null;
+
+      onChange(formattedAddress, {
+        address: formattedAddress,
+        lat,
+        lng,
+        placeId,
+      });
+    } catch (err) {
+      console.error('Error al obtener detalles del lugar:', err);
+      const fallbackText = suggestion.placePrediction?.text?.toString() || value;
+      onChange(fallbackText);
+    }
+  };
+
+  return (
+    <div ref={containerRef} className={`relative ${wrapperClassName}`}>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setShowDropdown(true);
+        }}
+        onFocus={() => {
+          if (predictions.length > 0) setShowDropdown(true);
+        }}
+        placeholder={placeholder}
+        className={`w-full ${className}`}
+        required={required}
+        autoComplete="off"
+      />
+
+      {showDropdown && predictions.length > 0 && (
+        <ul className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto divide-y divide-gray-100 text-left">
+          {predictions.map((item, idx) => {
+            const pred = item.placePrediction;
+            const mainText = pred.mainText?.toString() || pred.text?.toString() || '';
+            const secondaryText = pred.secondaryText?.toString() || '';
+
+            return (
+              <li
+                key={pred.placeId || idx}
+                onClick={() => handleSelectPrediction(item)}
+                className="p-3 hover:bg-blue-50 cursor-pointer transition-colors flex items-start gap-2.5"
+              >
+                <span className="text-blue-500 text-sm mt-0.5">📍</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-gray-800 truncate">
+                    {mainText}
+                  </p>
+                  {secondaryText && (
+                    <p className="text-[11px] text-gray-500 truncate">
+                      {secondaryText}
+                    </p>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+};
+
+export default LocationInput;
+</file>
+
+<file path="src/components/MapLink.tsx">
+import React from 'react';
+
+interface MapLinkProps {
+  location: string;
+  compact?: boolean;
+  className?: string;
+}
+
+const MapLink: React.FC<MapLinkProps> = ({ location, compact = false, className = '' }) => {
+  if (!location) return <span className="text-gray-300">—</span>;
+
+  const sites = location.split(' / ').map((s) => s.trim()).filter(Boolean);
+
+  return (
+    <div className={`flex flex-col gap-1 ${className}`}>
+      {sites.map((site, index) => {
+        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site)}`;
+        // Si compact es true, muestra únicamente el texto previo a la primera coma
+        const displayText = compact ? site.split(',')[0].trim() : site;
+
+        return (
+          <a
+            key={index}
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 hover:underline transition-colors w-fit text-left"
+            title={`Open "${site}" in Google Maps`}
+          >
+            <span>📍</span>
+            <span className="font-semibold text-xs sm:text-sm">{displayText}</span>
+            <span className="text-[10px] text-gray-400 no-underline">↗</span>
+          </a>
+        );
+      })}
+    </div>
+  );
+};
+
+export default MapLink;
+</file>
+
+<file path="src/components/Toast.tsx">
+import React, { useEffect } from 'react';
+
+interface ToastProps {
+  message: string;
+  onClose: () => void; 
+}
+
+const Toast: React.FC<ToastProps> = ({ message, onClose }) => {
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 3000);
+    
+    return () => clearTimeout(timer); 
+  }, [onClose]);
+
+  return (
+    <div className="fixed top-5 left-1/2 transform -translate-x-1/2 md:left-auto md:right-5 md:translate-x-0 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-xl flex items-center justify-between space-x-3 transition-all duration-300 ease-in-out w-max max-w-[90vw] sm:max-w-sm">
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <span className="font-semibold">{message}</span>
+      
+      <button onClick={onClose} className="ml-4 hover:text-gray-200">
+         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+      </button>
+    </div>
+  );
+};
+
+export default Toast;
+</file>
+
+<file path="src/components/WorkerCalculator.tsx">
+import React, { useState, useEffect } from 'react';
+
+interface WorkerCalculatorProps {
+  logs: any[];
+}
+
+const WorkerCalculator: React.FC<WorkerCalculatorProps> = ({ logs }) => {
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [totalHours, setTotalHours] = useState(0);
+
+  useEffect(() => {
+    if (!startDate || !endDate) {
+      setTotalHours(0);
+      return;
+    }
+
+    const start = new Date(startDate + 'T00:00:00').getTime();
+    const end = new Date(endDate + 'T23:59:59').getTime();
+
+    const filteredLogs = logs.filter(log => {
+      if (!log.timestamp) return false;
+      const logTime = log.timestamp.toDate().getTime();
+      return logTime >= start && logTime <= end;
+    });
+
+    const sum = filteredLogs.reduce((acc, log) => acc + (Number(log.totalHours) || 0), 0);
+    setTotalHours(sum);
+  }, [startDate, endDate, logs]);
+
+  return (
+    <div className="animate-fade-in space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">From</label>
+          <input 
+            type="date" 
+            value={startDate} 
+            onChange={(e) => setStartDate(e.target.value)} 
+            className="w-full p-3 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">To</label>
+          <input 
+            type="date" 
+            value={endDate} 
+            onChange={(e) => setEndDate(e.target.value)} 
+            className="w-full p-3 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+          />
+        </div>
+      </div>
+
+      {startDate && endDate && (
+        <div className="bg-white border-2 border-gray-100 rounded-xl p-6 text-center shadow-sm mt-6 animate-fade-in">
+          <p className="text-gray-500 text-sm font-bold uppercase mb-2">Total Hours</p>
+          <p className="text-5xl font-black text-blue-600">{totalHours}</p>
+          <p className="text-xs text-gray-400 mt-2">
+            From {new Date(startDate + 'T00:00:00').toLocaleDateString('en-US')} to {new Date(endDate + 'T23:59:59').toLocaleDateString('en-US')}
+          </p>
+        </div>
+      )}
+      
+      {(!startDate || !endDate) && (
+        <div className="py-8 text-center text-gray-400 border-2 border-dashed border-gray-200 rounded-xl mt-6">
+          <p className="text-sm">Select both dates to see the result.</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default WorkerCalculator;
+</file>
+
+<file path="src/App.css">
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
+.pac-container {
+  z-index: 10000 !important;
+  border-radius: 0.75rem;
+  margin-top: 4px;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  border: 1px solid #e5e7eb;
+  font-family: inherit;
+}
+</file>
+
+<file path="tailwind.config.js">
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          DEFAULT: "var(--color-brand-primary)",
+          hover: "var(--color-brand-hover)",
+          accent: "var(--color-brand-accent)",
+          "accent-light": "var(--color-brand-accent-light)",
+        },
+        status: {
+          success: "var(--color-status-success)",
+          "success-light": "var(--color-status-success-light)",
+          danger: "var(--color-status-danger)",
+          "danger-light": "var(--color-status-danger-light)",
+          warning: "var(--color-status-warning)",
+          "warning-light": "var(--color-status-warning-light)",
+        },
+      },
+    },
+  },
+  plugins: [],
+};
+</file>
+
+<file path="vite.config.ts">
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [
+    react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.svg', 'logo.png', 'icons.svg'],
+      manifest: {
+        name: 'Western Trades Work Platform',
+        short_name: 'Western Trades',
+        description: 'Aplicación de registro y control de horas de trabajo',
+        theme_color: '#2563eb',
+        background_color: '#ffffff',
+        display: 'standalone',
+        start_url: '/',
+        icons: [
+          {
+            src: '/logo.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ]
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        runtimeCaching: [
+          {
+            // Cachear fuentes o peticiones externas habituales
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 año
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          }
+        ]
+      },
+      devOptions: {
+        enabled: true // Permite probar el Service Worker en entorno local (dev)
+      }
+    })
+  ]
+});
+</file>
+
+<file path="public/manifest.json">
+{
+  "short_name": "Western Trades",
+  "name": "Wester Trades",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff"
+}
+</file>
+
+<file path="src/index.css">
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-brand-primary: #2563eb;
+  --color-brand-hover: #1d4ed8;
+  --color-brand-secondary: #9333ea;
+}
+</file>
+
+<file path=".gitignore">
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+dev-dist
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# variables de entorno
+.env
+.env.*
+!.env.example
+</file>
+
+<file path="src/firebaseConfig.ts">
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { 
+  initializeFirestore, 
+  persistentLocalCache, 
+  persistentMultipleTabManager 
+} from "firebase/firestore";
+import { getStorage } from "firebase/storage"; // <-- Nueva importación
+
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+};
+
+const app = initializeApp(firebaseConfig);
+
+export const auth = getAuth(app);
+
+// Inicialización de Firestore con soporte offline multi-pestaña
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager()
+  })
+});
+
+// Inicialización de Firebase Storage
+export const storage = getStorage(app); // <-- Nueva exportación
+</file>
+
+<file path="package.json">
+{
+  "name": "working-platform",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.4",
+    "firebase": "^12.12.1",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/node": "^24.12.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "autoprefixer": "^10.5.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.5.0",
+    "postcss": "^8.5.10",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.58.2",
+    "vite": "^8.0.9",
+    "vite-plugin-pwa": "^1.3.0"
+  }
+}
+</file>
+
+<file path="src/components/Calendar.tsx">
+import React, { useState, useEffect } from 'react';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import PhotoEvidenceUploader from './PhotoEvidence';
+import PhotoModal from './PhotoModal';
+import MapLink from './MapLink';
+
+interface CalendarProps {
+  logs: any[]; 
+  role?: string;
+  onLogUpdated?: () => void;
+}
+
+const Calendar: React.FC<CalendarProps> = ({ logs, role = 'worker', onLogUpdated }) => {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedLog, setSelectedLog] = useState<any>(null);
+  const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+  const [isUpdatingPhotos, setIsUpdatingPhotos] = useState(false);
+
+  // Mantener sincronizado el registro seleccionado cuando cambien los logs
+  useEffect(() => {
+    if (selectedLog) {
+      const updated = logs.find((l) => l.id === selectedLog.id);
+      if (updated) setSelectedLog(updated);
+    }
+  }, [logs]);
+
+  const currentYearValue = currentMonth.getFullYear();
+  const currentMonthValue = currentMonth.getMonth();
+
+  const daysInMonth = new Date(currentYearValue, currentMonthValue + 1, 0).getDate();
+  const firstDayOfMonth = new Date(currentYearValue, currentMonthValue, 1).getDay();
+
+  const prevMonth = () => {
+    setCurrentMonth(new Date(currentYearValue, currentMonthValue - 1, 1));
+    setSelectedLog(null);
+  };
+  
+  const nextMonth = () => {
+    setCurrentMonth(new Date(currentYearValue, currentMonthValue + 1, 1));
+    setSelectedLog(null);
+  };
+
+  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMonth = parseInt(e.target.value, 10);
+    setCurrentMonth(new Date(currentYearValue, newMonth, 1));
+    setSelectedLog(null);
+  };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newYear = parseInt(e.target.value, 10);
+    setCurrentMonth(new Date(newYear, currentMonthValue, 1));
+    setSelectedLog(null);
+  };
+
+  const getLogForDay = (day: number) => {
+    return logs.find(log => {
+      if (!log.timestamp) return false;
+      const logDate = log.timestamp.toDate();
+      return (
+        logDate.getDate() === day &&
+        logDate.getMonth() === currentMonthValue &&
+        logDate.getFullYear() === currentYearValue
+      );
+    });
+  };
+
+  const handleDayClick = (log: any) => {
+    if (!log) return; 
+    if (selectedLog && selectedLog.id === log?.id) {
+      setSelectedLog(null);
+    } else {
+      setSelectedLog(log);
+    }
+  };
+
+  // Guardar fotos añadidas o eliminadas directamente en Firestore
+  const handlePhotosChange = async (updatedPhotos: string[]) => {
+    if (!selectedLog) return;
+    setIsUpdatingPhotos(true);
+    try {
+      const logRef = doc(db, 'timeLogs', selectedLog.id);
+      await updateDoc(logRef, { photos: updatedPhotos });
+      
+      setSelectedLog((prev: any) => ({ ...prev, photos: updatedPhotos }));
+      if (onLogUpdated) {
+        onLogUpdated();
+      }
+    } catch (error) {
+      console.error('Error updating photos in log:', error);
+    } finally {
+      setIsUpdatingPhotos(false);
+    }
+  };
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June", 
+    "July", "August", "September", "October", "November", "December"
+  ];
+  
+  const years = Array.from({ length: 7 }, (_, i) => 2024 + i);
+
+  return (
+    <div className="animate-fade-in space-y-4">
+      {/* Controles de Navegación del Mes */}
+      <div className="flex justify-between items-center bg-gray-50 p-2.5 rounded-xl border border-gray-200">
+        <button 
+          type="button"
+          onClick={prevMonth} 
+          className="px-3 py-1 text-gray-600 hover:bg-gray-200 rounded-lg font-bold transition-colors cursor-pointer"
+        >
+          &lt;
+        </button>
+        
+        <div className="flex space-x-2">
+          <select 
+            value={currentMonthValue}
+            onChange={handleMonthChange}
+            className="bg-white border border-gray-300 text-gray-700 text-xs sm:text-sm font-semibold py-1.5 px-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+          >
+            {monthNames.map((month, index) => (
+              <option key={month} value={index}>{month}</option>
+            ))}
+          </select>
+
+          <select 
+            value={currentYearValue}
+            onChange={handleYearChange}
+            className="bg-white border border-gray-300 text-gray-700 text-xs sm:text-sm font-semibold py-1.5 px-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+          >
+            {years.map(year => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
+        </div>
+
+        <button 
+          type="button"
+          onClick={nextMonth} 
+          className="px-3 py-1 text-gray-600 hover:bg-gray-200 rounded-lg font-bold transition-colors cursor-pointer"
+        >
+          &gt;
+        </button>
+      </div>
+
+      {/* Días de la Semana */}
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+          <div key={day} className="text-[11px] font-bold text-gray-400 uppercase py-1">
+            {day}
+          </div>
+        ))}
+      </div>
+
+      {/* Cuadrícula de Días */}
+      <div className="grid grid-cols-7 gap-1.5">
+        {Array.from({ length: firstDayOfMonth }).map((_, i) => (
+          <div key={`empty-${i}`} className="p-2 min-h-[52px]"></div>
+        ))}
+        
+        {Array.from({ length: daysInMonth }).map((_, i) => {
+          const day = i + 1;
+          const log = getLogForDay(day);
+          const isSelected = selectedLog && selectedLog.id === log?.id;
+
+          return (
+            <div 
+              key={day} 
+              onClick={() => handleDayClick(log)}
+              className={`
+                p-2 rounded-lg text-center text-xs transition-all min-h-[52px] flex flex-col justify-between
+                ${log ? 'cursor-pointer shadow-xs border' : 'text-gray-400 bg-gray-50/70 border border-gray-100'}
+                ${log && !isSelected ? 'bg-emerald-50 border-emerald-200 text-emerald-900 font-bold hover:bg-emerald-100' : ''}
+                ${isSelected ? 'bg-blue-600 text-white font-bold ring-2 ring-blue-400 shadow-md border-transparent' : ''}
+              `}
+            >
+              <span className="block leading-none">{day}</span>
+              {log && (
+                <span className={`text-[11px] font-black mt-1 ${isSelected ? 'text-white' : 'text-emerald-700'}`}>
+                  {log.totalHours}h
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Tarjeta de Detalle del Registro Seleccionado */}
+      {selectedLog && (
+        <div className="mt-4 p-4 border-l-4 border-blue-600 bg-blue-50/60 rounded-r-xl shadow-xs relative animate-fade-in border border-blue-100 space-y-3">
+          <button 
+            type="button"
+            onClick={() => setSelectedLog(null)} 
+            className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+            title="Close details"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <h3 className="font-bold text-gray-800 text-sm pr-6">
+            Log Details
+          </h3>
+
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <p className="text-gray-500 font-medium">Location:</p>
+            <MapLink location={selectedLog.location} compact />
+            <p className="text-gray-500 font-medium">Schedule:</p>
+            <p className="font-semibold text-gray-800">{selectedLog.checkIn} - {selectedLog.checkOut}</p>
+            <p className="text-gray-500 font-medium">Total Hours:</p>
+            <p className="font-black text-blue-700">{selectedLog.totalHours} hrs</p>
+          </div>
+
+          {selectedLog.comments && (
+            <div className="pt-2 border-t border-blue-200">
+              <p className="text-[10px] text-gray-500 uppercase tracking-wide font-bold">Comments</p>
+              <p className="text-xs italic text-gray-700 mt-0.5">"{selectedLog.comments}"</p>
+            </div>
+          )}
+
+          {/* Gestión de Evidencias Fotográficas */}
+          {role === 'teamlead' ? (
+            <div className="pt-3 border-t border-blue-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
+                  Site Evidence Photos
+                </span>
+                {selectedLog.photos && selectedLog.photos.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsPhotoModalOpen(true)}
+                    className="text-xs font-bold text-blue-700 hover:text-blue-900 transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <span>View Gallery ↗</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Uploader para ver miniaturas existentes y subir más fotos */}
+              <PhotoEvidenceUploader
+                docId={selectedLog.id}
+                photos={selectedLog.photos || []}
+                onPhotosChange={handlePhotosChange}
+              />
+
+              {isUpdatingPhotos && (
+                <p className="text-[11px] text-blue-600 font-semibold animate-pulse">
+                  Syncing photos...
+                </p>
+              )}
+            </div>
+          ) : (
+            /* Modo solo lectura si es Worker y el turno tiene fotos */
+            selectedLog.photos && selectedLog.photos.length > 0 && (
+              <div className="pt-3 border-t border-blue-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-gray-600 uppercase tracking-wider">
+                    Site Evidence
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setIsPhotoModalOpen(true)}
+                    className="text-xs font-bold text-blue-700 hover:text-blue-900 transition-colors cursor-pointer"
+                  >
+                    View Photos ({selectedLog.photos.length}) ↗
+                  </button>
+                </div>
+
+                <div className="flex gap-2 overflow-x-auto py-1">
+                  {selectedLog.photos.map((url: string, idx: number) => (
+                    <img
+                      key={idx}
+                      src={url}
+                      alt={`Evidence ${idx + 1}`}
+                      onClick={() => setIsPhotoModalOpen(true)}
+                      className="w-14 h-14 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                    />
+                  ))}
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      )}
+
+      {/* Visor Modal en pantalla completa */}
+      <PhotoModal
+        isOpen={isPhotoModalOpen}
+        onClose={() => setIsPhotoModalOpen(false)}
+        photos={selectedLog?.photos || []}
+        title={`Evidence • ${selectedLog?.location || 'Job Site'}`}
+      />
+    </div>
+  );
+};
+
+export default Calendar;
+</file>
+
+<file path="src/App.tsx">
+import { useState, useEffect } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from './firebaseConfig';
+import Auth from './components/Auth';
+import Dashboard from './components/Dashboard';
+import AdminPanel from './components/AdminPanel'; 
+
+export type UserRole = 'admin' | 'teamlead' | 'worker';
+
+function App() {
+  const [user, setUser] = useState<any>(null);
+  const [userRole, setUserRole] = useState<UserRole>('worker');
+  const [loading, setLoading] = useState(true);
+
+  const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+        try {
+          const userDocRef = doc(db, 'users', currentUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+
+          if (userDocSnap.exists()) {
+            const data = userDocSnap.data();
+            
+            if (currentUser.email === ADMIN_EMAIL || data.role === 'admin') {
+              setUserRole('admin');
+            } else if (data.role === 'teamlead') {
+              setUserRole('teamlead');
+            } else {
+              setUserRole('worker');
+            }
+          } else {
+            setUserRole(currentUser.email === ADMIN_EMAIL ? 'admin' : 'worker');
+          }
+        } catch (error) {
+          console.error("Error al obtener rol:", error);
+          setUserRole(currentUser.email === ADMIN_EMAIL ? 'admin' : 'worker');
+        }
+      } else {
+        setUser(null);
+        setUserRole('worker');
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [ADMIN_EMAIL]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-sm font-semibold text-gray-500">Loading platform...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return <Auth />;
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {userRole === 'admin' ? (
+        <AdminPanel user={user} />
+      ) : (
+        <Dashboard user={user} role={userRole} />
+      )}
+    </div>
+  );
+}
+
+export default App;
+</file>
+
+<file path="index.html">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#8cc641" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>working-platform</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+</file>
+
+<file path="src/components/Auth.tsx">
+import React, { useState } from 'react';
+import { auth } from '../firebaseConfig';
+import { 
+  signInWithEmailAndPassword, 
+  sendPasswordResetEmail 
+} from 'firebase/auth';
+import { currentTenant } from '../config/tenant.config';
+
+const Auth: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error: any) {
+      alert("Error: " + error.message);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      alert("Please enter your email first so we can send you a reset link.");
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent! Check your inbox.");
+    } catch (error: any) {
+      alert("Error: " + error.message);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
+      <div className="text-center mb-8 animate-fade-in">
+        <img
+          src={currentTenant.company.logoUrl}
+          alt={`${currentTenant.company.name} Logo`}
+          className="mx-auto h-36 w-auto object-contain mb-4"
+        />
+      </div>
+      
+      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center mb-6 text-brand">
+          Log In
+        </h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input 
+            type="email" 
+            name="email"
+            autoComplete="username"
+            placeholder="Email" 
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required 
+          />
+          
+          <input 
+            type="password" 
+            name="password"
+            autoComplete="current-password"
+            placeholder="Password" 
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required 
+          />
+          
+          <button 
+            type="submit" 
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-brand hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand transition-colors cursor-pointer"
+          >
+            Log In
+          </button>
+        </form>
+
+        <div className="text-center mt-6">
+          <button 
+            onClick={handleForgotPassword}
+            className="text-xs text-gray-500 hover:text-brand underline cursor-pointer"
+          >
+            Forgot your password?
+          </button>
+        </div>
+
+        <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+          <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">
+            {currentTenant.company.shortName} • Internal Access Only
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Auth;
+</file>
+
+<file path="src/components/AdminPanel.tsx">
+import React, { useState, useEffect } from "react";
+import { db, auth } from "../firebaseConfig";
+import {
+  collection,
+  getDocs,
+  query,
+  setDoc,
+  doc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
+import { signOut } from "firebase/auth";
+import Toast from "./Toast";
+import PhotoModal from "./PhotoModal";
+import MapLink from "./MapLink";
+import ToolboxAuditor from "./ToolBoxAuditor";
+
+interface AdminPanelProps {
+  user: any;
+}
+
+const InlineEditForm = ({
+  workerId,
+  dateObj,
+  onSave,
+  onCancel,
+  showNotification,
+}: any) => {
+  const [location, setLocation] = useState("");
+  const [extraLocations, setExtraLocations] = useState<string[]>([]);
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [totalHours, setTotalHours] = useState("");
+  const [comments, setComments] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleAddLocation = () => {
+    if (extraLocations.length < 2) {
+      setExtraLocations([...extraLocations, ""]);
+    }
+  };
+
+  const handleExtraLocationChange = (index: number, val: string) => {
+    const updated = [...extraLocations];
+    updated[index] = val;
+    setExtraLocations(updated);
+  };
+
+  const handleRemoveExtraLocation = (index: number) => {
+    setExtraLocations(extraLocations.filter((_, i) => i !== index));
+  };
+
+  const handleSave = async () => {
+    const cleanMain = location.trim();
+    const cleanExtras = extraLocations.map((l) => l.trim()).filter(Boolean);
+
+    if (!cleanMain || !checkIn || !checkOut || !totalHours) {
+      showNotification("Please fill in all time and location fields.");
+      return;
+    }
+
+    const allLocations = [cleanMain, ...cleanExtras];
+    const combinedLocation = allLocations.join(" / ");
+
+    setIsSubmitting(true);
+    await onSave(workerId, dateObj, {
+      location: combinedLocation,
+      locations: allLocations,
+      checkIn,
+      checkOut,
+      totalHours,
+      comments,
+    });
+    setIsSubmitting(false);
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-blue-100 shadow-sm animate-fade-in w-full items-start">
+      {/* Ubicaciones de trabajo (principal y hasta 2 extras) */}
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[10px] uppercase font-bold text-gray-400">
+          Location
+        </label>
+        <input
+          type="text"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          placeholder="Primary job site"
+        />
+
+        {extraLocations.map((extraLoc, index) => (
+          <div key={index} className="flex gap-1 animate-fade-in">
+            <input
+              type="text"
+              value={extraLoc}
+              onChange={(e) => handleExtraLocationChange(index, e.target.value)}
+              placeholder={`Additional job site ${index + 2}`}
+              className="flex-1 p-2 border border-blue-200 bg-blue-50/30 rounded-lg text-xs outline-none focus:border-blue-500"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => handleRemoveExtraLocation(index)}
+              className="px-2 py-1 bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded text-xs font-bold transition-colors cursor-pointer"
+              title="Remove site"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+
+        {extraLocations.length < 2 && (
+          <button
+            type="button"
+            onClick={handleAddLocation}
+            className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors text-left cursor-pointer mt-0.5"
+          >
+            + Add another job site
+          </button>
+        )}
+      </div>
+
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <label className="text-[10px] uppercase font-bold text-gray-400">
+            Check In
+          </label>
+          <input
+            type="time"
+            value={checkIn}
+            onChange={(e) => setCheckIn(e.target.value)}
+            className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="text-[10px] uppercase font-bold text-gray-400">
+            Check Out
+          </label>
+          <input
+            type="time"
+            value={checkOut}
+            onChange={(e) => setCheckOut(e.target.value)}
+            className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          />
+        </div>
+      </div>
+
+      <div className="flex gap-2">
+        <div className="w-16">
+          <label className="text-[10px] uppercase font-bold text-gray-400">
+            Hrs
+          </label>
+          <input
+            type="number"
+            step="0.5"
+            value={totalHours}
+            onChange={(e) => setTotalHours(e.target.value)}
+            className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            placeholder="0"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="text-[10px] uppercase font-bold text-gray-400">
+            Note
+          </label>
+          <input
+            type="text"
+            value={comments}
+            onChange={(e) => setComments(e.target.value)}
+            className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            placeholder="Optional"
+          />
+        </div>
+      </div>
+
+      <div className="flex gap-2 items-center justify-end md:mt-4">
+        <button
+          onClick={onCancel}
+          className="p-2.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
+          title="Cancel"
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        <button
+          onClick={handleSave}
+          disabled={isSubmitting}
+          className="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400 shadow-sm cursor-pointer disabled:cursor-not-allowed"
+          title="Save"
+        >
+          {isSubmitting ? (
+            <span className="text-xs font-bold px-1">...</span>
+          ) : (
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="3"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const getLocalTodayString = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const getFirstDayOfMonth = () => {
+  const d = new Date();
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+// Formateador visual para el rango de la quincena (ej: "Sep 14 – Sep 27, 2026")
+const formatPeriodLegend = (startStr: string, endStr: string) => {
+  if (!startStr || !endStr) return "";
+  const s = new Date(startStr + "T00:00:00");
+  const e = new Date(endStr + "T00:00:00");
+  const sMonth = s.toLocaleDateString("en-US", { month: "short" });
+  const eMonth = e.toLocaleDateString("en-US", { month: "short" });
+  const sDay = s.getDate();
+  const eDay = e.getDate();
+  const year = e.getFullYear();
+
+  if (sMonth === eMonth) {
+    return `${sMonth} ${sDay} – ${eDay}, ${year}`;
+  }
+  return `${sMonth} ${sDay} – ${eMonth} ${eDay}, ${year}`;
+};
+
+// Configuración y cálculo base bisemanal (14 días)
+const ANCHOR_DATE = new Date(2026, 7, 31); // Lunes 31 de agosto de 2026
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const CYCLE_DAYS = 14;
+
+const getBaseCycleIndex = () => {
+  const now = new Date();
+  const todayAtMidnight = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  );
+  const diffDays = Math.floor(
+    (todayAtMidnight.getTime() - ANCHOR_DATE.getTime()) / MS_PER_DAY,
+  );
+  return Math.floor(diffDays / CYCLE_DAYS);
+};
+
+const getPeriodRangeByIndex = (cycleIndex: number) => {
+  const currentStart = new Date(
+    ANCHOR_DATE.getTime() + cycleIndex * CYCLE_DAYS * MS_PER_DAY,
+  );
+  const currentEnd = new Date(
+    ANCHOR_DATE.getTime() + (cycleIndex * CYCLE_DAYS + 13) * MS_PER_DAY,
+  );
+
+  const formatDate = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  return {
+    start: formatDate(currentStart),
+    end: formatDate(currentEnd),
+  };
+};
+
+const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
+  const [activeTab, setActiveTab] = useState<'payroll' | 'safety'>('payroll');
+  const [allLogs, setAllLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [allRegisteredUsers, setAllRegisteredUsers] = useState<any[]>([]);
+  const [oldestLoadedDate, setOldestLoadedDate] =
+    useState<Date>(getFirstDayOfMonth());
+  const [selectedUser, setSelectedUser] = useState("All");
+  const [startDate, setStartDate] = useState(getLocalTodayString());
+  const [endDate, setEndDate] = useState("");
+  const [expandedRangeUserId, setExpandedRangeUserId] = useState<string | null>(
+    null,
+  );
+  const [editingRowKey, setEditingRowKey] = useState<string | null>(null);
+
+  const [activeCycleIndex, setActiveCycleIndex] =
+    useState<number>(getBaseCycleIndex());
+
+  // Estados para el visor modal de fotos de evidencias
+  const [activeEvidencePhotos, setActiveEvidencePhotos] = useState<
+    string[] | null
+  >(null);
+  const [evidenceModalTitle, setEvidenceModalTitle] = useState<string>("");
+
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
+
+  const showNotification = (message: string) => {
+    setToastMessage(message);
+  };
+
+  const loadUsers = async () => {
+    try {
+      const usersSnapshot = await getDocs(collection(db, "users"));
+      const usersList: any[] = [];
+
+      usersSnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.email !== user.email) {
+          usersList.push({
+            id: doc.id,
+            fullName: data.fullName,
+            email: data.email,
+          });
+        }
+      });
+
+      usersList.sort((a, b) => a.fullName.localeCompare(b.fullName));
+      setAllRegisteredUsers(usersList);
+    } catch (error: any) {
+      showNotification("Error loading users: " + error.message);
+    }
+  };
+
+  const loadLogs = async (fromDate: Date) => {
+    setLoading(true);
+    try {
+      const q = query(
+        collection(db, "timeLogs"),
+        where("timestamp", ">=", Timestamp.fromDate(fromDate)),
+      );
+      const querySnapshot = await getDocs(q);
+
+      const logsData: any[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.userEmail !== user.email) {
+          logsData.push({ id: doc.id, ...data });
+        }
+      });
+
+      setAllLogs(logsData);
+      setOldestLoadedDate(fromDate);
+    } catch (error: any) {
+      showNotification("Error loading logs: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const initData = async () => {
+      await loadUsers();
+      await loadLogs(getFirstDayOfMonth());
+    };
+    initData();
+  }, []);
+
+  useEffect(() => {
+    if (startDate) {
+      const selectedDate = new Date(startDate + "T00:00:00");
+      if (selectedDate < oldestLoadedDate) {
+        loadLogs(selectedDate);
+      }
+    }
+  }, [startDate]);
+
+  const handleInlineSubmit = async (
+    workerId: string,
+    dateObj: Date,
+    data: any,
+  ) => {
+    try {
+      const targetWorker = allRegisteredUsers.find((w) => w.id === workerId);
+      if (!targetWorker) return;
+
+      const [hours, minutes] = data.checkIn.split(":");
+      const finalDate = new Date(dateObj);
+      finalDate.setHours(Number(hours), Number(minutes), 0, 0);
+
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const day = String(dateObj.getDate()).padStart(2, "0");
+      const dateStr = `${year}-${month}-${day}`;
+      const docId = `${targetWorker.id}_${dateStr}`;
+
+      await setDoc(
+        doc(db, "timeLogs", docId),
+        {
+          userId: targetWorker.id,
+          userEmail: targetWorker.email,
+          location: data.location,
+          locations: data.locations || [data.location],
+          checkIn: data.checkIn,
+          checkOut: data.checkOut,
+          totalHours: Number(data.totalHours),
+          comments: data.comments || "",
+          timestamp: Timestamp.fromDate(finalDate),
+          dateStr: dateStr,
+        },
+        { merge: true },
+      );
+
+      showNotification("Log added successfully!");
+      setEditingRowKey(null);
+      loadLogs(oldestLoadedDate);
+    } catch (error: any) {
+      showNotification("Error saving: " + error.message);
+    }
+  };
+
+  const toggleRangeRow = (userId: string) => {
+    setExpandedRangeUserId(expandedRangeUserId === userId ? null : userId);
+  };
+
+  const getDatesInRange = (startStr: string, endStr: string) => {
+    const dates = [];
+    const current = new Date(startStr + "T00:00:00");
+    const end = new Date(endStr + "T00:00:00");
+    while (current <= end) {
+      dates.push(new Date(current));
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
+  };
+
+  const filteredUsers =
+    selectedUser === "All"
+      ? allRegisteredUsers
+      : allRegisteredUsers.filter((worker) => worker.id === selectedUser);
+
+  const displayedUsers = [...filteredUsers].sort((a, b) =>
+    a.fullName.localeCompare(b.fullName),
+  );
+
+  const handleSelectToday = () => {
+    setStartDate(getLocalTodayString());
+    setEndDate("");
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+  };
+
+  const handleSelectPeriodToPay = () => {
+    const payIndex = getBaseCycleIndex() - 1;
+    setActiveCycleIndex(payIndex);
+    const range = getPeriodRangeByIndex(payIndex);
+    setStartDate(range.start);
+    setEndDate(range.end);
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+  };
+
+  const handleSelectCurrentPeriod = () => {
+    const baseIndex = getBaseCycleIndex();
+    setActiveCycleIndex(baseIndex);
+    const range = getPeriodRangeByIndex(baseIndex);
+    setStartDate(range.start);
+    setEndDate(range.end);
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+  };
+
+  const handlePrevPeriod = () => {
+    const newIndex = activeCycleIndex - 1;
+    setActiveCycleIndex(newIndex);
+    const range = getPeriodRangeByIndex(newIndex);
+    setStartDate(range.start);
+    setEndDate(range.end);
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+  };
+
+  const handleNextPeriod = () => {
+    const newIndex = activeCycleIndex + 1;
+    setActiveCycleIndex(newIndex);
+    const range = getPeriodRangeByIndex(newIndex);
+    setStartDate(range.start);
+    setEndDate(range.end);
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+  };
+
+  const handleClearFilters = () => {
+    setSelectedUser("All");
+    setStartDate(getLocalTodayString());
+    setEndDate("");
+    setExpandedRangeUserId(null);
+    setEditingRowKey(null);
+    setActiveCycleIndex(getBaseCycleIndex());
+  };
+
+  const isTodayActive =
+    startDate === getLocalTodayString() && (!endDate || endDate === startDate);
+  const isPeriodActive = Boolean(endDate && endDate !== startDate);
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8 relative">
+      {toastMessage && (
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      )}
+
+      <div className="max-w-6xl mx-auto space-y-6">
+        
+        {/* Cabecera Principal */}
+        <div className="bg-gray-900 rounded-xl p-6 shadow-lg flex justify-between items-center text-white">
+          <h1 className="text-xl font-bold">Admin Dashboard</h1>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-bold transition-colors cursor-pointer"
+          >
+            Log Out
+          </button>
+        </div>
+
+        {/* Selector de Pestañas: Nómina vs Charlas de Seguridad */}
+        <div className="flex gap-2 p-1 bg-gray-200/80 rounded-xl w-fit">
+          <button
+            type="button"
+            onClick={() => setActiveTab('payroll')}
+            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+              activeTab === 'payroll'
+                ? 'bg-white text-gray-900 shadow-xs'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            ⏱️ Hours & Payroll
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('safety')}
+            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+              activeTab === 'safety'
+                ? 'bg-white text-purple-900 shadow-xs'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            🛡️ Safety & Toolbox Meetings
+          </button>
+        </div>
+
+        {/* PESTAÑA 1: Horas y Nómina */}
+        {activeTab === 'payroll' && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 space-y-4">
+              {/* Barra de accesos rápidos con leyenda de fechas */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Quick View:
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleSelectToday}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
+                      isTodayActive
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
+                        : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                    }`}
+                  >
+                    📍 Today
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-1">
+                    Pay Periods:
+                  </span>
+
+                  {/* Botón Quincena Anterior (<) */}
+                  <button
+                    type="button"
+                    onClick={handlePrevPeriod}
+                    className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+                    title="Previous Pay Period"
+                  >
+                    ◀
+                  </button>
+
+                  {/* Leyenda visible de la quincena actual seleccionada */}
+                  {isPeriodActive && (
+                    <span className="text-xs font-extrabold text-purple-900 bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200 tracking-wide shadow-xs">
+                      📅 {formatPeriodLegend(startDate, endDate)}
+                    </span>
+                  )}
+
+                  {/* Quincena por Pagar */}
+                  <button
+                    type="button"
+                    onClick={handleSelectPeriodToPay}
+                    className="px-3 py-1.5 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition-colors cursor-pointer"
+                  >
+                    💰 Period to Pay
+                  </button>
+
+                  {/* Quincena en Curso */}
+                  <button
+                    type="button"
+                    onClick={handleSelectCurrentPeriod}
+                    className="px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors cursor-pointer"
+                  >
+                    📅 Current Period
+                  </button>
+
+                  {/* Botón Quincena Siguiente (>) */}
+                  <button
+                    type="button"
+                    onClick={handleNextPeriod}
+                    className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+                    title="Next Pay Period"
+                  >
+                    ▶
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-4 items-end">
+                <div className="flex-1 w-full">
+                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                    Worker
+                  </label>
+                  <select
+                    value={selectedUser}
+                    onChange={(e) => {
+                      setSelectedUser(e.target.value);
+                      setExpandedRangeUserId(null);
+                    }}
+                    className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                  >
+                    <option value="All">All workers</option>
+                    {allRegisteredUsers.map((worker) => (
+                      <option key={worker.id} value={worker.id}>
+                        {worker.fullName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex-1 w-full">
+                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                    Specific Day / From
+                  </label>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <div className="flex-1 w-full">
+                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                    To (Optional)
+                  </label>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                </div>
+                <button
+                  onClick={handleClearFilters}
+                  className="w-full md:w-auto px-6 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+              {!startDate && (
+                <div className="p-12 text-center flex flex-col items-center">
+                  <h3 className="text-lg font-bold text-gray-700">
+                    Select a date
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-1 max-w-md">
+                    Choose a 'From' date to view the details for that period.
+                  </p>
+                </div>
+              )}
+
+              {startDate && (
+                <div className="overflow-x-auto">
+                  <div className="p-4 bg-purple-50 border-b border-purple-100 text-purple-800 text-sm font-bold flex justify-between items-center">
+                    <span>
+                      Report:{" "}
+                      {new Date(startDate + "T00:00:00").toLocaleDateString(
+                        "en-US",
+                      )}
+                      {endDate && endDate !== startDate
+                        ? ` to ${new Date(endDate + "T23:59:59").toLocaleDateString("en-US")}`
+                        : ""}
+                    </span>
+                    <span className="bg-purple-200 text-purple-900 px-3 py-1 rounded-full text-xs">
+                      Active Data
+                    </span>
+                  </div>
+
+                  {loading ? (
+                    <div className="p-12 text-center text-gray-400 animate-pulse">
+                      Querying Database...
+                    </div>
+                  ) : (
+                    <table className="w-full text-left">
+                      <thead className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider border-b">
+                        <tr>
+                          <th className="p-4">Worker</th>
+                          <th className="p-4 text-center">
+                            Total Accumulated Hours
+                          </th>
+                          <th className="p-4 text-right">Details</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {displayedUsers.map((worker) => {
+                          const effectiveEndDate = endDate ? endDate : startDate;
+                          const start = new Date(
+                            startDate + "T00:00:00",
+                          ).getTime();
+                          const end = new Date(
+                            effectiveEndDate + "T23:59:59",
+                          ).getTime();
+
+                          const userLogsInRange = allLogs.filter((log) => {
+                            if (!log.timestamp || log.userId !== worker.id)
+                              return false;
+                            const logTime = log.timestamp.toDate().getTime();
+                            return logTime >= start && logTime <= end;
+                          });
+
+                          const totalWorkerHours = userLogsInRange.reduce(
+                            (sum, log) => sum + (Number(log.totalHours) || 0),
+                            0,
+                          );
+
+                          const totalWorkerPhotos = userLogsInRange.reduce(
+                            (sum, log) =>
+                              sum +
+                              (log.photos && Array.isArray(log.photos)
+                                ? log.photos.length
+                                : 0),
+                            0,
+                          );
+
+                          const isExpanded = expandedRangeUserId === worker.id;
+                          const datesInRange = getDatesInRange(
+                            startDate,
+                            effectiveEndDate,
+                          );
+
+                          return (
+                            <React.Fragment key={worker.id}>
+                              <tr
+                                onClick={() => toggleRangeRow(worker.id)}
+                                className="transition-colors hover:bg-purple-50/50 cursor-pointer"
+                              >
+                                <td className="p-4">
+                                  <p className="font-bold text-gray-800 text-sm">
+                                    {worker.fullName}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <p className="text-xs text-purple-600">
+                                      {userLogsInRange.length} of{" "}
+                                      {datesInRange.length} days
+                                    </p>
+                                    {totalWorkerPhotos > 0 && (
+                                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                        📷 {totalWorkerPhotos}
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="p-4 text-center">
+                                  <span
+                                    className={`text-xl font-black ${totalWorkerHours > 0 ? "text-purple-600" : "text-gray-300"}`}
+                                  >
+                                    {totalWorkerHours}h
+                                  </span>
+                                </td>
+                                <td className="p-4 text-right">
+                                  <button
+                                    className="text-gray-400 hover:text-purple-600 transition-transform duration-200 cursor-pointer"
+                                    style={{
+                                      transform: isExpanded
+                                        ? "rotate(180deg)"
+                                        : "rotate(0deg)",
+                                    }}
+                                  >
+                                    ▼
+                                  </button>
+                                </td>
+                              </tr>
+
+                              {isExpanded && (
+                                <tr className="bg-purple-50/30 border-b border-purple-100">
+                                <td colSpan={3} className="p-0">
+                                  <div className="p-4 md:p-6 shadow-inner">
+                                    <h4 className="text-sm font-bold text-purple-800 mb-3">
+                                      Detailed View
+                                    </h4>
+                                    <div className="overflow-x-auto rounded-lg border border-purple-100">
+                                      <table className="w-full text-left text-sm bg-white">
+                                        <thead className="bg-purple-50 text-xs font-bold text-purple-600 uppercase border-b border-purple-100">
+                                          <tr>
+                                            <th className="p-3">Date</th>
+                                            <th className="p-3">Status</th>
+                                            <th className="p-3">
+                                              Location / Job Site
+                                            </th>
+                                            <th className="p-3 text-center">
+                                              Schedule
+                                            </th>
+                                            <th className="p-3 text-center">
+                                              Hours
+                                            </th>
+                                            <th className="p-3 text-center">
+                                              Evidence
+                                            </th>
+                                          </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-purple-50">
+                                          {datesInRange.map(
+                                            (dateObj, index) => {
+                                              const logsForDay =
+                                                userLogsInRange.filter(
+                                                  (log) => {
+                                                    const logDate =
+                                                      log.timestamp.toDate();
+                                                    return (
+                                                      logDate.getDate() ===
+                                                        dateObj.getDate() &&
+                                                      logDate.getMonth() ===
+                                                        dateObj.getMonth() &&
+                                                      logDate.getFullYear() ===
+                                                        dateObj.getFullYear()
+                                                    );
+                                                  },
+                                                );
+
+                                              const isWeekend =
+                                                dateObj.getDay() === 0 ||
+                                                dateObj.getDay() === 6;
+                                              const rowKey = `${worker.id}-${dateObj.getTime()}`;
+                                              const isEditingThisRow =
+                                                editingRowKey === rowKey;
+
+                                              if (logsForDay.length > 0) {
+                                                return logsForDay.map((log) => {
+                                                  const hasPhotos =
+                                                    log.photos &&
+                                                    Array.isArray(log.photos) &&
+                                                    log.photos.length > 0;
+
+                                                  return (
+                                                    <tr
+                                                      key={log.id}
+                                                      className="hover:bg-gray-50"
+                                                    >
+                                                      <td className="p-3">
+                                                        <span
+                                                          className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-gray-700"}`}
+                                                        >
+                                                          {dateObj.toLocaleDateString(
+                                                            "en-US",
+                                                            {
+                                                              weekday: "short",
+                                                              day: "2-digit",
+                                                              month: "short",
+                                                            },
+                                                          )}
+                                                        </span>
+                                                      </td>
+                                                      <td className="p-3">
+                                                        <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
+                                                          Worked
+                                                        </span>
+                                                      </td>
+                                                      <td className="p-3 text-gray-700">
+                                                        <MapLink
+                                                          location={
+                                                            log.location
+                                                          }
+                                                        />
+                                                      </td>
+                                                      <td className="p-3 text-center text-gray-600">
+                                                        {log.checkIn} -{" "}
+                                                        {log.checkOut}
+                                                      </td>
+                                                      <td className="p-3 text-center font-bold text-purple-700">
+                                                        {log.totalHours}h
+                                                      </td>
+                                                      <td className="p-3 text-center">
+                                                        {hasPhotos ? (
+                                                          <button
+                                                            type="button"
+                                                            onClick={(e) => {
+                                                              e.stopPropagation();
+                                                              setActiveEvidencePhotos(
+                                                                log.photos,
+                                                              );
+                                                              setEvidenceModalTitle(
+                                                                `Evidence: ${worker.fullName} • ${dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
+                                                              );
+                                                            }}
+                                                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                                                            title="View site photos"
+                                                          >
+                                                            <span>📷</span>
+                                                            <span>
+                                                              {
+                                                                log.photos
+                                                                  .length
+                                                              }
+                                                            </span>
+                                                          </button>
+                                                        ) : (
+                                                          <span className="text-gray-300 text-xs">
+                                                            —
+                                                          </span>
+                                                        )}
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                });
+                                              } else if (isEditingThisRow) {
+                                                return (
+                                                  <tr
+                                                    key={`edit-${index}`}
+                                                    className="bg-blue-50/50"
+                                                  >
+                                                    <td className="p-3 align-top">
+                                                      <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
+                                                        {dateObj.toLocaleDateString(
+                                                          "en-US",
+                                                          {
+                                                            weekday: "short",
+                                                            day: "2-digit",
+                                                            month: "short",
+                                                          },
+                                                        )}
+                                                      </span>
+                                                    </td>
+                                                    <td
+                                                      colSpan={5}
+                                                      className="p-3"
+                                                    >
+                                                      <InlineEditForm
+                                                        workerId={worker.id}
+                                                        dateObj={dateObj}
+                                                        onSave={
+                                                          handleInlineSubmit
+                                                        }
+                                                        onCancel={() =>
+                                                          setEditingRowKey(null)
+                                                        }
+                                                        showNotification={
+                                                          showNotification
+                                                        }
+                                                      />
+                                                    </td>
+                                                  </tr>
+                                                );
+                                              } else {
+                                                return (
+                                                  <tr
+                                                    key={`missing-${index}`}
+                                                    className="bg-red-50/40 hover:bg-red-50 transition-colors group"
+                                                  >
+                                                    <td className="p-3">
+                                                      <span
+                                                        className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-red-800"}`}
+                                                      >
+                                                        {dateObj.toLocaleDateString(
+                                                          "en-US",
+                                                          {
+                                                            weekday: "short",
+                                                            day: "2-digit",
+                                                            month: "short",
+                                                          },
+                                                        )}
+                                                      </span>
+                                                    </td>
+                                                    <td className="p-3">
+                                                      <span className="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full">
+                                                        No Log
+                                                      </span>
+                                                    </td>
+                                                    <td
+                                                      className="p-3 text-red-400 italic"
+                                                      colSpan={3}
+                                                    ></td>
+                                                    <td className="p-3 text-center">
+                                                      <button
+                                                        onClick={() =>
+                                                          setEditingRowKey(
+                                                            rowKey,
+                                                          )
+                                                        }
+                                                        className="p-1.5 bg-white border border-red-200 text-red-500 rounded hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 shadow-sm cursor-pointer"
+                                                        title="Add missing hours"
+                                                      >
+                                                        <svg
+                                                          className="w-4 h-4"
+                                                          fill="none"
+                                                          stroke="currentColor"
+                                                          viewBox="0 0 24 24"
+                                                        >
+                                                          <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth="2"
+                                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                                          />
+                                                        </svg>
+                                                      </button>
+                                                    </td>
+                                                  </tr>
+                                                );
+                                              }
+                                            },
+                                          )}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                      {displayedUsers.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={3}
+                            className="p-8 text-center text-gray-500"
+                          >
+                            No workers found.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        )}
+
+        {/* PESTAÑA 2: Charlas de Seguridad (Toolbox Meetings) */}
+        {activeTab === 'safety' && (
+          <div className="animate-fade-in">
+            <ToolboxAuditor />
+          </div>
+        )}
+
+      </div>
+
+      {/* Visor Modal de Evidencias Fotográficas */}
+      <PhotoModal
+        isOpen={activeEvidencePhotos !== null}
+        onClose={() => setActiveEvidencePhotos(null)}
+        photos={activeEvidencePhotos || []}
+        title={evidenceModalTitle}
+      />
+    </div>
+  );
+};
+
+export default AdminPanel;
+</file>
+
+<file path="src/components/Dashboard.tsx">
+import React, { useState, useEffect } from 'react';
+import { auth, db } from '../firebaseConfig';
+import { signOut } from 'firebase/auth';
+import { 
+  collection, 
+  query, 
+  where, 
+  getDocs, 
+  setDoc, 
+  doc, 
+  Timestamp, 
+  getDoc 
+} from 'firebase/firestore';
+import Toast from './Toast';
+import Calendar from './Calendar';
+import PhotoEvidenceUploader from './PhotoEvidence';
+import LocationInput from './LocationInput';
+import ToolboxMeetingModal from './ToolBoxMeetingModal';
+
+interface DashboardProps {
+  user: any;
+  role?: 'worker' | 'teamlead' | string;
+}
+
+// Configuración de nómina bisemanal
+const ANCHOR_DATE = new Date(2026, 7, 31);
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const CYCLE_DAYS = 14;
+
+const getBaseCycleIndex = () => {
+  const now = new Date();
+  const todayAtMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.floor((todayAtMidnight.getTime() - ANCHOR_DATE.getTime()) / MS_PER_DAY);
+  return Math.floor(diffDays / CYCLE_DAYS);
+};
+
+const getPeriodRangeByIndex = (cycleIndex: number) => {
+  const currentStart = new Date(ANCHOR_DATE.getTime() + cycleIndex * CYCLE_DAYS * MS_PER_DAY);
+  const currentEnd = new Date(ANCHOR_DATE.getTime() + (cycleIndex * CYCLE_DAYS + 13) * MS_PER_DAY);
+
+  const formatDate = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  return {
+    start: formatDate(currentStart),
+    end: formatDate(currentEnd),
+  };
+};
+
+const formatPeriodLegend = (startStr: string, endStr: string) => {
+  if (!startStr || !endStr) return "";
+  const s = new Date(startStr + "T00:00:00");
+  const e = new Date(endStr + "T00:00:00");
+  const sMonth = s.toLocaleDateString("en-US", { month: "short" });
+  const eMonth = e.toLocaleDateString("en-US", { month: "short" });
+  const sDay = s.getDate();
+  const eDay = e.getDate();
+  const year = e.getFullYear();
+
+  if (sMonth === eMonth) {
+    return `${sMonth} ${sDay} – ${eDay}, ${year}`;
+  }
+  return `${sMonth} ${sDay} – ${eMonth} ${eDay}, ${year}`;
+};
+
+const getLocalTodayString = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
+  const [userName, setUserName] = useState('');
+  const [hasLoggedToday, setHasLoggedToday] = useState(false);
+  const [myLogs, setMyLogs] = useState<any[]>([]);
+  // const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Formulario diario de horas
+  const [mainLocation, setMainLocation] = useState('');
+  const [extraLocations, setExtraLocations] = useState<string[]>([]);
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
+  const [totalHours, setTotalHours] = useState('');
+  const [comments, setComments] = useState('');
+  const [evidencePhotos, setEvidencePhotos] = useState<string[]>([]);
+
+  // Estado del modal de Toolbox Meeting
+  const [isToolboxOpen, setIsToolboxOpen] = useState(false);
+
+  // Navegación de periodos
+  const [activeCycleIndex, setActiveCycleIndex] = useState<number>(getBaseCycleIndex());
+  const [periodRange, setPeriodRange] = useState(getPeriodRangeByIndex(getBaseCycleIndex()));
+
+  // Control de vista desplegable y calculadora
+  const [showDetails, setShowDetails] = useState(false);
+  const [hourlyWage, setHourlyWage] = useState<string>('');
+
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
+
+  const showNotification = (msg: string) => {
+    setToastMessage(msg);
+  };
+
+  // Cargar nombre del usuario
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (userDoc.exists()) {
+          setUserName(userDoc.data().fullName || user.email);
+        } else {
+          setUserName(user.email);
+        }
+      } catch (err) {
+        setUserName(user.email);
+      }
+    };
+    fetchUserData();
+  }, [user]);
+
+  // Consultar registros del trabajador
+  const fetchMyLogs = async () => {
+    // setLoading(true);
+    try {
+      const q = query(
+        collection(db, 'timeLogs'),
+        where('userId', '==', user.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const logs: any[] = [];
+      let foundToday = false;
+      const todayStr = getLocalTodayString();
+
+      querySnapshot.forEach((docSnapshot) => {
+        const data = docSnapshot.data();
+        logs.push({ id: docSnapshot.id, ...data });
+
+        if (data.dateStr === todayStr) {
+          foundToday = true;
+        } else if (data.timestamp) {
+          const logDate = data.timestamp.toDate();
+          const y = logDate.getFullYear();
+          const m = String(logDate.getMonth() + 1).padStart(2, '0');
+          const d = String(logDate.getDate()).padStart(2, '0');
+          if (`${y}-${m}-${d}` === todayStr) {
+            foundToday = true;
+          }
+        }
+      });
+
+      setMyLogs(logs);
+      setHasLoggedToday(foundToday);
+    } catch (error: any) {
+      showNotification('Error loading logs: ' + error.message);
+    } finally {
+      // setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMyLogs();
+  }, [user]);
+
+  // Manejo de obras múltiples
+  const handleAddLocation = () => {
+    if (extraLocations.length < 2) {
+      setExtraLocations([...extraLocations, '']);
+    }
+  };
+
+  const handleExtraLocationChange = (index: number, val: string) => {
+    const updated = [...extraLocations];
+    updated[index] = val;
+    setExtraLocations(updated);
+  };
+
+  const handleRemoveExtraLocation = (index: number) => {
+    setExtraLocations(extraLocations.filter((_, i) => i !== index));
+  };
+
+  // Control estricto de entrada para horas: solo números y punto decimal
+  const handleTotalHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(',', '.');
+    if (val === '' || /^\d*\.?\d*$/.test(val)) {
+      setTotalHours(val);
+    }
+  };
+
+  // Guardar turno del día
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanMain = mainLocation.trim();
+    const cleanExtras = extraLocations.map((l) => l.trim()).filter(Boolean);
+    const cleanHours = totalHours.trim();
+
+    if (!cleanMain || !checkIn || !checkOut || !cleanHours) {
+      showNotification('Please fill in all required fields including total hours.');
+      return;
+    }
+
+    const parsedHours = Number(cleanHours);
+    if (isNaN(parsedHours) || parsedHours <= 0) {
+      showNotification('Please enter a valid number of total hours (e.g. 8 or 8.5).');
+      return;
+    }
+
+    const allLocations = [cleanMain, ...cleanExtras];
+    const combinedLocation = allLocations.join(' / ');
+    const todayStr = getLocalTodayString();
+    const docId = `${user.uid}_${todayStr}`;
+
+    setSubmitting(true);
+    try {
+      await setDoc(doc(db, 'timeLogs', docId), {
+        userId: user.uid,
+        userEmail: user.email,
+        location: combinedLocation,
+        locations: allLocations,
+        checkIn,
+        checkOut,
+        totalHours: parsedHours,
+        comments: comments.trim(),
+        photos: evidencePhotos,
+        dateStr: todayStr,
+        timestamp: Timestamp.now(),
+      });
+
+      showNotification('Hours logged successfully!');
+      setMainLocation('');
+      setExtraLocations([]);
+      setCheckIn('');
+      setCheckOut('');
+      setTotalHours('');
+      setComments('');
+      setEvidencePhotos([]);
+      await fetchMyLogs();
+    } catch (err: any) {
+      showNotification('Error saving log: ' + err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Navegación de periodos
+  const handlePrevPeriod = () => {
+    const nextIdx = activeCycleIndex - 1;
+    setActiveCycleIndex(nextIdx);
+    setPeriodRange(getPeriodRangeByIndex(nextIdx));
+  };
+
+  const handleNextPeriod = () => {
+    const nextIdx = activeCycleIndex + 1;
+    setActiveCycleIndex(nextIdx);
+    setPeriodRange(getPeriodRangeByIndex(nextIdx));
+  };
+
+  const handleCurrentPeriod = () => {
+    const baseIdx = getBaseCycleIndex();
+    setActiveCycleIndex(baseIdx);
+    setPeriodRange(getPeriodRangeByIndex(baseIdx));
+  };
+
+  // Filtrado de horas de la quincena
+  const periodLogs = myLogs.filter((log) => {
+    if (!log.timestamp) return false;
+    const logDate = log.timestamp.toDate();
+    const start = new Date(periodRange.start + 'T00:00:00');
+    const end = new Date(periodRange.end + 'T23:59:59');
+    return logDate >= start && logDate <= end;
+  });
+
+  const periodTotalHours = periodLogs.reduce(
+    (sum, log) => sum + (Number(log.totalHours) || 0),
+    0
+  );
+
+  const estimatedPay = hourlyWage && Number(hourlyWage) > 0 
+    ? (periodTotalHours * Number(hourlyWage)).toFixed(2) 
+    : null;
+
+  return (
+    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+      {toastMessage && (
+        <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      )}
+
+      <div className="max-w-4xl mx-auto space-y-6">
+        
+        {/* Cabecera con Nombre y Etiqueta de Rol */}
+        <div className="bg-gray-900 rounded-xl p-6 shadow-lg flex justify-between items-center text-white">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-xl font-bold">
+                {userName || 'Loading...'}
+              </h1>
+              {role === 'teamlead' ? (
+                <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded-md">
+                  Lead
+                </span>
+              ) : (
+                <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-md">
+                  Worker
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-1 font-medium">
+              {role === 'teamlead' ? 'Team Lead Portal' : 'Worker Portal'}
+            </p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-bold transition-colors cursor-pointer"
+          >
+            Log Out
+          </button>
+        </div>
+
+        {/* Acceso a Toolbox Meeting exclusivo para Team Lead */}
+        {role === 'teamlead' && (
+          <div className="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-4 sm:p-5 rounded-xl shadow-md flex items-center justify-between gap-4 animate-fade-in">
+            <div>
+              <span className="px-2 py-0.5 text-[10px] uppercase font-black tracking-wider bg-purple-700/60 text-purple-200 rounded border border-purple-400/30">
+                Safety First
+              </span>
+              <h3 className="text-sm sm:text-base font-bold mt-1">Daily Safety Briefing</h3>
+              <p className="text-xs text-purple-200 mt-0.5">Start daily toolbox meeting & capture crew signatures.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsToolboxOpen(true)}
+              className="px-4 py-2.5 bg-white text-purple-950 hover:bg-purple-50 rounded-lg text-xs font-black shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
+            >
+              <span>📋</span>
+              <span>Open Toolbox</span>
+            </button>
+          </div>
+        )}
+
+        {/* Sección de Registro Diario de Horas */}
+        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+          <h2 className="text-lg font-bold text-gray-800 mb-4">Daily Time Entry</h2>
+
+          {hasLoggedToday ? (
+            <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-sm font-semibold flex items-center gap-2">
+              <span>✓</span>
+              <span>You have already submitted your hours for today.</span>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                  Primary Job Site
+                </label>
+                <LocationInput
+                  value={mainLocation}
+                  onChange={(val) => setMainLocation(val)}
+                  placeholder="Search job site address..."
+                  className="p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                  required
+                />
+
+                {extraLocations.map((extraLoc, index) => (
+                  <div key={index} className="flex gap-2 mt-2 items-center">
+                    <LocationInput
+                      value={extraLoc}
+                      onChange={(val) => handleExtraLocationChange(index, val)}
+                      placeholder={`Additional job site ${index + 2}`}
+                      wrapperClassName="flex-1"
+                      className="p-3 border border-blue-200 bg-blue-50/30 rounded-lg text-sm outline-none focus:border-blue-500"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveExtraLocation(index)}
+                      className="px-3.5 py-3 bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded-lg text-sm font-bold transition-colors cursor-pointer self-stretch flex items-center justify-center"
+                      title="Remove site"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+
+                {extraLocations.length < 2 && (
+                  <button
+                    type="button"
+                    onClick={handleAddLocation}
+                    className="mt-2 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    + Add another job site
+                  </button>
+                )}
+              </div>
+
+              {/* Fila con Check In, Check Out y Total Hours */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                    Check In
+                  </label>
+                  <input
+                    type="time"
+                    value={checkIn}
+                    onChange={(e) => setCheckIn(e.target.value)}
+                    className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                    Check Out
+                  </label>
+                  <input
+                    type="time"
+                    value={checkOut}
+                    onChange={(e) => setCheckOut(e.target.value)}
+                    className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                    Total Hours
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    pattern="[0-9]*[.,]?[0-9]*"
+                    value={totalHours}
+                    onChange={handleTotalHoursChange}
+                    placeholder=""
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none font-bold text-gray-800"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                  Notes (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={comments}
+                  onChange={(e) => setComments(e.target.value)}
+                  placeholder="Tasks performed, delays, comments..."
+                  className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                />
+              </div>
+
+              {/* Módulo de Evidencias Fotográficas: solo para Team Leads */}
+              {role === 'teamlead' && (
+                <div className="pt-2 border-t border-gray-100">
+                  <PhotoEvidenceUploader
+                    docId={`${user.uid}_${getLocalTodayString()}`}
+                    photos={evidencePhotos}
+                    onPhotosChange={setEvidencePhotos}
+                  />
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm transition-colors shadow-sm disabled:bg-blue-400 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {submitting ? 'Submitting...' : 'Submit Daily Hours'}
+              </button>
+            </form>
+          )}
+        </div>
+
+        {/* Resumen de Nómina y Calendario Desplegable */}
+        <div className="bg-white rounded-xl shadow-md border border-gray-100 p-6 space-y-4">
+          
+          {/* Encabezado del Periodo con Navegación */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
+            <div>
+              <h3 className="text-base font-bold text-gray-800">Pay Period Summary</h3>
+              <p className="text-xs text-purple-700 font-extrabold mt-0.5">
+                📅 {formatPeriodLegend(periodRange.start, periodRange.end)}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handlePrevPeriod}
+                className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+                title="Previous Pay Period"
+              >
+                ◀
+              </button>
+              <button
+                type="button"
+                onClick={handleCurrentPeriod}
+                className="px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors cursor-pointer"
+              >
+                Current
+              </button>
+              <button
+                type="button"
+                onClick={handleNextPeriod}
+                className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+                title="Next Pay Period"
+              >
+                ▶
+              </button>
+            </div>
+          </div>
+
+          {/* Tarjeta Principal Compacta */}
+          <div className="flex items-center justify-between p-4 bg-purple-50 rounded-xl border border-purple-100">
+            <div>
+              <span className="text-xs uppercase font-bold text-purple-700 tracking-wider">
+                Total Accumulated
+              </span>
+              <p className="text-2xl font-black text-purple-900 mt-0.5">
+                {periodTotalHours}h
+              </p>
+              <p className="text-xs text-purple-600 font-medium">
+                {periodLogs.length} shifts in this pay period
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowDetails(!showDetails)}
+              className="px-3.5 py-2 text-xs font-bold bg-white text-purple-700 hover:bg-purple-100 border border-purple-200 rounded-lg transition-colors shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>{showDetails ? "Hide Calendar" : "View Calendar & Details"}</span>
+              <span 
+                className="text-[10px] transform transition-transform duration-200"
+                style={{ transform: showDetails ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              >
+                ▼
+              </span>
+            </button>
+          </div>
+
+          {/* SECCIÓN DESPLEGABLE: Calculadora y Calendario Modular */}
+          {showDetails && (
+            <div className="pt-4 border-t border-gray-100 space-y-6 animate-fade-in">
+              
+              {/* Calculadora de Pago Estimado */}
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="w-full sm:w-auto">
+                  <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                    Hourly Wage Calculator
+                  </label>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold text-gray-400">$</span>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      pattern="[0-9]*[.,]?[0-9]*"
+                      value={hourlyWage}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(',', '.');
+                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                          setHourlyWage(val);
+                        }
+                      }}
+                      placeholder="e.g. 25"
+                      className="w-24 p-1.5 border rounded-lg text-xs bg-white outline-none focus:border-blue-500 font-bold"
+                    />
+                    <span className="text-xs text-gray-400">/hr</span>
+                  </div>
+                </div>
+
+                {estimatedPay ? (
+                  <div className="text-right w-full sm:w-auto">
+                    <span className="text-[10px] uppercase font-bold text-gray-400 block">
+                      Estimated Gross Pay
+                    </span>
+                    <span className="text-lg font-black text-emerald-600">
+                      ${estimatedPay}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 italic">
+                    Enter your rate to calculate pay
+                  </p>
+                )}
+              </div>
+
+              {/* Calendario mensual modular */}
+              <div>
+                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  Monthly Logs Calendar
+                </h4>
+                <Calendar 
+                  logs={myLogs}
+                  role={role}
+                  onLogUpdated={fetchMyLogs}
+                />
+              </div>
+
+            </div>
+          )}
+
+        </div>
+
+      </div>
+
+      {/* Modal de Toolbox Meeting */}
+      <ToolboxMeetingModal
+        isOpen={isToolboxOpen}
+        onClose={() => setIsToolboxOpen(false)}
+        currentUser={user}
+        showNotification={showNotification}
+      />
+    </div>
+  );
+};
+
+export default Dashboard;
+</file>
+
+</files>
