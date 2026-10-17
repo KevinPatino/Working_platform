@@ -20,6 +20,7 @@ import Toast from "./Toast";
 import PhotoModal from "./PhotoModal";
 import MapLink from "./MapLink";
 import ToolboxAuditor from "./ToolBoxAuditor";
+import ProjectsManager from "./ProjectsManager";
 import LocationInput from "./LocationInput";
 import { 
   getBaseCycleIndex, 
@@ -244,7 +245,7 @@ const getFirstDayOfMonth = () => {
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   // <-- PASO 4.1: Nueva pestaña 'team'
-  const [activeTab, setActiveTab] = useState<'payroll' | 'safety' | 'team'>('payroll');
+  const [activeTab, setActiveTab] = useState<'payroll' | 'safety' | 'team' | 'projects'>('payroll');
   const [adminCompanyId, setAdminCompanyId] = useState<string | null>(null);
   const [allLogs, setAllLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -592,6 +593,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
             }`}
           >
             🛡️ Safety & Toolbox Meetings
+          </button>
+          {/* NUEVO BOTÓN DE PROYECTOS PARA EL ADMIN */}
+          <button
+            type="button"
+            onClick={() => setActiveTab('projects')}
+            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+              activeTab === 'projects' ? 'bg-white text-blue-900 shadow-xs' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            🏗️ Projects
           </button>
           <button
             type="button"
@@ -1114,6 +1125,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
         {activeTab === 'safety' && (
           <div className="animate-fade-in">
             <ToolboxAuditor companyId={adminCompanyId} />
+          </div>
+        )}
+
+        {/* PESTAÑA: Proyectos para el Administrador */}
+        {activeTab === 'projects' && (
+          <div className="animate-fade-in">
+            <ProjectsManager
+              companyId={adminCompanyId}
+              currentUser={user}
+              showNotification={showNotification}
+            />
           </div>
         )}
 

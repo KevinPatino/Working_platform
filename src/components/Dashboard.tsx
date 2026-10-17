@@ -16,6 +16,7 @@ import Calendar from './Calendar';
 import PhotoEvidenceUploader from './PhotoEvidence';
 import LocationInput from './LocationInput';
 import ToolboxMeetingModal from './ToolBoxMeetingModal';
+import ProjectsManager from './ProjectsManager';
 
 // <-- NUEVO: Importamos las funciones centralizadas de nómina
 // (Nota: Si tu payroll.ts está en src/config/payroll.ts, cambia '../utils/payroll' por '../config/payroll')
@@ -50,6 +51,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
 
   // Estado del modal de Toolbox Meeting
   const [isToolboxOpen, setIsToolboxOpen] = useState(false);
+
+  // Estado del modal de Projects
+  const [showProjectsTab, setShowProjectsTab] = useState(false);
 
   // Navegación de periodos
   const [activeCycleIndex, setActiveCycleIndex] = useState<number>(getBaseCycleIndex());
@@ -295,24 +299,58 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
           </button>
         </div>
 
-        {/* Acceso a Toolbox Meeting exclusivo para Team Lead */}
+        {/* Acceso a Toolbox Meeting y Proyectos exclusivo para Team Lead */}
         {role === 'teamlead' && (
-          <div className="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-4 sm:p-5 rounded-xl shadow-md flex items-center justify-between gap-4 animate-fade-in">
-            <div>
-              <span className="px-2 py-0.5 text-[10px] uppercase font-black tracking-wider bg-purple-700/60 text-purple-200 rounded border border-purple-400/30">
-                Safety First
-              </span>
-              <h3 className="text-sm sm:text-base font-bold mt-1">Daily Safety Briefing</h3>
-              <p className="text-xs text-purple-200 mt-0.5">Start daily toolbox meeting & capture crew signatures.</p>
+          <div className="space-y-4 animate-fade-in">
+            {/* Tarjetas de Acciones Rápidas */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-gradient-to-r from-purple-900 to-indigo-900 text-white p-4 sm:p-5 rounded-xl shadow-md flex items-center justify-between gap-4">
+                <div>
+                  <span className="px-2 py-0.5 text-[10px] uppercase font-black tracking-wider bg-purple-700/60 text-purple-200 rounded border border-purple-400/30">
+                    Safety First
+                  </span>
+                  <h3 className="text-sm sm:text-base font-bold mt-1">Daily Safety Briefing</h3>
+                  <p className="text-xs text-purple-200 mt-0.5">Start daily toolbox meeting & capture crew signatures.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsToolboxOpen(true)}
+                  className="px-4 py-2.5 bg-white text-purple-950 hover:bg-purple-50 rounded-lg text-xs font-black shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
+                >
+                  <span>📋</span>
+                  <span>Open Toolbox</span>
+                </button>
+              </div>
+
+              <div className="bg-gradient-to-r from-blue-900 to-slate-900 text-white p-4 sm:p-5 rounded-xl shadow-md flex items-center justify-between gap-4">
+                <div>
+                  <span className="px-2 py-0.5 text-[10px] uppercase font-black tracking-wider bg-blue-700/60 text-blue-200 rounded border border-blue-400/30">
+                    Operations
+                  </span>
+                  <h3 className="text-sm sm:text-base font-bold mt-1">Manage Job Projects</h3>
+                  <p className="text-xs text-blue-200 mt-0.5">Create active sites and manage ongoing project locations.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowProjectsTab(!showProjectsTab)}
+                  className="px-4 py-2.5 bg-white text-blue-950 hover:bg-blue-50 rounded-lg text-xs font-black shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
+                >
+                  <span>🏗️</span>
+                  <span>{showProjectsTab ? 'View Hours' : 'Open Projects'}</span>
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setIsToolboxOpen(true)}
-              className="px-4 py-2.5 bg-white text-purple-950 hover:bg-purple-50 rounded-lg text-xs font-black shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
-            >
-              <span>📋</span>
-              <span>Open Toolbox</span>
-            </button>
+
+            {/* Si el Team Lead activa la pestaña de Proyectos */}
+            {showProjectsTab && (
+              <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                <ProjectsManager
+                  companyId={userCompanyId}
+                  currentUser={user}
+                  showNotification={showNotification}
+                />
+              </div>
+            )}
           </div>
         )}
 
