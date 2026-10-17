@@ -246,7 +246,6 @@ const getFirstDayOfMonth = () => {
 };
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
-  // <-- PASO 4.1: Nueva pestaña 'team'
   const [activeTab, setActiveTab] = useState<'payroll' | 'safety' | 'team' | 'projects'>('payroll');
   const [adminCompanyId, setAdminCompanyId] = useState<string | null>(null);
   const [allLogs, setAllLogs] = useState<any[]>([]);
@@ -266,13 +265,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   const [activeCycleIndex, setActiveCycleIndex] =
     useState<number>(getBaseCycleIndex());
 
-  // Estados para el visor modal de fotos de evidencias
   const [activeEvidencePhotos, setActiveEvidencePhotos] = useState<
     string[] | null
   >(null);
   const [evidenceModalTitle, setEvidenceModalTitle] = useState<string>("");
 
-  // <-- PASO 4.2: Estados para el formulario de alta de empleados
   const [newWorkerName, setNewWorkerName] = useState("");
   const [newWorkerEmail, setNewWorkerEmail] = useState("");
   const [newWorkerRole, setNewWorkerRole] = useState<"worker" | "teamlead">("worker");
@@ -364,7 +361,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     }
   }, [startDate, adminCompanyId]);
 
-  // <-- PASO 4.2: Función para registrar un nuevo trabajador sin cerrar la sesión del Admin
   const handleCreateWorker = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!adminCompanyId) {
@@ -382,7 +378,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     }
 
     setCreatingWorker(true);
-    // Creamos una app secundaria temporal para que Firebase no reemplace la sesión del Admin
     const tempAppName = `temp_worker_creation_${Date.now()}`;
     const secondaryApp = initializeApp(firebaseConfig, tempAppName);
     const secondaryAuth = getAuth(secondaryApp);
@@ -395,7 +390,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
       );
       const newUid = userCredential.user.uid;
 
-      // Guardamos el documento en la colección 'users' usando la sesión del Admin (db principal)
       await setDoc(doc(db, "users", newUid), {
         fullName: cleanName,
         email: cleanEmail,
@@ -404,7 +398,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
         createdAt: Timestamp.now(),
       });
 
-      // Cerramos sesión en la instancia temporal
       await signOut(secondaryAuth);
 
       showNotification(`Employee "${cleanName}" created successfully!`);
@@ -413,7 +406,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
       setNewWorkerRole("worker");
       setNewWorkerPassword("");
 
-      // Recargamos la lista de trabajadores
       await loadUsers(adminCompanyId);
     } catch (error: any) {
       console.error("Error creating employee:", error);
@@ -592,7 +584,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
           >
             🛡️ Safety & Toolbox Meetings
           </button>
-          {/* NUEVO BOTÓN DE PROYECTOS PARA EL ADMIN */}
           <button
             type="button"
             onClick={() => setActiveTab('projects')}
@@ -619,7 +610,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
         {activeTab === 'payroll' && (
           <div className="space-y-6 animate-fade-in">
             <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 space-y-4">
-              {/* Barra de accesos rápidos con leyenda de fechas */}
               <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
@@ -751,7 +741,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
               )}
 
               {startDate && (
-                <div className="overflow-x-auto">
+                <div>
                   <div className="p-4 bg-purple-50 border-b border-purple-100 text-purple-800 text-sm font-bold flex justify-between items-center">
                     <span>
                       Report:{" "}
@@ -772,346 +762,496 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                       Querying Database...
                     </div>
                   ) : (
-                    <table className="w-full text-left">
-                      <thead className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider border-b">
-                        <tr>
-                          <th className="p-4">Worker</th>
-                          <th className="p-4 text-center">
-                            Total Accumulated Hours
-                          </th>
-                          <th className="p-4 text-right">Details</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100">
+                    <>
+                      {/* VISTA MÓVIL: Tarjetas apiladas sin scroll horizontal */}
+                      <div className="block md:hidden divide-y divide-gray-100">
                         {displayedUsers.map((worker) => {
                           const effectiveEndDate = endDate ? endDate : startDate;
-                          const start = new Date(
-                            startDate + "T00:00:00",
-                          ).getTime();
-                          const end = new Date(
-                            effectiveEndDate + "T23:59:59",
-                          ).getTime();
+                          const start = new Date(startDate + "T00:00:00").getTime();
+                          const end = new Date(effectiveEndDate + "T23:59:59").getTime();
 
                           const userLogsInRange = allLogs.filter((log) => {
-                            if (!log.timestamp || log.userId !== worker.id)
-                              return false;
+                            if (!log.timestamp || log.userId !== worker.id) return false;
                             const logTime = log.timestamp.toDate().getTime();
                             return logTime >= start && logTime <= end;
                           });
 
                           const totalWorkerHours = userLogsInRange.reduce(
                             (sum, log) => sum + (Number(log.totalHours) || 0),
-                            0,
+                            0
                           );
 
                           const totalWorkerPhotos = userLogsInRange.reduce(
-                            (sum, log) =>
-                              sum +
-                              (log.photos && Array.isArray(log.photos)
-                                ? log.photos.length
-                                : 0),
-                            0,
+                            (sum, log) => sum + (log.photos && Array.isArray(log.photos) ? log.photos.length : 0),
+                            0
                           );
 
                           const isExpanded = expandedRangeUserId === worker.id;
-                          const datesInRange = getDatesInRange(
-                            startDate,
-                            effectiveEndDate,
-                          );
+                          const datesInRange = getDatesInRange(startDate, effectiveEndDate);
 
                           return (
-                            <React.Fragment key={worker.id}>
-                              <tr
+                            <div key={`mob-${worker.id}`} className="p-4 bg-white space-y-3">
+                              <div 
                                 onClick={() => toggleRangeRow(worker.id)}
-                                className="transition-colors hover:bg-purple-50/50 cursor-pointer"
+                                className="flex justify-between items-center cursor-pointer"
                               >
-                                <td className="p-4">
-                                  <p className="font-bold text-gray-800 text-sm">
-                                    {worker.fullName}
-                                  </p>
+                                <div>
+                                  <p className="font-bold text-gray-900 text-sm">{worker.fullName}</p>
                                   <div className="flex items-center gap-2 mt-0.5">
-                                    <p className="text-xs text-purple-600">
-                                      {userLogsInRange.length} of{" "}
-                                      {datesInRange.length} days
+                                    <p className="text-xs text-purple-600 font-medium">
+                                      {userLogsInRange.length} of {datesInRange.length} days
                                     </p>
                                     {totalWorkerPhotos > 0 && (
-                                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
                                         📷 {totalWorkerPhotos}
                                       </span>
                                     )}
                                   </div>
-                                </td>
-                                <td className="p-4 text-center">
-                                  <span
-                                    className={`text-xl font-black ${totalWorkerHours > 0 ? "text-purple-600" : "text-gray-300"}`}
-                                  >
+                                </div>
+                                <div className="flex items-center gap-3">
+                                  <span className={`text-lg font-black ${totalWorkerHours > 0 ? "text-purple-600" : "text-gray-300"}`}>
                                     {totalWorkerHours}h
                                   </span>
-                                </td>
-                                <td className="p-4 text-right">
-                                  <button
-                                    className="text-gray-400 hover:text-purple-600 transition-transform duration-200 cursor-pointer"
-                                    style={{
-                                      transform: isExpanded
-                                        ? "rotate(180deg)"
-                                        : "rotate(0deg)",
-                                    }}
-                                  >
+                                  <span className="text-gray-400 text-xs" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>
                                     ▼
-                                  </button>
-                                </td>
-                              </tr>
+                                  </span>
+                                </div>
+                              </div>
 
                               {isExpanded && (
-                                <tr className="bg-purple-50/30 border-b border-purple-100">
-                                  <td colSpan={3} className="p-0">
-                                    <div className="p-4 md:p-6 shadow-inner">
-                                      <h4 className="text-sm font-bold text-purple-800 mb-3">
-                                        Detailed View
-                                      </h4>
-                                      <div className="overflow-x-auto rounded-lg border border-purple-100">
-                                        <table className="w-full text-left text-sm bg-white">
-                                          <thead className="bg-purple-50 text-xs font-bold text-purple-600 uppercase border-b border-purple-100">
-                                            <tr>
-                                              <th className="p-3">Date</th>
-                                              <th className="p-3">Status</th>
-                                              <th className="p-3">
-                                                Location / Job Site
-                                              </th>
-                                              <th className="p-3 text-center">
-                                                Schedule
-                                              </th>
-                                              <th className="p-3 text-center">
-                                                Hours
-                                              </th>
-                                              <th className="p-3 text-center">
-                                                Evidence
-                                              </th>
-                                            </tr>
-                                          </thead>
-                                          <tbody className="divide-y divide-purple-50">
-                                            {datesInRange.map(
-                                              (dateObj, index) => {
-                                                const logsForDay =
-                                                  userLogsInRange.filter(
-                                                    (log) => {
-                                                      const logDate =
-                                                        log.timestamp.toDate();
-                                                      return (
-                                                        logDate.getDate() ===
-                                                          dateObj.getDate() &&
-                                                        logDate.getMonth() ===
-                                                          dateObj.getMonth() &&
-                                                        logDate.getFullYear() ===
-                                                          dateObj.getFullYear()
-                                                      );
-                                                    },
-                                                  );
+                                <div className="pt-3 border-t border-purple-100 space-y-2 bg-purple-50/40 p-3 rounded-xl">
+                                  <h4 className="text-xs font-bold text-purple-900 uppercase tracking-wide">Detailed Daily Log</h4>
+                                  {datesInRange.map((dateObj, index) => {
+                                    const logsForDay = userLogsInRange.filter((log) => {
+                                      const logDate = log.timestamp.toDate();
+                                      return (
+                                        logDate.getDate() === dateObj.getDate() &&
+                                        logDate.getMonth() === dateObj.getMonth() &&
+                                        logDate.getFullYear() === dateObj.getFullYear()
+                                      );
+                                    });
 
-                                                const isWeekend =
-                                                  dateObj.getDay() === 0 ||
-                                                  dateObj.getDay() === 6;
-                                                const rowKey = `${worker.id}-${dateObj.getTime()}`;
-                                                const isEditingThisRow =
-                                                  editingRowKey === rowKey;
+                                    const rowKey = `${worker.id}-${dateObj.getTime()}`;
+                                    const isEditingThisRow = editingRowKey === rowKey;
+                                    const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
 
-                                                if (logsForDay.length > 0) {
-                                                  return logsForDay.map((log) => {
-                                                    const hasPhotos =
-                                                      log.photos &&
-                                                      Array.isArray(log.photos) &&
-                                                      log.photos.length > 0;
-
-                                                    return (
-                                                      <tr
-                                                        key={log.id}
-                                                        className="hover:bg-gray-50"
-                                                      >
-                                                        <td className="p-3">
-                                                          <span
-                                                            className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-gray-700"}`}
-                                                          >
-                                                            {dateObj.toLocaleDateString(
-                                                              "en-US",
-                                                              {
-                                                                weekday: "short",
-                                                                day: "2-digit",
-                                                                month: "short",
-                                                              },
-                                                            )}
-                                                          </span>
-                                                        </td>
-                                                        <td className="p-3">
-                                                          <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
-                                                            Worked
-                                                          </span>
-                                                        </td>
-                                                        <td className="p-3 text-gray-700">
-                                                          <MapLink
-                                                            location={
-                                                              log.location
-                                                            }
-                                                          />
-                                                        </td>
-                                                        <td className="p-3 text-center text-gray-600">
-                                                          {log.checkIn} -{" "}
-                                                          {log.checkOut}
-                                                        </td>
-                                                        <td className="p-3 text-center font-bold text-purple-700">
-                                                          {log.totalHours}h
-                                                        </td>
-                                                        <td className="p-3 text-center">
-                                                          {hasPhotos ? (
-                                                            <button
-                                                              type="button"
-                                                              onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setActiveEvidencePhotos(
-                                                                  log.photos,
-                                                                );
-                                                                setEvidenceModalTitle(
-                                                                  `Evidence: ${worker.fullName} • ${dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
-                                                                );
-                                                              }}
-                                                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
-                                                              title="View site photos"
-                                                            >
-                                                              <span>📷</span>
-                                                              <span>
-                                                                {
-                                                                  log.photos
-                                                                    .length
-                                                                }
-                                                              </span>
-                                                            </button>
-                                                          ) : (
-                                                            <span className="text-gray-300 text-xs">
-                                                              —
-                                                            </span>
-                                                          )}
-                                                        </td>
-                                                      </tr>
-                                                    );
-                                                  });
-                                                } else if (isEditingThisRow) {
-                                                  return (
-                                                    <tr
-                                                      key={`edit-${index}`}
-                                                      className="bg-blue-50/50"
-                                                    >
-                                                      <td className="p-3 align-top">
-                                                        <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
-                                                          {dateObj.toLocaleDateString(
-                                                            "en-US",
-                                                            {
-                                                              weekday: "short",
-                                                              day: "2-digit",
-                                                              month: "short",
-                                                            },
-                                                          )}
-                                                        </span>
-                                                      </td>
-                                                      <td
-                                                        colSpan={5}
-                                                        className="p-3"
-                                                      >
-                                                        <InlineEditForm
-                                                          workerId={worker.id}
-                                                          dateObj={dateObj}
-                                                          onSave={
-                                                            handleInlineSubmit
-                                                          }
-                                                          onCancel={() =>
-                                                            setEditingRowKey(null)
-                                                          }
-                                                          showNotification={
-                                                            showNotification
-                                                          }
-                                                        />
-                                                      </td>
-                                                    </tr>
-                                                  );
-                                                } else {
-                                                  return (
-                                                    <tr
-                                                      key={`missing-${index}`}
-                                                      className="bg-red-50/40 hover:bg-red-50 transition-colors group"
-                                                    >
-                                                      <td className="p-3">
-                                                        <span
-                                                          className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-red-800"}`}
-                                                        >
-                                                          {dateObj.toLocaleDateString(
-                                                            "en-US",
-                                                            {
-                                                              weekday: "short",
-                                                              day: "2-digit",
-                                                              month: "short",
-                                                            },
-                                                          )}
-                                                        </span>
-                                                      </td>
-                                                      <td className="p-3">
-                                                        <span className="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full">
-                                                          No Log
-                                                        </span>
-                                                      </td>
-                                                      <td
-                                                        className="p-3 text-red-400 italic"
-                                                        colSpan={3}
-                                                      ></td>
-                                                      <td className="p-3 text-center">
-                                                        <button
-                                                          onClick={() =>
-                                                            setEditingRowKey(
-                                                              rowKey,
-                                                            )
-                                                          }
-                                                          className="p-1.5 bg-white border border-red-200 text-red-500 rounded hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 shadow-sm cursor-pointer"
-                                                          title="Add missing hours"
-                                                        >
-                                                          <svg
-                                                            className="w-4 h-4"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
-                                                          >
-                                                            <path
-                                                              strokeLinecap="round"
-                                                              strokeLinejoin="round"
-                                                              strokeWidth="2"
-                                                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                                            />
-                                                          </svg>
-                                                        </button>
-                                                      </td>
-                                                    </tr>
-                                                  );
-                                                }
-                                              },
+                                    if (logsForDay.length > 0) {
+                                      return logsForDay.map((log) => (
+                                        <div key={log.id} className="bg-white p-3 rounded-lg border border-purple-100 shadow-xs space-y-1.5">
+                                          <div className="flex justify-between items-center text-xs">
+                                            <span className="font-bold text-gray-700">
+                                              {dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                                            </span>
+                                            <span className="font-extrabold text-purple-700">{log.totalHours}h</span>
+                                          </div>
+                                          <div className="text-xs text-gray-600 space-y-1">
+                                            {log.locations && Array.isArray(log.locations) && log.locations.length > 0 ? (
+                                              log.locations.map((loc: string, idx: number) => (
+                                                <MapLink key={idx} location={loc} />
+                                              ))
+                                            ) : (
+                                              <MapLink location={log.location} />
                                             )}
-                                          </tbody>
-                                        </table>
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
+                                          </div>
+                                          <div className="flex justify-between items-center text-[11px] text-gray-500 pt-1 border-t border-gray-100">
+                                            <span>🕒 {log.checkIn} - {log.checkOut}</span>
+                                            {log.photos && log.photos.length > 0 && (
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  setActiveEvidencePhotos(log.photos);
+                                                  setEvidenceModalTitle(`Evidence: ${worker.fullName}`);
+                                                }}
+                                                className="text-blue-600 font-bold underline"
+                                              >
+                                                📷 {log.photos.length} photos
+                                              </button>
+                                            )}
+                                          </div>
+                                        </div>
+                                      ));
+                                    } else if (isEditingThisRow) {
+                                      return (
+                                        <div key={`mob-edit-${index}`} className="bg-blue-50 p-3 rounded-lg border border-blue-200 space-y-2">
+                                          <span className="text-xs font-bold text-blue-800">
+                                            Add Hours for {dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                          </span>
+                                          <InlineEditForm
+                                            workerId={worker.id}
+                                            dateObj={dateObj}
+                                            onSave={handleInlineSubmit}
+                                            onCancel={() => setEditingRowKey(null)}
+                                            showNotification={showNotification}
+                                          />
+                                        </div>
+                                      );
+                                    } else {
+                                      return (
+                                        <div key={`mob-missing-${index}`} className="flex justify-between items-center bg-white p-2.5 rounded-lg border border-red-100 text-xs">
+                                          <span className={`font-medium ${isWeekend ? "text-yellow-700" : "text-red-600"}`}>
+                                            {dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} (No Log)
+                                          </span>
+                                          <button
+                                            onClick={() => setEditingRowKey(rowKey)}
+                                            className="px-2.5 py-1 bg-red-50 text-red-600 font-bold rounded hover:bg-red-100"
+                                          >
+                                            + Add
+                                          </button>
+                                        </div>
+                                      );
+                                    }
+                                  })}
+                                </div>
                               )}
-                            </React.Fragment>
+                            </div>
                           );
                         })}
-                        {displayedUsers.length === 0 && (
-                          <tr>
-                            <td
-                              colSpan={3}
-                              className="p-8 text-center text-gray-500"
-                            >
-                              No workers found.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                      </div>
+
+                      {/* VISTA ESCRITORIO: Tabla clásica */}
+                      <div className="hidden md:block overflow-x-auto">
+                        <table className="w-full text-left">
+                          <thead className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider border-b">
+                            <tr>
+                              <th className="p-4">Worker</th>
+                              <th className="p-4 text-center">
+                                Total Accumulated Hours
+                              </th>
+                              <th className="p-4 text-right">Details</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            {displayedUsers.map((worker) => {
+                              const effectiveEndDate = endDate ? endDate : startDate;
+                              const start = new Date(
+                                startDate + "T00:00:00",
+                              ).getTime();
+                              const end = new Date(
+                                effectiveEndDate + "T23:59:59",
+                              ).getTime();
+
+                              const userLogsInRange = allLogs.filter((log) => {
+                                if (!log.timestamp || log.userId !== worker.id)
+                                  return false;
+                                const logTime = log.timestamp.toDate().getTime();
+                                return logTime >= start && logTime <= end;
+                              });
+
+                              const totalWorkerHours = userLogsInRange.reduce(
+                                (sum, log) => sum + (Number(log.totalHours) || 0),
+                                0,
+                              );
+
+                              const totalWorkerPhotos = userLogsInRange.reduce(
+                                (sum, log) =>
+                                  sum +
+                                  (log.photos && Array.isArray(log.photos)
+                                    ? log.photos.length
+                                    : 0),
+                                0,
+                              );
+
+                              const isExpanded = expandedRangeUserId === worker.id;
+                              const datesInRange = getDatesInRange(
+                                startDate,
+                                effectiveEndDate,
+                              );
+
+                              return (
+                                <React.Fragment key={worker.id}>
+                                  <tr
+                                    onClick={() => toggleRangeRow(worker.id)}
+                                    className="transition-colors hover:bg-purple-50/50 cursor-pointer"
+                                  >
+                                    <td className="p-4">
+                                      <p className="font-bold text-gray-800 text-sm">
+                                        {worker.fullName}
+                                      </p>
+                                      <div className="flex items-center gap-2 mt-0.5">
+                                        <p className="text-xs text-purple-600">
+                                          {userLogsInRange.length} of{" "}
+                                          {datesInRange.length} days
+                                        </p>
+                                        {totalWorkerPhotos > 0 && (
+                                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                            📷 {totalWorkerPhotos}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </td>
+                                    <td className="p-4 text-center">
+                                      <span
+                                        className={`text-xl font-black ${totalWorkerHours > 0 ? "text-purple-600" : "text-gray-300"}`}
+                                      >
+                                        {totalWorkerHours}h
+                                      </span>
+                                    </td>
+                                    <td className="p-4 text-right">
+                                      <button
+                                        className="text-gray-400 hover:text-purple-600 transition-transform duration-200 cursor-pointer"
+                                        style={{
+                                          transform: isExpanded
+                                            ? "rotate(180deg)"
+                                            : "rotate(0deg)",
+                                        }}
+                                      >
+                                        ▼
+                                      </button>
+                                    </td>
+                                  </tr>
+
+                                  {isExpanded && (
+                                    <tr className="bg-purple-50/30 border-b border-purple-100">
+                                      <td colSpan={3} className="p-0">
+                                        <div className="p-4 md:p-6 shadow-inner">
+                                          <h4 className="text-sm font-bold text-purple-800 mb-3">
+                                            Detailed View
+                                          </h4>
+                                          <div className="overflow-x-auto rounded-lg border border-purple-100">
+                                            <table className="w-full text-left text-sm bg-white">
+                                              <thead className="bg-purple-50 text-xs font-bold text-purple-600 uppercase border-b border-purple-100">
+                                                <tr>
+                                                  <th className="p-3">Date</th>
+                                                  <th className="p-3">Status</th>
+                                                  <th className="p-3">
+                                                    Location / Job Site
+                                                  </th>
+                                                  <th className="p-3 text-center">
+                                                    Schedule
+                                                  </th>
+                                                  <th className="p-3 text-center">
+                                                    Hours
+                                                  </th>
+                                                  <th className="p-3 text-center">
+                                                    Evidence
+                                                  </th>
+                                                </tr>
+                                              </thead>
+                                              <tbody className="divide-y divide-purple-50">
+                                                {datesInRange.map(
+                                                  (dateObj, index) => {
+                                                    const logsForDay =
+                                                      userLogsInRange.filter(
+                                                        (log) => {
+                                                          const logDate =
+                                                            log.timestamp.toDate();
+                                                          return (
+                                                            logDate.getDate() ===
+                                                              dateObj.getDate() &&
+                                                            logDate.getMonth() ===
+                                                              dateObj.getMonth() &&
+                                                            logDate.getFullYear() ===
+                                                              dateObj.getFullYear()
+                                                          );
+                                                        },
+                                                      );
+
+                                                    const isWeekend =
+                                                      dateObj.getDay() === 0 ||
+                                                      dateObj.getDay() === 6;
+                                                    const rowKey = `${worker.id}-${dateObj.getTime()}`;
+                                                    const isEditingThisRow =
+                                                      editingRowKey === rowKey;
+
+                                                    if (logsForDay.length > 0) {
+                                                      return logsForDay.map((log) => {
+                                                        const hasPhotos =
+                                                          log.photos &&
+                                                          Array.isArray(log.photos) &&
+                                                          log.photos.length > 0;
+
+                                                        return (
+                                                          <tr
+                                                            key={log.id}
+                                                            className="hover:bg-gray-50"
+                                                          >
+                                                            <td className="p-3">
+                                                              <span
+                                                                className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-gray-700"}`}
+                                                              >
+                                                                {dateObj.toLocaleDateString(
+                                                                  "en-US",
+                                                                  {
+                                                                    weekday: "short",
+                                                                    day: "2-digit",
+                                                                    month: "short",
+                                                                  },
+                                                                )}
+                                                              </span>
+                                                            </td>
+                                                            <td className="p-3">
+                                                              <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
+                                                                Worked
+                                                              </span>
+                                                            </td>
+                                                            <td className="p-3 text-gray-700">
+                                                              <MapLink
+                                                                location={
+                                                                  log.location
+                                                                }
+                                                              />
+                                                            </td>
+                                                            <td className="p-3 text-center text-gray-600">
+                                                              {log.checkIn} -{" "}
+                                                              {log.checkOut}
+                                                            </td>
+                                                            <td className="p-3 text-center font-bold text-purple-700">
+                                                              {log.totalHours}h
+                                                            </td>
+                                                            <td className="p-3 text-center">
+                                                              {hasPhotos ? (
+                                                                <button
+                                                                  type="button"
+                                                                  onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setActiveEvidencePhotos(
+                                                                      log.photos,
+                                                                    );
+                                                                    setEvidenceModalTitle(
+                                                                      `Evidence: ${worker.fullName} • ${dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
+                                                                    );
+                                                                  }}
+                                                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                                                                  title="View site photos"
+                                                                >
+                                                                  <span>📷</span>
+                                                                  <span>
+                                                                    {
+                                                                      log.photos
+                                                                        .length
+                                                                    }
+                                                                  </span>
+                                                                </button>
+                                                              ) : (
+                                                                <span className="text-gray-300 text-xs">
+                                                                  —
+                                                                </span>
+                                                              )}
+                                                            </td>
+                                                          </tr>
+                                                        );
+                                                      });
+                                                    } else if (isEditingThisRow) {
+                                                      return (
+                                                        <tr
+                                                          key={`edit-${index}`}
+                                                          className="bg-blue-50/50"
+                                                        >
+                                                          <td className="p-3 align-top">
+                                                            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
+                                                              {dateObj.toLocaleDateString(
+                                                                "en-US",
+                                                                {
+                                                                  weekday: "short",
+                                                                  day: "2-digit",
+                                                                  month: "short",
+                                                                },
+                                                              )}
+                                                            </span>
+                                                          </td>
+                                                          <td
+                                                            colSpan={5}
+                                                            className="p-3"
+                                                          >
+                                                            <InlineEditForm
+                                                              workerId={worker.id}
+                                                              dateObj={dateObj}
+                                                              onSave={
+                                                                handleInlineSubmit
+                                                              }
+                                                              onCancel={() =>
+                                                                setEditingRowKey(null)
+                                                              }
+                                                              showNotification={
+                                                                showNotification
+                                                              }
+                                                            />
+                                                          </td>
+                                                        </tr>
+                                                      );
+                                                    } else {
+                                                      return (
+                                                        <tr
+                                                          key={`missing-${index}`}
+                                                          className="bg-red-50/40 hover:bg-red-50 transition-colors group"
+                                                        >
+                                                          <td className="p-3">
+                                                            <span
+                                                              className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-red-800"}`}
+                                                            >
+                                                              {dateObj.toLocaleDateString(
+                                                                "en-US",
+                                                                {
+                                                                  weekday: "short",
+                                                                  day: "2-digit",
+                                                                  month: "short",
+                                                                },
+                                                              )}
+                                                            </span>
+                                                          </td>
+                                                          <td className="p-3">
+                                                            <span className="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full">
+                                                              No Log
+                                                            </span>
+                                                          </td>
+                                                          <td
+                                                            className="p-3 text-red-400 italic"
+                                                            colSpan={3}
+                                                          ></td>
+                                                          <td className="p-3 text-center">
+                                                            <button
+                                                              onClick={() =>
+                                                                setEditingRowKey(
+                                                                  rowKey,
+                                                                )
+                                                              }
+                                                              className="p-1.5 bg-white border border-red-200 text-red-500 rounded hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 shadow-sm cursor-pointer"
+                                                              title="Add missing hours"
+                                                            >
+                                                              <svg
+                                                                className="w-4 h-4"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                              >
+                                                                <path
+                                                                  strokeLinecap="round"
+                                                                  strokeLinejoin="round"
+                                                                  strokeWidth="2"
+                                                                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                                                />
+                                                              </svg>
+                                                            </button>
+                                                          </td>
+                                                        </tr>
+                                                      );
+                                                    }
+                                                  },
+                                                )}
+                                              </tbody>
+                                            </table>
+                                          </div>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  )}
+                                </React.Fragment>
+                              );
+                            })}
+                            {displayedUsers.length === 0 && (
+                              <tr>
+                                <td
+                                  colSpan={3}
+                                  className="p-8 text-center text-gray-500"
+                                >
+                                  No workers found.
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
                   )}
                 </div>
               )}
@@ -1137,11 +1277,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
           </div>
         )}
 
-        {/* PESTAÑA 3: Gestión de Equipo y Alta de Trabajadores (Actividades 4.1 y 4.2) */}
+        {/* PESTAÑA 3: Gestión de Equipo y Alta de Trabajadores */}
         {activeTab === 'team' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
             
-            {/* Formulario para dar de alta un nuevo trabajador */}
             <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 h-fit">
               <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 rounded-md border border-blue-200">
                 Onboarding
@@ -1221,7 +1360,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
               </form>
             </div>
 
-            {/* Lista de empleados actuales de la compañía */}
             <div className="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden h-fit">
               <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
                 <div>
@@ -1257,11 +1395,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                         </td>
                         <td className="p-4 text-center">
                           {worker.role === "teamlead" ? (
-                            <span className="px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md border border-purple-200">
+                            <span className="px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md border border-purple-200 whitespace-nowrap">
                               Team Lead
                             </span>
                           ) : (
-                            <span className="px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 rounded-md border border-emerald-200">
+                            <span className="px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 rounded-md border border-emerald-200 whitespace-nowrap">
                               Worker
                             </span>
                           )}
@@ -1286,7 +1424,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
 
       </div>
 
-      {/* Visor Modal de Evidencias Fotográficas */}
       <PhotoModal
         isOpen={activeEvidencePhotos !== null}
         onClose={() => setActiveEvidencePhotos(null)}
@@ -1297,4 +1434,4 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   );
 };
 
-export default AdminPanel;
+export default AdminPanel;  

@@ -8,7 +8,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ userName, role, onLogout }) => {
   return (
-    <div className="sticky top-8 z-30 bg-gray-950/95 backdrop-blur-md rounded-xl p-6 shadow-xl flex justify-between items-center text-white border border-gray-800">
+    <div className="sticky top-0 z-40 w-full bg-gray-950/95 backdrop-blur-md rounded-xl p-6 shadow-xl flex justify-between items-center text-white border border-gray-800">
       <div>
         <div className="flex items-center gap-2.5">
           <h1 className="text-xl font-bold">{userName || 'Loading...'}</h1>
