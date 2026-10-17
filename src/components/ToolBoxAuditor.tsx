@@ -16,6 +16,8 @@ interface ToolboxMeeting {
   companyId?: string;
   dateStr: string;
   jobSite: string;
+  projectId?: string;
+  projectName?: string;
   topic: string;
   hazards: string[];
   notes?: string;
@@ -400,7 +402,12 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
                   <h4 className="text-sm font-bold text-gray-900 leading-snug">
                     {meeting.topic}
                   </h4>
-                  <div className="mt-1">
+                  <div className="mt-1 space-y-1">
+                    {meeting.projectName && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                        🏗️ {meeting.projectName}
+                      </span>
+                    )}
                     <MapLink location={meeting.jobSite} />
                   </div>
                 </div>

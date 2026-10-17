@@ -11,6 +11,7 @@ import {
   Timestamp 
 } from 'firebase/firestore';
 import LocationInput from './LocationInput';
+import ProjectDetailView from './ProjectDetailView';
 
 interface ProjectsManagerProps {
   companyId: string | null;
@@ -26,6 +27,8 @@ export interface Project {
   status: 'active' | 'completed';
   createdBy: string;
   createdAt?: any;
+  photos?: string[];
+  notes?: string;
 }
 
 const ProjectsManager: React.FC<ProjectsManagerProps> = ({
@@ -35,6 +38,9 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
 }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Estado para abrir el expediente de un proyecto específico
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   // Formulario de nuevo proyecto
   const [projectName, setProjectName] = useState('');
@@ -55,7 +61,6 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
         ...(docSnap.data() as Omit<Project, 'id'>),
       }));
 
-      // Ordenar por fecha de creación descendente
       list.sort((a, b) => {
         const tA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
         const tB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
@@ -98,6 +103,8 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
         status: 'active',
         createdBy: currentUser.uid,
         createdAt: Timestamp.now(),
+        photos: [],
+        notes: '',
       });
 
       showNotification('Project created successfully!');
@@ -123,6 +130,22 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
       showNotification('Error updating project status: ' + err.message);
     }
   };
+
+  // Si el usuario hizo clic en "Open Project", mostramos la vista de detalle de esa obra
+  if (selectedProject) {
+    return (
+      <ProjectDetailView
+        project={selectedProject}
+        companyId={companyId}
+        currentUser={currentUser}
+        onBack={() => {
+          setSelectedProject(null);
+          fetchProjects();
+        }}
+        showNotification={showNotification}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -197,7 +220,10 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
           ) : (
             <div className="divide-y divide-gray-100">
               {projects.map((proj) => (
-                <div key={proj.id} className="p-4 flex items-center justify-between gap-4 hover:bg-gray-50/80 transition-colors">
+                <div
+                  key={proj.id}
+                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50/80 transition-colors"
+                >
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-gray-900 text-sm truncate">
@@ -218,17 +244,29 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleToggleStatus(proj.id, proj.status)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer shrink-0 ${
-                      proj.status === 'active'
-                        ? 'bg-red-50 text-red-600 hover:bg-red-100'
-                        : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                    }`}
-                  >
-                    {proj.status === 'active' ? 'Mark Completed' : 'Reactivate'}
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {/* Botón para entrar al expediente del proyecto */}
+                    <button
+                      type="button"
+                      onClick={() => setSelectedProject(proj)}
+                      className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                    >
+                      <span>📂</span>
+                      <span>Open Project</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleToggleStatus(proj.id, proj.status)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                        proj.status === 'active'
+                          ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                          : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                      }`}
+                    >
+                      {proj.status === 'active' ? 'Mark Completed' : 'Reactivate'}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

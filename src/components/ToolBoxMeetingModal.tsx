@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, Timestamp, query, where, getDocs } from 'firebase/firestore';
 import LocationInput from './LocationInput';
 import SignaturePad from './SignaturePad';
 
@@ -16,6 +16,13 @@ interface ToolboxMeetingModalProps {
   currentUser: any;
   userCompanyId: string | null;
   showNotification: (msg: string) => void;
+  // NUEVO: Si se abre desde dentro de un proyecto específico, viene preasignado
+  defaultProject?: {
+    id: string;
+    name: string;
+    address: string;
+  } | null;
+  onMeetingSaved?: () => void;
 }
 
 const COMMON_HAZARDS = [
@@ -42,6 +49,8 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
   currentUser,
   userCompanyId,
   showNotification,
+  defaultProject = null,
+  onMeetingSaved,
 }) => {
   const [jobSite, setJobSite] = useState('');
   const [topic, setTopic] = useState(COMMON_TOPICS[0]);
@@ -54,6 +63,48 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
   const [currentWorkerName, setCurrentWorkerName] = useState('');
   const [signingWorkerName, setSigningWorkerName] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Estados para el selector híbrido de proyectos
+  const [projectsList, setProjectsList] = useState<any[]>([]);
+  const [locationType, setLocationType] = useState<'address' | 'project'>('address');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+
+  // Cargar proyectos activos cuando se abre el modal
+  useEffect(() => {
+    if (!isOpen || !userCompanyId) return;
+
+    const fetchProjects = async () => {
+      try {
+        const q = query(
+          collection(db, 'projects'),
+          where('companyId', '==', userCompanyId),
+          where('status', '==', 'active')
+        );
+        const snap = await getDocs(q);
+        const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setProjectsList(list);
+      } catch (err) {
+        console.error('Error loading projects in Toolbox modal:', err);
+      }
+    };
+
+    fetchProjects();
+  }, [isOpen, userCompanyId]);
+
+  // Si viene un defaultProject (abierto desde adentro del proyecto), preconfigurar todo
+  useEffect(() => {
+    if (isOpen) {
+      if (defaultProject) {
+        setLocationType('project');
+        setSelectedProjectId(defaultProject.id);
+        setJobSite(defaultProject.address);
+      } else {
+        setLocationType('address');
+        setSelectedProjectId('');
+        setJobSite('');
+      }
+    }
+  }, [isOpen, defaultProject]);
 
   if (!isOpen) return null;
 
@@ -92,6 +143,12 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (locationType === 'project' && !selectedProjectId) {
+      showNotification('Please select an active project.');
+      return;
+    }
+
     if (!jobSite.trim()) {
       showNotification('Please provide the job site location.');
       return;
@@ -106,10 +163,15 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
       const today = new Date();
       const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
+      // Identificar nombre del proyecto
+      const projectObj = defaultProject || projectsList.find((p) => p.id === selectedProjectId);
+
       await addDoc(collection(db, 'toolboxMeetings'), {
         companyId: userCompanyId,
         dateStr,
         jobSite: jobSite.trim(),
+        projectId: locationType === 'project' && selectedProjectId ? selectedProjectId : null,
+        projectName: locationType === 'project' && projectObj ? projectObj.name : null,
         topic,
         hazards: selectedHazards,
         notes: notes.trim(),
@@ -121,6 +183,10 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
       });
 
       showNotification('Toolbox Meeting saved successfully!');
+      // Reiniciar campos
+      setAttendees([]);
+      setNotes('');
+      if (onMeetingSaved) onMeetingSaved();
       onClose();
     } catch (err: any) {
       showNotification('Error saving Toolbox Meeting: ' + err.message);
@@ -153,18 +219,93 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Ubicación de la Obra (con autocompletado de Places) */}
+          
+          {/* Ubicación de la Obra: Fija si viene de un proyecto, o Selector Híbrido */}
           <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-              Job Site Location
-            </label>
-            <LocationInput
-              value={jobSite}
-              onChange={(val) => setJobSite(val)}
-              placeholder="Search or type site address..."
-              className="p-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
-              required
-            />
+            {defaultProject ? (
+              <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl space-y-1">
+                <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
+                  🏗️ Linked to Active Project
+                </span>
+                <p className="text-sm font-bold text-gray-900 mt-1">{defaultProject.name}</p>
+                <p className="text-xs text-gray-600">📍 {defaultProject.address}</p>
+              </div>
+            ) : (
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Job Site Location
+                  </label>
+                  <div className="flex gap-1.5 p-1 bg-gray-100 rounded-lg">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLocationType('address');
+                        setSelectedProjectId('');
+                        setJobSite('');
+                      }}
+                      className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                        locationType === 'address'
+                          ? 'bg-white text-gray-900 shadow-xs'
+                          : 'text-gray-500 hover:text-gray-800'
+                      }`}
+                    >
+                      📍 Custom Address
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLocationType('project');
+                        setJobSite('');
+                      }}
+                      className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                        locationType === 'project'
+                          ? 'bg-white text-blue-900 shadow-xs'
+                          : 'text-gray-500 hover:text-gray-800'
+                      }`}
+                    >
+                      🏗️ Active Project ({projectsList.length})
+                    </button>
+                  </div>
+                </div>
+
+                {locationType === 'address' ? (
+                  <LocationInput
+                    value={jobSite}
+                    onChange={(val) => setJobSite(val)}
+                    placeholder="Search or type site address..."
+                    className="p-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                    required
+                  />
+                ) : (
+                  <div className="space-y-2">
+                    <select
+                      value={selectedProjectId}
+                      onChange={(e) => {
+                        const projId = e.target.value;
+                        setSelectedProjectId(projId);
+                        const found = projectsList.find((p) => p.id === projId);
+                        setJobSite(found ? found.address : '');
+                      }}
+                      className="w-full p-3 border border-blue-200 rounded-lg text-sm bg-blue-50/30 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-800"
+                      required
+                    >
+                      <option value="">-- Select an Active Project --</option>
+                      {projectsList.map((proj) => (
+                        <option key={proj.id} value={proj.id}>
+                          {proj.name} — {proj.address}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedProjectId && jobSite && (
+                      <p className="text-xs text-blue-800 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                        📍 <strong>Site Address:</strong> {jobSite}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Tema de Seguridad */}

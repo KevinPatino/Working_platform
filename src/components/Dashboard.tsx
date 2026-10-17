@@ -18,14 +18,14 @@ import LocationInput from './LocationInput';
 import ToolboxMeetingModal from './ToolBoxMeetingModal';
 import ProjectsManager from './ProjectsManager';
 
-// <-- NUEVO: Importamos las funciones centralizadas de nómina
-// (Nota: Si tu payroll.ts está en src/config/payroll.ts, cambia '../utils/payroll' por '../config/payroll')
 import { 
   getBaseCycleIndex, 
   getPeriodRangeByIndex, 
   formatPeriodLegend, 
   getLocalTodayString 
 } from '../utils/payroll';
+
+import Header from './Header';
 
 interface DashboardProps {
   user: any;
@@ -52,8 +52,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
   // Estado del modal de Toolbox Meeting
   const [isToolboxOpen, setIsToolboxOpen] = useState(false);
 
-  // Estado del modal de Projects
+  // Estado de la pestaña de Projects (Team Lead)
   const [showProjectsTab, setShowProjectsTab] = useState(false);
+
+  // Estados para manejo de proyectos en el registro de horas
+  const [projectsList, setProjectsList] = useState<any[]>([]);
+  const [locationType, setLocationType] = useState<'address' | 'project'>('address');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
 
   // Navegación de periodos
   const [activeCycleIndex, setActiveCycleIndex] = useState<number>(getBaseCycleIndex());
@@ -90,9 +95,33 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
     fetchUserData();
   }, [user]);
 
+  // Cargar proyectos activos de la empresa
+  const fetchActiveProjects = async () => {
+    if (!userCompanyId) return;
+    try {
+      const q = query(
+        collection(db, 'projects'),
+        where('companyId', '==', userCompanyId),
+        where('status', '==', 'active')
+      );
+      const snapshot = await getDocs(q);
+      const list = snapshot.docs.map(docSnap => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+      setProjectsList(list);
+    } catch (err) {
+      console.error('Error fetching active projects for selection:', err);
+    }
+  };
+
+  // Se recarga al obtener el companyId o al cerrar/abrir el panel de proyectos del Team Lead
+  useEffect(() => {
+    fetchActiveProjects();
+  }, [userCompanyId, showProjectsTab]);
+
   // Consultar registros del trabajador (filtrando estrictamente por usuario y empresa)
   const fetchMyLogs = async () => {
-    // <-- CORRECCIÓN 1: Si aún no ha cargado el companyId desde Firebase, esperamos
     if (!userCompanyId) return;
 
     try {
@@ -130,7 +159,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
     }
   };
 
-  // <-- CORRECCIÓN 2: Se ejecuta automáticamente en cuanto userCompanyId termina de cargar
   useEffect(() => {
     if (userCompanyId) {
       fetchMyLogs();
@@ -166,9 +194,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // <-- CORRECCIÓN 3: Bloqueo preventivo si no hay empresa asignada
     if (!userCompanyId) {
       showNotification('Error: Your account is not linked to a company.');
+      return;
+    }
+
+    if (locationType === 'project' && !selectedProjectId) {
+      showNotification('Please select an active project from the list.');
       return;
     }
 
@@ -192,14 +224,19 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
     const todayStr = getLocalTodayString();
     const docId = `${user.uid}_${todayStr}`;
 
+    // Identificar el nombre del proyecto si fue seleccionado
+    const selectedProjectObj = projectsList.find((p) => p.id === selectedProjectId);
+
     setSubmitting(true);
     try {
       await setDoc(doc(db, 'timeLogs', docId), {
         userId: user.uid,
         userEmail: user.email,
-        companyId: userCompanyId, // <-- CORRECCIÓN 4: Ahora sí guardamos el companyId en Firestore
+        companyId: userCompanyId,
         location: combinedLocation,
         locations: allLocations,
+        projectId: locationType === 'project' && selectedProjectId ? selectedProjectId : null,
+        projectName: locationType === 'project' && selectedProjectObj ? selectedProjectObj.name : null,
         checkIn,
         checkOut,
         totalHours: parsedHours,
@@ -211,6 +248,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
 
       showNotification('Hours logged successfully!');
       setMainLocation('');
+      setSelectedProjectId('');
+      setLocationType('address');
       setExtraLocations([]);
       setCheckIn('');
       setCheckOut('');
@@ -271,33 +310,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
       <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Cabecera con Nombre y Etiqueta de Rol */}
-        <div className="bg-gray-900 rounded-xl p-6 shadow-lg flex justify-between items-center text-white">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl font-bold">
-                {userName || 'Loading...'}
-              </h1>
-              {role === 'teamlead' ? (
-                <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30 rounded-md">
-                  Lead
-                </span>
-              ) : (
-                <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-md">
-                  Worker
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-gray-400 mt-1 font-medium">
-              {role === 'teamlead' ? 'Team Lead Portal' : 'Worker Portal'}
-            </p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-bold transition-colors cursor-pointer"
-          >
-            Log Out
-          </button>
-        </div>
+        <Header 
+          userName={userName} 
+          role={role} 
+          onLogout={handleLogout} 
+        />
 
         {/* Acceso a Toolbox Meeting y Proyectos exclusivo para Team Lead */}
         {role === 'teamlead' && (
@@ -336,7 +353,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                   className="px-4 py-2.5 bg-white text-blue-950 hover:bg-blue-50 rounded-lg text-xs font-black shadow-xs transition-colors cursor-pointer flex items-center gap-1.5 shrink-0"
                 >
                   <span>🏗️</span>
-                  <span>{showProjectsTab ? 'View Hours' : 'Open Projects'}</span>
+                  <span>{showProjectsTab ? 'Hide Projects' : 'Open Projects'}</span>
                 </button>
               </div>
             </div>
@@ -366,17 +383,96 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
-                  Primary Job Site
-                </label>
-                <LocationInput
-                  value={mainLocation}
-                  onChange={(val) => setMainLocation(val)}
-                  placeholder="Search job site address..."
-                  className="p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
-                  required
-                />
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Primary Job Site
+                  </label>
 
+                  {/* Selector Híbrido: Dirección Libre vs Proyecto Activo */}
+                  <div className="flex gap-1.5 p-1 bg-gray-100 rounded-lg">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLocationType('address');
+                        setSelectedProjectId('');
+                        setMainLocation('');
+                      }}
+                      className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                        locationType === 'address'
+                          ? 'bg-white text-gray-900 shadow-xs'
+                          : 'text-gray-500 hover:text-gray-800'
+                      }`}
+                    >
+                      📍 Custom Address
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLocationType('project');
+                        setMainLocation('');
+                      }}
+                      className={`px-3 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
+                        locationType === 'project'
+                          ? 'bg-white text-blue-900 shadow-xs'
+                          : 'text-gray-500 hover:text-gray-800'
+                      }`}
+                    >
+                      🏗️ Active Project ({projectsList.length})
+                    </button>
+                  </div>
+                </div>
+
+                {/* Condicional según el modo elegido */}
+                {locationType === 'address' ? (
+                  <LocationInput
+                    value={mainLocation}
+                    onChange={(val) => setMainLocation(val)}
+                    placeholder="Search job site address..."
+                    className="p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                    required
+                  />
+                ) : (
+                  <div className="space-y-2">
+                    <select
+                      value={selectedProjectId}
+                      onChange={(e) => {
+                        const projId = e.target.value;
+                        setSelectedProjectId(projId);
+                        const found = projectsList.find((p) => p.id === projId);
+                        if (found) {
+                          setMainLocation(found.address);
+                        } else {
+                          setMainLocation('');
+                        }
+                      }}
+                      className="w-full p-3 border border-blue-200 rounded-lg text-sm bg-blue-50/30 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-800"
+                      required
+                    >
+                      <option value="">-- Select an Active Project --</option>
+                      {projectsList.map((proj) => (
+                        <option key={proj.id} value={proj.id}>
+                          {proj.name} — {proj.address}
+                        </option>
+                      ))}
+                    </select>
+
+                    {selectedProjectId && mainLocation && (
+                      <div className="p-2.5 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-2 text-xs text-blue-800">
+                        <span>📍</span>
+                        <span className="font-semibold">Assigned Address:</span>
+                        <span className="truncate">{mainLocation}</span>
+                      </div>
+                    )}
+
+                    {projectsList.length === 0 && (
+                      <p className="text-xs text-amber-600 font-medium">
+                        ⚠️ No active projects available right now. Switch to "Custom Address" or ask a Team Lead/Admin to create one.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Ubicaciones secundarias / adicionales si el trabajador se movió de sitio */}
                 {extraLocations.map((extraLoc, index) => (
                   <div key={index} className="flex gap-2 mt-2 items-center">
                     <LocationInput
@@ -519,6 +615,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                 type="button"
                 onClick={handleNextPeriod}
                 className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+                title="Next Pay Period"
               >
                 ▶
               </button>

@@ -29,6 +29,8 @@ import {
   getLocalTodayString 
 } from '../utils/payroll';
 
+import Header from "./Header";
+
 interface AdminPanelProps {
   user: any;
 }
@@ -560,15 +562,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Cabecera Principal */}
-        <div className="bg-gray-900 rounded-xl p-6 shadow-lg flex justify-between items-center text-white">
-          <h1 className="text-xl font-bold">Admin Dashboard</h1>
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-sm font-bold transition-colors cursor-pointer"
-          >
-            Log Out
-          </button>
-        </div>
+        <Header 
+          userName={'Wester Trades'}  
+          role="admin"                       
+          onLogout={handleLogout} 
+        />
 
         {/* Selector de Pestañas: Nómina, Seguridad y Equipo */}
         <div className="flex flex-wrap gap-2 p-1 bg-gray-200/80 rounded-xl w-fit">
