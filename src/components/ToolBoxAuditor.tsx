@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
-import { collection, getDocs, query, where } from 'firebase/firestore'; // <-- NUEVO: Importar 'where'
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { jsPDF } from 'jspdf';
 import MapLink from './MapLink';
+import { currentTenant } from '../config/tenant.config';
 
 interface Attendee {
   workerName: string;
@@ -11,7 +13,7 @@ interface Attendee {
 
 interface ToolboxMeeting {
   id: string;
-  companyId?: string; // <-- NUEVO: Añadido companyId a la interfaz
+  companyId?: string;
   dateStr: string;
   jobSite: string;
   topic: string;
@@ -24,12 +26,10 @@ interface ToolboxMeeting {
   createdAt?: any;
 }
 
-// <-- NUEVO: Interfaz para recibir el companyId desde AdminPanel
 interface ToolboxAuditorProps {
   companyId: string | null;
 }
 
-// <-- MODIFICADO: El componente ahora recibe companyId
 const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
   const [meetings, setMeetings] = useState<ToolboxMeeting[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,13 +40,11 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
   const [dateFilter, setDateFilter] = useState('');
   const [leadFilter, setLeadFilter] = useState('all');
 
-  // <-- MODIFICADO: Filtrar por companyId
   const fetchMeetings = async () => {
-    if (!companyId) return; // Si no hay empresa, no hacemos nada
+    if (!companyId) return;
 
     setLoading(true);
     try {
-      // Solo traemos las actas de ESTA empresa
       const q = query(
         collection(db, 'toolboxMeetings'), 
         where('companyId', '==', companyId)
@@ -58,8 +56,6 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
         ...(doc.data() as Omit<ToolboxMeeting, 'id'>),
       }));
 
-      // Ordenamos las más recientes primero en JavaScript 
-      // (evita tener que crear índices compuestos extra en Firebase)
       data.sort((a, b) => {
         const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
         const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
@@ -74,10 +70,201 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
     }
   };
 
-  // <-- MODIFICADO: Añadir companyId como dependencia del useEffect
   useEffect(() => {
     fetchMeetings();
   }, [companyId]);
+
+  // <-- PASO 4.4: Generador de PDF formal para cumplimiento con WorkSafeBC
+  const handleExportPDF = (meeting: ToolboxMeeting) => {
+    const docPdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    const pageWidth = docPdf.internal.pageSize.getWidth();
+    const margin = 15;
+    let y = 18;
+
+    // Encabezado oscuro corporativo
+    docPdf.setFillColor(17, 24, 39); // gray-900
+    docPdf.rect(0, 0, pageWidth, 32, 'F');
+
+    docPdf.setTextColor(255, 255, 255);
+    docPdf.setFont('helvetica', 'bold');
+    docPdf.setFontSize(15);
+    docPdf.text('TOOLBOX SAFETY MEETING RECORD', margin, 14);
+
+    docPdf.setFont('helvetica', 'normal');
+    docPdf.setFontSize(9);
+    docPdf.setTextColor(209, 213, 219);
+    docPdf.text(
+      `${currentTenant.company.name} • OHS / WorkSafeBC Compliance Documentation`,
+      margin,
+      21
+    );
+    docPdf.text(`Document ID: ${meeting.id}`, margin, 26);
+
+    y = 42;
+
+    // Caja de Metadatos de la Reunión
+    docPdf.setFillColor(249, 250, 251);
+    docPdf.setDrawColor(229, 231, 235);
+    docPdf.roundedRect(margin, y, pageWidth - margin * 2, 28, 2, 2, 'FD');
+
+    docPdf.setTextColor(17, 24, 39);
+    docPdf.setFontSize(9);
+
+    docPdf.setFont('helvetica', 'bold');
+    docPdf.text('Date:', margin + 4, y + 7);
+    docPdf.setFont('helvetica', 'normal');
+    docPdf.text(meeting.dateStr, margin + 22, y + 7);
+
+    docPdf.setFont('helvetica', 'bold');
+    docPdf.text('Supervisor / Lead:', pageWidth / 2, y + 7);
+    docPdf.setFont('helvetica', 'normal');
+    docPdf.text(
+      meeting.leadName || meeting.leadEmail || 'N/A',
+      pageWidth / 2 + 32,
+      y + 7
+    );
+
+    docPdf.setFont('helvetica', 'bold');
+    docPdf.text('Job Site:', margin + 4, y + 15);
+    docPdf.setFont('helvetica', 'normal');
+    const siteLines = docPdf.splitTextToSize(meeting.jobSite, pageWidth - margin * 2 - 28);
+    docPdf.text(siteLines, margin + 22, y + 15);
+
+    docPdf.setFont('helvetica', 'bold');
+    docPdf.text('Topic:', margin + 4, y + 23);
+    docPdf.setFont('helvetica', 'normal');
+    docPdf.text(meeting.topic, margin + 22, y + 23);
+
+    y += 36;
+
+    // Sección: Peligros y Controles Discutidos
+    docPdf.setFont('helvetica', 'bold');
+    docPdf.setFontSize(11);
+    docPdf.setTextColor(17, 24, 39);
+    docPdf.text('1. Hazards & Safety Controls Discussed', margin, y);
+    y += 6;
+
+    docPdf.setFont('helvetica', 'normal');
+    docPdf.setFontSize(9.5);
+    docPdf.setTextColor(55, 65, 81);
+
+    meeting.hazards.forEach((hazard) => {
+      const splitHazard = docPdf.splitTextToSize(`[X]  ${hazard}`, pageWidth - margin * 2 - 4);
+      docPdf.text(splitHazard, margin + 2, y);
+      y += splitHazard.length * 5 + 1.5;
+    });
+
+    y += 4;
+
+    // Sección: Notas del Supervisor (si existen)
+    if (meeting.notes && meeting.notes.trim() !== '') {
+      docPdf.setFont('helvetica', 'bold');
+      docPdf.setFontSize(11);
+      docPdf.setTextColor(17, 24, 39);
+      docPdf.text('2. Specific Site Controls & Supervisor Notes', margin, y);
+      y += 6;
+
+      docPdf.setFont('helvetica', 'normal');
+      docPdf.setFontSize(9.5);
+      docPdf.setTextColor(55, 65, 81);
+      const noteLines = docPdf.splitTextToSize(meeting.notes, pageWidth - margin * 2 - 4);
+      docPdf.text(noteLines, margin + 2, y);
+      y += noteLines.length * 5 + 6;
+    }
+
+    // Sección: Firmas de los Trabajadores
+    docPdf.setFont('helvetica', 'bold');
+    docPdf.setFontSize(11);
+    docPdf.setTextColor(17, 24, 39);
+    docPdf.text(
+      `3. Crew Attendance & Digital Signatures (${meeting.attendees?.length || 0} Workers)`,
+      margin,
+      y
+    );
+    y += 4;
+
+    docPdf.setFont('helvetica', 'italic');
+    docPdf.setFontSize(8);
+    docPdf.setTextColor(107, 114, 128);
+    docPdf.text(
+      'By signing below, workers acknowledge they attended the briefing and understand the hazards and controls for today.',
+      margin,
+      y + 3
+    );
+    y += 8;
+
+    // Cabecera de la tabla de firmas
+    docPdf.setFillColor(243, 244, 246);
+    docPdf.setDrawColor(209, 213, 219);
+    docPdf.rect(margin, y, pageWidth - margin * 2, 8, 'FD');
+
+    docPdf.setFont('helvetica', 'bold');
+    docPdf.setFontSize(9);
+    docPdf.setTextColor(31, 41, 55);
+    docPdf.text('#', margin + 3, y + 5.5);
+    docPdf.text('Worker Full Name', margin + 14, y + 5.5);
+    docPdf.text('Time Signed', margin + 95, y + 5.5);
+    docPdf.text('Signature', margin + 135, y + 5.5);
+    y += 8;
+
+    // Filas de cada firmante
+    const rowHeight = 16;
+    meeting.attendees?.forEach((att, idx) => {
+      // Salto de página automático si se llena la hoja
+      if (y + rowHeight > 275) {
+        docPdf.addPage();
+        y = 20;
+      }
+
+      docPdf.setDrawColor(229, 231, 235);
+      docPdf.rect(margin, y, pageWidth - margin * 2, rowHeight, 'S');
+
+      docPdf.setFont('helvetica', 'normal');
+      docPdf.setFontSize(9.5);
+      docPdf.setTextColor(17, 24, 39);
+      docPdf.text(`${idx + 1}`, margin + 3, y + 9.5);
+
+      docPdf.setFont('helvetica', 'bold');
+      docPdf.text(att.workerName, margin + 14, y + 9.5);
+
+      docPdf.setFont('helvetica', 'normal');
+      docPdf.setTextColor(107, 114, 128);
+      docPdf.text(att.signedAt || '—', margin + 95, y + 9.5);
+
+      // Incrustar la firma en Base64 PNG
+      if (att.signature && att.signature.startsWith('data:image')) {
+        try {
+          docPdf.addImage(att.signature, 'PNG', margin + 130, y + 1.5, 42, 13);
+        } catch (err) {
+          console.warn('Could not embed signature image:', err);
+        }
+      }
+
+      y += rowHeight;
+    });
+
+    // Pie de página legal
+    docPdf.setFont('helvetica', 'normal');
+    docPdf.setFontSize(7.5);
+    docPdf.setTextColor(156, 163, 175);
+    docPdf.text(
+      `Generated on ${new Date().toLocaleString('en-CA')} • Verified Digital Record`,
+      margin,
+      287
+    );
+
+    const safeSiteName = meeting.jobSite
+      .split(',')[0]
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .slice(0, 25);
+
+    docPdf.save(`Toolbox_Meeting_${meeting.dateStr}_${safeSiteName}.pdf`);
+  };
 
   // Lista única de Team Leads que han realizado charlas para el filtro
   const uniqueLeads = Array.from(
@@ -86,18 +273,15 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
 
   // Filtrado reactivo multidimensional
   const filteredMeetings = meetings.filter((m) => {
-    // 1. Filtro por fecha exacta
     if (dateFilter && m.dateStr !== dateFilter) {
       return false;
     }
 
-    // 2. Filtro por Team Lead
     if (leadFilter !== 'all') {
       const leadIdentifier = m.leadName || m.leadEmail || 'Unknown';
       if (leadIdentifier !== leadFilter) return false;
     }
 
-    // 3. Filtro por texto libre: busca en la obra, tema, notas o si algún firmante coincide
     if (searchQuery.trim()) {
       const queryLower = searchQuery.toLowerCase();
       const matchSite = m.jobSite.toLowerCase().includes(queryLower);
@@ -348,9 +532,19 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
               </div>
             </div>
 
-            {/* Acciones */}
-            <div className="flex justify-end pt-3 border-t border-gray-100">
+            {/* Acciones: Botón Export to PDF + Cerrar */}
+            <div className="flex items-center justify-between gap-3 pt-3 border-t border-gray-100">
               <button
+                type="button"
+                onClick={() => handleExportPDF(selectedMeeting)}
+                className="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-2 shadow-sm"
+              >
+                <span>📄</span>
+                <span>Export to PDF (WorkSafeBC)</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setSelectedMeeting(null)}
                 className="px-5 py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
               >

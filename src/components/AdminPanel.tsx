@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { db, auth } from "../firebaseConfig";
+import { db, auth, firebaseConfig } from "../firebaseConfig";
+import { initializeApp, deleteApp } from "firebase/app";
 import {
   collection,
   getDocs,
@@ -8,14 +9,18 @@ import {
   doc,
   Timestamp,
   where,
-  getDoc, // <-- NUEVO: Importar getDoc
+  getDoc,
 } from "firebase/firestore";
-import { signOut } from "firebase/auth";
+import { 
+  signOut, 
+  getAuth, 
+  createUserWithEmailAndPassword 
+} from "firebase/auth";
 import Toast from "./Toast";
 import PhotoModal from "./PhotoModal";
 import MapLink from "./MapLink";
 import ToolboxAuditor from "./ToolBoxAuditor";
-// <-- NUEVO: Importamos desde payroll.ts
+import LocationInput from "./LocationInput";
 import { 
   getBaseCycleIndex, 
   getPeriodRangeByIndex, 
@@ -27,7 +32,6 @@ interface AdminPanelProps {
   user: any;
 }
 
-// ... (El componente InlineEditForm se mantiene igual)
 const InlineEditForm = ({
   workerId,
   dateObj,
@@ -85,27 +89,26 @@ const InlineEditForm = ({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-blue-100 shadow-sm animate-fade-in w-full items-start">
-      {/* Ubicaciones de trabajo (principal y hasta 2 extras) */}
       <div className="flex flex-col gap-1.5">
         <label className="text-[10px] uppercase font-bold text-gray-400">
           Location
         </label>
-        <input
-          type="text"
+        <LocationInput
           value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          onChange={(val) => setLocation(val)}
+          className="p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors bg-white"
           placeholder="Primary job site"
+          required
         />
 
         {extraLocations.map((extraLoc, index) => (
           <div key={index} className="flex gap-1 animate-fade-in">
-            <input
-              type="text"
+            <LocationInput
               value={extraLoc}
-              onChange={(e) => handleExtraLocationChange(index, e.target.value)}
+              onChange={(val) => handleExtraLocationChange(index, val)}
               placeholder={`Additional job site ${index + 2}`}
-              className="flex-1 p-2 border border-blue-200 bg-blue-50/30 rounded-lg text-xs outline-none focus:border-blue-500"
+              wrapperClassName="flex-1"
+              className="p-2 border border-blue-200 bg-blue-50/30 rounded-lg text-xs outline-none focus:border-blue-500"
               required
             />
             <button
@@ -232,7 +235,6 @@ const InlineEditForm = ({
   );
 };
 
-
 const getFirstDayOfMonth = () => {
   const d = new Date();
   d.setDate(1);
@@ -240,10 +242,10 @@ const getFirstDayOfMonth = () => {
   return d;
 };
 
-
 const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
-  const [activeTab, setActiveTab] = useState<'payroll' | 'safety'>('payroll');
-  const [adminCompanyId, setAdminCompanyId] = useState<string | null>(null); // <-- NUEVO ESTADO
+  // <-- PASO 4.1: Nueva pestaña 'team'
+  const [activeTab, setActiveTab] = useState<'payroll' | 'safety' | 'team'>('payroll');
+  const [adminCompanyId, setAdminCompanyId] = useState<string | null>(null);
   const [allLogs, setAllLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -267,6 +269,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   >(null);
   const [evidenceModalTitle, setEvidenceModalTitle] = useState<string>("");
 
+  // <-- PASO 4.2: Estados para el formulario de alta de empleados
+  const [newWorkerName, setNewWorkerName] = useState("");
+  const [newWorkerEmail, setNewWorkerEmail] = useState("");
+  const [newWorkerRole, setNewWorkerRole] = useState<"worker" | "teamlead">("worker");
+  const [newWorkerPassword, setNewWorkerPassword] = useState("");
+  const [creatingWorker, setCreatingWorker] = useState(false);
+
   const handleLogout = async () => {
     await signOut(auth);
   };
@@ -275,20 +284,20 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     setToastMessage(message);
   };
 
-  // <-- CAMBIO: Se agrega el companyId al filtro
   const loadUsers = async (companyId: string) => {
     try {
-      const q = query(collection(db, "users"), where("companyId", "==", companyId)); // <-- CAMBIO
+      const q = query(collection(db, "users"), where("companyId", "==", companyId));
       const usersSnapshot = await getDocs(q);
       const usersList: any[] = [];
 
-      usersSnapshot.forEach((doc) => {
-        const data = doc.data();
+      usersSnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
         if (data.email !== user.email) {
           usersList.push({
-            id: doc.id,
-            fullName: data.fullName,
+            id: docSnap.id,
+            fullName: data.fullName || data.email,
             email: data.email,
+            role: data.role || "worker",
           });
         }
       });
@@ -300,22 +309,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     }
   };
 
-  // <-- CAMBIO: Se agrega el companyId al filtro
   const loadLogs = async (fromDate: Date, companyId: string) => {
     setLoading(true);
     try {
       const q = query(
         collection(db, "timeLogs"),
-        where("companyId", "==", companyId), // <-- CAMBIO
+        where("companyId", "==", companyId),
         where("timestamp", ">=", Timestamp.fromDate(fromDate)),
       );
       const querySnapshot = await getDocs(q);
 
       const logsData: any[] = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
         if (data.userEmail !== user.email) {
-          logsData.push({ id: doc.id, ...data });
+          logsData.push({ id: docSnap.id, ...data });
         }
       });
 
@@ -328,7 +336,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     }
   };
 
-  // <-- CAMBIO: Obtener el companyId antes de cargar datos
   useEffect(() => {
     const initData = async () => {
       const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -345,7 +352,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     initData();
   }, [user]);
 
-  // <-- CAMBIO: Se agrega adminCompanyId como dependencia
   useEffect(() => {
     if (startDate && adminCompanyId) {
       const selectedDate = new Date(startDate + "T00:00:00");
@@ -354,6 +360,66 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
       }
     }
   }, [startDate, adminCompanyId]);
+
+  // <-- PASO 4.2: Función para registrar un nuevo trabajador sin cerrar la sesión del Admin
+  const handleCreateWorker = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminCompanyId) {
+      showNotification("Error: Admin company ID not found.");
+      return;
+    }
+
+    const cleanName = newWorkerName.trim();
+    const cleanEmail = newWorkerEmail.trim().toLowerCase();
+    const cleanPass = newWorkerPassword.trim();
+
+    if (!cleanName || !cleanEmail || cleanPass.length < 6) {
+      showNotification("Please fill all fields. Password must be at least 6 characters.");
+      return;
+    }
+
+    setCreatingWorker(true);
+    // Creamos una app secundaria temporal para que Firebase no reemplace la sesión del Admin
+    const tempAppName = `temp_worker_creation_${Date.now()}`;
+    const secondaryApp = initializeApp(firebaseConfig, tempAppName);
+    const secondaryAuth = getAuth(secondaryApp);
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        secondaryAuth,
+        cleanEmail,
+        cleanPass
+      );
+      const newUid = userCredential.user.uid;
+
+      // Guardamos el documento en la colección 'users' usando la sesión del Admin (db principal)
+      await setDoc(doc(db, "users", newUid), {
+        fullName: cleanName,
+        email: cleanEmail,
+        role: newWorkerRole,
+        companyId: adminCompanyId,
+        createdAt: Timestamp.now(),
+      });
+
+      // Cerramos sesión en la instancia temporal
+      await signOut(secondaryAuth);
+
+      showNotification(`Employee "${cleanName}" created successfully!`);
+      setNewWorkerName("");
+      setNewWorkerEmail("");
+      setNewWorkerRole("worker");
+      setNewWorkerPassword("");
+
+      // Recargamos la lista de trabajadores
+      await loadUsers(adminCompanyId);
+    } catch (error: any) {
+      console.error("Error creating employee:", error);
+      showNotification("Error creating employee: " + error.message);
+    } finally {
+      await deleteApp(secondaryApp);
+      setCreatingWorker(false);
+    }
+  };
 
   const handleInlineSubmit = async (
     workerId: string,
@@ -379,7 +445,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
         {
           userId: targetWorker.id,
           userEmail: targetWorker.email,
-          companyId: adminCompanyId, // <-- NUEVO: Se inyecta la compañía
+          companyId: adminCompanyId,
           location: data.location,
           locations: data.locations || [data.location],
           checkIn: data.checkIn,
@@ -394,7 +460,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
 
       showNotification("Log added successfully!");
       setEditingRowKey(null);
-      loadLogs(oldestLoadedDate, adminCompanyId!); // <-- CAMBIO: Pasar el companyId
+      loadLogs(oldestLoadedDate, adminCompanyId!);
     } catch (error: any) {
       showNotification("Error saving: " + error.message);
     }
@@ -503,8 +569,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
           </button>
         </div>
 
-        {/* Selector de Pestañas: Nómina vs Charlas de Seguridad */}
-        <div className="flex gap-2 p-1 bg-gray-200/80 rounded-xl w-fit">
+        {/* Selector de Pestañas: Nómina, Seguridad y Equipo */}
+        <div className="flex flex-wrap gap-2 p-1 bg-gray-200/80 rounded-xl w-fit">
           <button
             type="button"
             onClick={() => setActiveTab('payroll')}
@@ -526,6 +592,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
             }`}
           >
             🛡️ Safety & Toolbox Meetings
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('team')}
+            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+              activeTab === 'team'
+                ? 'bg-white text-blue-900 shadow-xs'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            👥 Team / Employees ({allRegisteredUsers.length})
           </button>
         </div>
 
@@ -557,7 +634,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                     Pay Periods:
                   </span>
 
-                  {/* Botón Quincena Anterior (<) */}
                   <button
                     type="button"
                     onClick={handlePrevPeriod}
@@ -567,14 +643,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                     ◀
                   </button>
 
-                  {/* Leyenda visible de la quincena actual seleccionada */}
                   {isPeriodActive && (
                     <span className="text-xs font-extrabold text-purple-900 bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200 tracking-wide shadow-xs">
                       📅 {formatPeriodLegend(startDate, endDate)}
                     </span>
                   )}
 
-                  {/* Quincena por Pagar */}
                   <button
                     type="button"
                     onClick={handleSelectPeriodToPay}
@@ -583,7 +657,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                     💰 Period to Pay
                   </button>
 
-                  {/* Quincena en Curso */}
                   <button
                     type="button"
                     onClick={handleSelectCurrentPeriod}
@@ -592,7 +665,6 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                     📅 Current Period
                   </button>
 
-                  {/* Botón Quincena Siguiente (>) */}
                   <button
                     type="button"
                     onClick={handleNextPeriod}
@@ -783,72 +855,182 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
 
                               {isExpanded && (
                                 <tr className="bg-purple-50/30 border-b border-purple-100">
-                                <td colSpan={3} className="p-0">
-                                  <div className="p-4 md:p-6 shadow-inner">
-                                    <h4 className="text-sm font-bold text-purple-800 mb-3">
-                                      Detailed View
-                                    </h4>
-                                    <div className="overflow-x-auto rounded-lg border border-purple-100">
-                                      <table className="w-full text-left text-sm bg-white">
-                                        <thead className="bg-purple-50 text-xs font-bold text-purple-600 uppercase border-b border-purple-100">
-                                          <tr>
-                                            <th className="p-3">Date</th>
-                                            <th className="p-3">Status</th>
-                                            <th className="p-3">
-                                              Location / Job Site
-                                            </th>
-                                            <th className="p-3 text-center">
-                                              Schedule
-                                            </th>
-                                            <th className="p-3 text-center">
-                                              Hours
-                                            </th>
-                                            <th className="p-3 text-center">
-                                              Evidence
-                                            </th>
-                                          </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-purple-50">
-                                          {datesInRange.map(
-                                            (dateObj, index) => {
-                                              const logsForDay =
-                                                userLogsInRange.filter(
-                                                  (log) => {
-                                                    const logDate =
-                                                      log.timestamp.toDate();
+                                  <td colSpan={3} className="p-0">
+                                    <div className="p-4 md:p-6 shadow-inner">
+                                      <h4 className="text-sm font-bold text-purple-800 mb-3">
+                                        Detailed View
+                                      </h4>
+                                      <div className="overflow-x-auto rounded-lg border border-purple-100">
+                                        <table className="w-full text-left text-sm bg-white">
+                                          <thead className="bg-purple-50 text-xs font-bold text-purple-600 uppercase border-b border-purple-100">
+                                            <tr>
+                                              <th className="p-3">Date</th>
+                                              <th className="p-3">Status</th>
+                                              <th className="p-3">
+                                                Location / Job Site
+                                              </th>
+                                              <th className="p-3 text-center">
+                                                Schedule
+                                              </th>
+                                              <th className="p-3 text-center">
+                                                Hours
+                                              </th>
+                                              <th className="p-3 text-center">
+                                                Evidence
+                                              </th>
+                                            </tr>
+                                          </thead>
+                                          <tbody className="divide-y divide-purple-50">
+                                            {datesInRange.map(
+                                              (dateObj, index) => {
+                                                const logsForDay =
+                                                  userLogsInRange.filter(
+                                                    (log) => {
+                                                      const logDate =
+                                                        log.timestamp.toDate();
+                                                      return (
+                                                        logDate.getDate() ===
+                                                          dateObj.getDate() &&
+                                                        logDate.getMonth() ===
+                                                          dateObj.getMonth() &&
+                                                        logDate.getFullYear() ===
+                                                          dateObj.getFullYear()
+                                                      );
+                                                    },
+                                                  );
+
+                                                const isWeekend =
+                                                  dateObj.getDay() === 0 ||
+                                                  dateObj.getDay() === 6;
+                                                const rowKey = `${worker.id}-${dateObj.getTime()}`;
+                                                const isEditingThisRow =
+                                                  editingRowKey === rowKey;
+
+                                                if (logsForDay.length > 0) {
+                                                  return logsForDay.map((log) => {
+                                                    const hasPhotos =
+                                                      log.photos &&
+                                                      Array.isArray(log.photos) &&
+                                                      log.photos.length > 0;
+
                                                     return (
-                                                      logDate.getDate() ===
-                                                        dateObj.getDate() &&
-                                                      logDate.getMonth() ===
-                                                        dateObj.getMonth() &&
-                                                      logDate.getFullYear() ===
-                                                        dateObj.getFullYear()
+                                                      <tr
+                                                        key={log.id}
+                                                        className="hover:bg-gray-50"
+                                                      >
+                                                        <td className="p-3">
+                                                          <span
+                                                            className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-gray-700"}`}
+                                                          >
+                                                            {dateObj.toLocaleDateString(
+                                                              "en-US",
+                                                              {
+                                                                weekday: "short",
+                                                                day: "2-digit",
+                                                                month: "short",
+                                                              },
+                                                            )}
+                                                          </span>
+                                                        </td>
+                                                        <td className="p-3">
+                                                          <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
+                                                            Worked
+                                                          </span>
+                                                        </td>
+                                                        <td className="p-3 text-gray-700">
+                                                          <MapLink
+                                                            location={
+                                                              log.location
+                                                            }
+                                                          />
+                                                        </td>
+                                                        <td className="p-3 text-center text-gray-600">
+                                                          {log.checkIn} -{" "}
+                                                          {log.checkOut}
+                                                        </td>
+                                                        <td className="p-3 text-center font-bold text-purple-700">
+                                                          {log.totalHours}h
+                                                        </td>
+                                                        <td className="p-3 text-center">
+                                                          {hasPhotos ? (
+                                                            <button
+                                                              type="button"
+                                                              onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setActiveEvidencePhotos(
+                                                                  log.photos,
+                                                                );
+                                                                setEvidenceModalTitle(
+                                                                  `Evidence: ${worker.fullName} • ${dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
+                                                                );
+                                                              }}
+                                                              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                                                              title="View site photos"
+                                                            >
+                                                              <span>📷</span>
+                                                              <span>
+                                                                {
+                                                                  log.photos
+                                                                    .length
+                                                                }
+                                                              </span>
+                                                            </button>
+                                                          ) : (
+                                                            <span className="text-gray-300 text-xs">
+                                                              —
+                                                            </span>
+                                                          )}
+                                                        </td>
+                                                      </tr>
                                                     );
-                                                  },
-                                                );
-
-                                              const isWeekend =
-                                                dateObj.getDay() === 0 ||
-                                                dateObj.getDay() === 6;
-                                              const rowKey = `${worker.id}-${dateObj.getTime()}`;
-                                              const isEditingThisRow =
-                                                editingRowKey === rowKey;
-
-                                              if (logsForDay.length > 0) {
-                                                return logsForDay.map((log) => {
-                                                  const hasPhotos =
-                                                    log.photos &&
-                                                    Array.isArray(log.photos) &&
-                                                    log.photos.length > 0;
-
+                                                  });
+                                                } else if (isEditingThisRow) {
                                                   return (
                                                     <tr
-                                                      key={log.id}
-                                                      className="hover:bg-gray-50"
+                                                      key={`edit-${index}`}
+                                                      className="bg-blue-50/50"
+                                                    >
+                                                      <td className="p-3 align-top">
+                                                        <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
+                                                          {dateObj.toLocaleDateString(
+                                                            "en-US",
+                                                            {
+                                                              weekday: "short",
+                                                              day: "2-digit",
+                                                              month: "short",
+                                                            },
+                                                          )}
+                                                        </span>
+                                                      </td>
+                                                      <td
+                                                        colSpan={5}
+                                                        className="p-3"
+                                                      >
+                                                        <InlineEditForm
+                                                          workerId={worker.id}
+                                                          dateObj={dateObj}
+                                                          onSave={
+                                                            handleInlineSubmit
+                                                          }
+                                                          onCancel={() =>
+                                                            setEditingRowKey(null)
+                                                          }
+                                                          showNotification={
+                                                            showNotification
+                                                          }
+                                                        />
+                                                      </td>
+                                                    </tr>
+                                                  );
+                                                } else {
+                                                  return (
+                                                    <tr
+                                                      key={`missing-${index}`}
+                                                      className="bg-red-50/40 hover:bg-red-50 transition-colors group"
                                                     >
                                                       <td className="p-3">
                                                         <span
-                                                          className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-gray-700"}`}
+                                                          className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-red-800"}`}
                                                         >
                                                           {dateObj.toLocaleDateString(
                                                             "en-US",
@@ -861,188 +1043,224 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                         </span>
                                                       </td>
                                                       <td className="p-3">
-                                                        <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
-                                                          Worked
+                                                        <span className="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full">
+                                                          No Log
                                                         </span>
                                                       </td>
-                                                      <td className="p-3 text-gray-700">
-                                                        <MapLink
-                                                          location={
-                                                            log.location
-                                                          }
-                                                        />
-                                                      </td>
-                                                      <td className="p-3 text-center text-gray-600">
-                                                        {log.checkIn} -{" "}
-                                                        {log.checkOut}
-                                                      </td>
-                                                      <td className="p-3 text-center font-bold text-purple-700">
-                                                        {log.totalHours}h
-                                                      </td>
+                                                      <td
+                                                        className="p-3 text-red-400 italic"
+                                                        colSpan={3}
+                                                      ></td>
                                                       <td className="p-3 text-center">
-                                                        {hasPhotos ? (
-                                                          <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                              e.stopPropagation();
-                                                              setActiveEvidencePhotos(
-                                                                log.photos,
-                                                              );
-                                                              setEvidenceModalTitle(
-                                                                `Evidence: ${worker.fullName} • ${dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
-                                                              );
-                                                            }}
-                                                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
-                                                            title="View site photos"
+                                                        <button
+                                                          onClick={() =>
+                                                            setEditingRowKey(
+                                                              rowKey,
+                                                            )
+                                                          }
+                                                          className="p-1.5 bg-white border border-red-200 text-red-500 rounded hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 shadow-sm cursor-pointer"
+                                                          title="Add missing hours"
+                                                        >
+                                                          <svg
+                                                            className="w-4 h-4"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
                                                           >
-                                                            <span>📷</span>
-                                                            <span>
-                                                              {
-                                                                log.photos
-                                                                  .length
-                                                              }
-                                                            </span>
-                                                          </button>
-                                                        ) : (
-                                                          <span className="text-gray-300 text-xs">
-                                                            —
-                                                          </span>
-                                                        )}
+                                                            <path
+                                                              strokeLinecap="round"
+                                                              strokeLinejoin="round"
+                                                              strokeWidth="2"
+                                                              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                                            />
+                                                          </svg>
+                                                        </button>
                                                       </td>
                                                     </tr>
                                                   );
-                                                });
-                                              } else if (isEditingThisRow) {
-                                                return (
-                                                  <tr
-                                                    key={`edit-${index}`}
-                                                    className="bg-blue-50/50"
-                                                  >
-                                                    <td className="p-3 align-top">
-                                                      <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
-                                                        {dateObj.toLocaleDateString(
-                                                          "en-US",
-                                                          {
-                                                            weekday: "short",
-                                                            day: "2-digit",
-                                                            month: "short",
-                                                          },
-                                                        )}
-                                                      </span>
-                                                    </td>
-                                                    <td
-                                                      colSpan={5}
-                                                      className="p-3"
-                                                    >
-                                                      <InlineEditForm
-                                                        workerId={worker.id}
-                                                        dateObj={dateObj}
-                                                        onSave={
-                                                          handleInlineSubmit
-                                                        }
-                                                        onCancel={() =>
-                                                          setEditingRowKey(null)
-                                                        }
-                                                        showNotification={
-                                                          showNotification
-                                                        }
-                                                      />
-                                                    </td>
-                                                  </tr>
-                                                );
-                                              } else {
-                                                return (
-                                                  <tr
-                                                    key={`missing-${index}`}
-                                                    className="bg-red-50/40 hover:bg-red-50 transition-colors group"
-                                                  >
-                                                    <td className="p-3">
-                                                      <span
-                                                        className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-red-800"}`}
-                                                      >
-                                                        {dateObj.toLocaleDateString(
-                                                          "en-US",
-                                                          {
-                                                            weekday: "short",
-                                                            day: "2-digit",
-                                                            month: "short",
-                                                          },
-                                                        )}
-                                                      </span>
-                                                    </td>
-                                                    <td className="p-3">
-                                                      <span className="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full">
-                                                        No Log
-                                                      </span>
-                                                    </td>
-                                                    <td
-                                                      className="p-3 text-red-400 italic"
-                                                      colSpan={3}
-                                                    ></td>
-                                                    <td className="p-3 text-center">
-                                                      <button
-                                                        onClick={() =>
-                                                          setEditingRowKey(
-                                                            rowKey,
-                                                          )
-                                                        }
-                                                        className="p-1.5 bg-white border border-red-200 text-red-500 rounded hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 shadow-sm cursor-pointer"
-                                                        title="Add missing hours"
-                                                      >
-                                                        <svg
-                                                          className="w-4 h-4"
-                                                          fill="none"
-                                                          stroke="currentColor"
-                                                          viewBox="0 0 24 24"
-                                                        >
-                                                          <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth="2"
-                                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                                          />
-                                                        </svg>
-                                                      </button>
-                                                    </td>
-                                                  </tr>
-                                                );
-                                              }
-                                            },
-                                          )}
-                                        </tbody>
-                                      </table>
+                                                }
+                                              },
+                                            )}
+                                          </tbody>
+                                        </table>
+                                      </div>
                                     </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                      {displayedUsers.length === 0 && (
-                        <tr>
-                          <td
-                            colSpan={3}
-                            className="p-8 text-center text-gray-500"
-                          >
-                            No workers found.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            )}
+                                  </td>
+                                </tr>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
+                        {displayedUsers.length === 0 && (
+                          <tr>
+                            <td
+                              colSpan={3}
+                              className="p-8 text-center text-gray-500"
+                            >
+                              No workers found.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
         )}
 
         {/* PESTAÑA 2: Charlas de Seguridad (Toolbox Meetings) */}
         {activeTab === 'safety' && (
           <div className="animate-fade-in">
-            {/* <-- CAMBIO: Pasar adminCompanyId a ToolboxAuditor */}
             <ToolboxAuditor companyId={adminCompanyId} />
+          </div>
+        )}
+
+        {/* PESTAÑA 3: Gestión de Equipo y Alta de Trabajadores (Actividades 4.1 y 4.2) */}
+        {activeTab === 'team' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+            
+            {/* Formulario para dar de alta un nuevo trabajador */}
+            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 h-fit">
+              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 rounded-md border border-blue-200">
+                Onboarding
+              </span>
+              <h3 className="text-base font-bold text-gray-800 mt-1 mb-4">
+                Register New Employee
+              </h3>
+
+              <form onSubmit={handleCreateWorker} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newWorkerName}
+                    onChange={(e) => setNewWorkerName(e.target.value)}
+                    placeholder="e.g. John Doe"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={newWorkerEmail}
+                    onChange={(e) => setNewWorkerEmail(e.target.value)}
+                    placeholder="worker@company.com"
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                    Role
+                  </label>
+                  <select
+                    value={newWorkerRole}
+                    onChange={(e) => setNewWorkerRole(e.target.value as "worker" | "teamlead")}
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                  >
+                    <option value="worker">Worker (Field Operatives)</option>
+                    <option value="teamlead">Team Lead (Photos & Toolbox Talks)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                    Temporary Password
+                  </label>
+                  <input
+                    type="text"
+                    value={newWorkerPassword}
+                    onChange={(e) => setNewWorkerPassword(e.target.value)}
+                    placeholder="Min. 6 characters"
+                    minLength={6}
+                    className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none font-mono"
+                    required
+                  />
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    Share this password with the worker so they can log in.
+                  </p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={creatingWorker}
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors shadow-sm cursor-pointer disabled:cursor-not-allowed"
+                >
+                  {creatingWorker ? "Creating Account..." : "+ Add Employee to Company"}
+                </button>
+              </form>
+            </div>
+
+            {/* Lista de empleados actuales de la compañía */}
+            <div className="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden h-fit">
+              <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-gray-800">
+                    Active Company Roster
+                  </h3>
+                  <p className="text-xs text-gray-400">
+                    Company ID: <span className="font-mono font-semibold text-gray-600">{adminCompanyId || "Loading..."}</span>
+                  </p>
+                </div>
+                <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-200">
+                  {allRegisteredUsers.length} Employees
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-gray-50/60 text-[11px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
+                    <tr>
+                      <th className="p-4">Name</th>
+                      <th className="p-4">Email</th>
+                      <th className="p-4 text-center">Role</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {allRegisteredUsers.map((worker) => (
+                      <tr key={worker.id} className="hover:bg-gray-50/80 transition-colors">
+                        <td className="p-4 font-bold text-gray-800">
+                          {worker.fullName}
+                        </td>
+                        <td className="p-4 text-gray-500 text-xs">
+                          {worker.email}
+                        </td>
+                        <td className="p-4 text-center">
+                          {worker.role === "teamlead" ? (
+                            <span className="px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md border border-purple-200">
+                              Team Lead
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 rounded-md border border-emerald-200">
+                              Worker
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+
+                    {allRegisteredUsers.length === 0 && (
+                      <tr>
+                        <td colSpan={3} className="p-8 text-center text-gray-400 text-xs">
+                          No employees registered under this company yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
           </div>
         )}
 

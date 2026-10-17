@@ -68,6 +68,7 @@ src/
     tenant.config.ts
   utils/
     imageCompressor.ts
+    payroll.ts
   App.css
   App.tsx
   firebaseConfig.ts
@@ -563,671 +564,6 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ workerName, onSave, onCance
 export default SignaturePad;
 </file>
 
-<file path="src/components/ToolBoxAuditor.tsx">
-import React, { useState, useEffect } from 'react';
-import { db } from '../firebaseConfig';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import MapLink from './MapLink';
-
-interface Attendee {
-  workerName: string;
-  signature: string;
-  signedAt: string;
-}
-
-interface ToolboxMeeting {
-  id: string;
-  dateStr: string;
-  jobSite: string;
-  topic: string;
-  hazards: string[];
-  notes?: string;
-  leadId: string;
-  leadName?: string;
-  leadEmail?: string;
-  attendees: Attendee[];
-  createdAt?: any;
-}
-
-const ToolboxAuditor: React.FC = () => {
-  const [meetings, setMeetings] = useState<ToolboxMeeting[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedMeeting, setSelectedMeeting] = useState<ToolboxMeeting | null>(null);
-
-  // Filtros de búsqueda
-  const [searchQuery, setSearchQuery] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
-  const [leadFilter, setLeadFilter] = useState('all');
-
-  const fetchMeetings = async () => {
-    setLoading(true);
-    try {
-      const q = query(collection(db, 'toolboxMeetings'), orderBy('createdAt', 'desc'));
-      const snapshot = await getDocs(q);
-      const data: ToolboxMeeting[] = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as Omit<ToolboxMeeting, 'id'>),
-      }));
-      setMeetings(data);
-    } catch (err) {
-      console.error('Error fetching toolbox meetings:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchMeetings();
-  }, []);
-
-  // Lista única de Team Leads que han realizado charlas para el filtro
-  const uniqueLeads = Array.from(
-    new Set(meetings.map((m) => m.leadName || m.leadEmail || 'Unknown'))
-  );
-
-  // Filtrado reactivo multidimensional
-  const filteredMeetings = meetings.filter((m) => {
-    // 1. Filtro por fecha exacta
-    if (dateFilter && m.dateStr !== dateFilter) {
-      return false;
-    }
-
-    // 2. Filtro por Team Lead
-    if (leadFilter !== 'all') {
-      const leadIdentifier = m.leadName || m.leadEmail || 'Unknown';
-      if (leadIdentifier !== leadFilter) return false;
-    }
-
-    // 3. Filtro por texto libre: busca en la obra, tema, notas o si algún firmante coincide
-    if (searchQuery.trim()) {
-      const queryLower = searchQuery.toLowerCase();
-      const matchSite = m.jobSite.toLowerCase().includes(queryLower);
-      const matchTopic = m.topic.toLowerCase().includes(queryLower);
-      const matchNotes = m.notes?.toLowerCase().includes(queryLower) || false;
-      const matchWorker = m.attendees?.some((att) =>
-        att.workerName.toLowerCase().includes(queryLower)
-      );
-
-      return matchSite || matchTopic || matchNotes || matchWorker;
-    }
-
-    return true;
-  });
-
-  return (
-    <div className="space-y-6">
-      {/* Barra de Filtros */}
-      <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="w-full md:flex-1">
-          <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
-            Search Site, Topic, or Worker
-          </label>
-          <div className="relative">
-            <span className="absolute left-3.5 top-3 text-gray-400">🔍</span>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter by address or worker name..."
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500 focus:bg-white transition-all"
-            />
-          </div>
-        </div>
-
-        <div className="flex w-full md:w-auto gap-3 items-center">
-          <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
-              Date
-            </label>
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
-              Conducted By (Lead)
-            </label>
-            <select
-              value={leadFilter}
-              onChange={(e) => setLeadFilter(e.target.value)}
-              className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500 cursor-pointer"
-            >
-              <option value="all">All Team Leads</option>
-              {uniqueLeads.map((lead, idx) => (
-                <option key={idx} value={lead}>
-                  {lead}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {(searchQuery || dateFilter || leadFilter !== 'all') && (
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setDateFilter('');
-                setLeadFilter('all');
-              }}
-              className="self-end px-3 py-2.5 text-xs font-bold text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
-            >
-              Clear
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Lista de Reuniones */}
-      {loading ? (
-        <div className="bg-white p-12 rounded-2xl shadow-sm text-center text-sm font-semibold text-gray-400">
-          Loading safety compliance records...
-        </div>
-      ) : filteredMeetings.length === 0 ? (
-        <div className="bg-white p-12 rounded-2xl shadow-sm text-center">
-          <p className="text-3xl mb-2">📋</p>
-          <h4 className="text-sm font-bold text-gray-700">No Toolbox Meetings Found</h4>
-          <p className="text-xs text-gray-400 mt-1">
-            {meetings.length === 0
-              ? 'No safety briefings have been submitted yet.'
-              : 'Try adjusting your filters.'}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredMeetings.map((meeting) => (
-            <div
-              key={meeting.id}
-              onClick={() => setSelectedMeeting(meeting)}
-              className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 rounded-md border border-purple-200/50">
-                    {meeting.dateStr}
-                  </span>
-                  <span className="text-xs font-bold text-gray-500">
-                    👤 {meeting.leadName || meeting.leadEmail}
-                  </span>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-bold text-gray-900 leading-snug">
-                    {meeting.topic}
-                  </h4>
-                  <div className="mt-1">
-                    <MapLink location={meeting.jobSite} />
-                  </div>
-                </div>
-
-                {/* Tags de Peligros Discutidos */}
-                <div className="flex flex-wrap gap-1.5 pt-1">
-                  {meeting.hazards.slice(0, 3).map((h, i) => (
-                    <span
-                      key={i}
-                      className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium"
-                    >
-                      {h.split('(')[0].trim()}
-                    </span>
-                  ))}
-                  {meeting.hazards.length > 3 && (
-                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-[10px] font-bold">
-                      +{meeting.hazards.length - 3} more
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Pie de tarjeta con contador de firmas */}
-              <div className="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
-                  {meeting.attendees?.length || 0} Workers Signed
-                </span>
-                <span className="text-xs font-bold text-purple-600 hover:underline">
-                  View Signatures & Details →
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Modal Detallado de Auditoría e Inspección de Firmas */}
-      {selectedMeeting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 p-6 space-y-6 my-auto animate-fade-in">
-            {/* Header del Modal */}
-            <div className="flex items-start justify-between pb-4 border-b border-gray-100">
-              <div>
-                <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md">
-                  Safety Meeting Report
-                </span>
-                <h3 className="text-lg font-bold text-gray-900 mt-1">
-                  {selectedMeeting.topic}
-                </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Conducted by <span className="font-bold text-gray-800">{selectedMeeting.leadName || selectedMeeting.leadEmail}</span> on <span className="font-bold text-gray-800">{selectedMeeting.dateStr}</span>
-                </p>
-              </div>
-              <button
-                onClick={() => setSelectedMeeting(null)}
-                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Ubicación */}
-            <div>
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
-                Job Site
-              </p>
-              <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                <MapLink location={selectedMeeting.jobSite} />
-              </div>
-            </div>
-
-            {/* Peligros y Medidas */}
-            <div>
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
-                Hazards & Safety Controls Discussed
-              </p>
-              <div className="space-y-1.5 bg-gray-50 p-3.5 rounded-xl border border-gray-200">
-                {selectedMeeting.hazards.map((h, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-xs text-gray-700">
-                    <span className="text-emerald-600 font-bold">✓</span>
-                    <span>{h}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Notas específicas */}
-            {selectedMeeting.notes && (
-              <div>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
-                  Supervisor Notes
-                </p>
-                <div className="p-3 bg-yellow-50/60 rounded-xl border border-yellow-200 text-xs text-yellow-900">
-                  {selectedMeeting.notes}
-                </div>
-              </div>
-            )}
-
-            {/* Firmas Táctiles de los Operarios */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                  Crew Signatures ({selectedMeeting.attendees?.length || 0})
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                {selectedMeeting.attendees?.map((att, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between gap-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-gray-900 truncate">
-                        {att.workerName}
-                      </p>
-                      <p className="text-[10px] text-gray-400">
-                        Signed at {att.signedAt}
-                      </p>
-                    </div>
-                    <img
-                      src={att.signature}
-                      alt={`Signature of ${att.workerName}`}
-                      className="h-10 w-24 object-contain bg-white border border-gray-200 rounded-lg p-0.5"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Acciones */}
-            <div className="flex justify-end pt-3 border-t border-gray-100">
-              <button
-                onClick={() => setSelectedMeeting(null)}
-                className="px-5 py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
-              >
-                Close Report
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default ToolboxAuditor;
-</file>
-
-<file path="src/components/ToolBoxMeetingModal.tsx">
-import React, { useState } from 'react';
-import { db } from '../firebaseConfig';
-import { collection, addDoc, Timestamp } from 'firebase/firestore';
-import LocationInput from './LocationInput';
-import SignaturePad from './SignaturePad';
-
-interface Attendee {
-  workerName: string;
-  signature: string; // Base64 Data URL
-  signedAt: string;
-}
-
-interface ToolboxMeetingModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  currentUser: any;
-  showNotification: (msg: string) => void;
-}
-
-const COMMON_HAZARDS = [
-  'PPE Inspection (Hard hat, hi-vis, steel toes, eye protection)',
-  'Demolition Falling Debris & Exclusion Zones',
-  'Silica Dust & Respirator Compliance',
-  'Slips, Trips & Good Housekeeping',
-  'Power Tools & Extension Cord Inspections',
-  'Overhead Hazards & Scaffolding Stability',
-  'Utility Locates (Power, Gas, Water) Verified',
-];
-
-const COMMON_TOPICS = [
-  'Daily Site Safety Orientation & Hazards Review',
-  'Interior Demolition & Structural Precautions',
-  'Dust Suppression & Ventilation Protocols',
-  'Material Handling & Ergonomics',
-  'Emergency Action Plan & Evacuation Routes',
-];
-
-const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
-  isOpen,
-  onClose,
-  currentUser,
-  showNotification,
-}) => {
-  const [jobSite, setJobSite] = useState('');
-  const [topic, setTopic] = useState(COMMON_TOPICS[0]);
-  const [selectedHazards, setSelectedHazards] = useState<string[]>([
-    COMMON_HAZARDS[0],
-    COMMON_HAZARDS[1],
-  ]);
-  const [notes, setNotes] = useState('');
-  const [attendees, setAttendees] = useState<Attendee[]>([]);
-  const [currentWorkerName, setCurrentWorkerName] = useState('');
-  const [signingWorkerName, setSigningWorkerName] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  if (!isOpen) return null;
-
-  const toggleHazard = (hazard: string) => {
-    setSelectedHazards((prev) =>
-      prev.includes(hazard) ? prev.filter((h) => h !== hazard) : [...prev, hazard]
-    );
-  };
-
-  const handleStartSigning = () => {
-    const cleanName = currentWorkerName.trim();
-    if (!cleanName) {
-      showNotification('Please enter a worker name to sign.');
-      return;
-    }
-    setSigningWorkerName(cleanName);
-  };
-
-  const handleSaveSignature = (signatureDataUrl: string) => {
-    if (!signingWorkerName) return;
-
-    const newAttendee: Attendee = {
-      workerName: signingWorkerName,
-      signature: signatureDataUrl,
-      signedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    };
-
-    setAttendees((prev) => [...prev, newAttendee]);
-    setSigningWorkerName(null);
-    setCurrentWorkerName('');
-  };
-
-  const handleRemoveAttendee = (index: number) => {
-    setAttendees((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!jobSite.trim()) {
-      showNotification('Please provide the job site location.');
-      return;
-    }
-    if (attendees.length === 0) {
-      showNotification('At least one worker must sign the meeting acknowledgment.');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const today = new Date();
-      const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-      await addDoc(collection(db, 'toolboxMeetings'), {
-        dateStr,
-        jobSite: jobSite.trim(),
-        topic,
-        hazards: selectedHazards,
-        notes: notes.trim(),
-        leadId: currentUser.uid,
-        leadEmail: currentUser.email,
-        leadName: currentUser.displayName || currentUser.email,
-        attendees,
-        createdAt: Timestamp.now(),
-      });
-
-      showNotification('Toolbox Meeting saved successfully!');
-      onClose();
-    } catch (err: any) {
-      showNotification('Error saving Toolbox Meeting: ' + err.message);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 p-5 sm:p-7 space-y-5 animate-fade-in my-auto">
-        
-        {/* Encabezado */}
-        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-          <div>
-            <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md">
-              Safety Compliance
-            </span>
-            <h3 className="text-lg font-bold text-gray-800 mt-1">
-              Daily Toolbox Talk & Safety Meeting
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-          >
-            ✕
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Ubicación de la Obra (con autocompletado de Places) */}
-          <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-              Job Site Location
-            </label>
-            <LocationInput
-              value={jobSite}
-              onChange={(val) => setJobSite(val)}
-              placeholder="Search or type site address..."
-              className="p-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
-              required
-            />
-          </div>
-
-          {/* Tema de Seguridad */}
-          <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-              Safety Topic
-            </label>
-            <select
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
-            >
-              {COMMON_TOPICS.map((t, idx) => (
-                <option key={idx} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Lista de Peligros y Controles */}
-          <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-              Hazards & Controls Discussed
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
-              {COMMON_HAZARDS.map((h, idx) => {
-                const isChecked = selectedHazards.includes(h);
-                return (
-                  <label
-                    key={idx}
-                    className="flex items-start gap-2 cursor-pointer text-xs font-medium text-gray-700 select-none"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => toggleHazard(h)}
-                      className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
-                    />
-                    <span>{h}</span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Notas Adicionales */}
-          <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-              Specific Controls & Notes (Optional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-              placeholder="E.g., Water mist active for dust suppression; 2nd floor hole covered and marked..."
-              className="w-full p-3 border border-gray-300 rounded-lg text-xs bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-            />
-          </div>
-
-          {/* Lista y Captura de Firmas */}
-          <div className="pt-3 border-t border-gray-100 space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
-                Crew Signatures ({attendees.length} Signed)
-              </label>
-            </div>
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={currentWorkerName}
-                onChange={(e) => setCurrentWorkerName(e.target.value)}
-                placeholder="Worker full name..."
-                className="flex-1 p-2.5 border border-gray-300 rounded-lg text-xs bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <button
-                type="button"
-                onClick={handleStartSigning}
-                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
-              >
-                <span>✍️</span>
-                <span>Sign</span>
-              </button>
-            </div>
-
-            {/* Listado de los que ya firmaron */}
-            {attendees.length > 0 && (
-              <div className="divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden bg-white max-h-48 overflow-y-auto">
-                {attendees.map((att, index) => (
-                  <div key={index} className="p-2.5 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <img
-                        src={att.signature}
-                        alt="Signature"
-                        className="h-7 w-20 object-contain border border-gray-200 rounded bg-gray-50"
-                      />
-                      <div className="truncate">
-                        <p className="text-xs font-bold text-gray-800 truncate">
-                          {att.workerName}
-                        </p>
-                        <p className="text-[10px] text-gray-400">
-                          Signed at {att.signedAt}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveAttendee(index)}
-                      className="text-gray-400 hover:text-red-500 p-1 text-xs font-bold transition-colors cursor-pointer"
-                      title="Remove"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Botones de Envío */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm disabled:bg-emerald-400 cursor-pointer disabled:cursor-not-allowed"
-            >
-              {submitting ? 'Saving...' : 'Save & Submit Toolbox Meeting'}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* Modal flotante de captura de firma */}
-      {signingWorkerName && (
-        <SignaturePad
-          workerName={signingWorkerName}
-          onSave={handleSaveSignature}
-          onCancel={() => setSigningWorkerName(null)}
-        />
-      )}
-    </div>
-  );
-};
-
-export default ToolboxMeetingModal;
-</file>
-
 <file path="src/config/tenant.config.ts">
 export interface TenantConfig {
   company: {
@@ -1363,6 +699,63 @@ export const compressImage = (
 
     reader.onerror = (err) => reject(err);
   });
+};
+</file>
+
+<file path="src/utils/payroll.ts">
+// src/utils/payroll.ts
+
+// Configuración de nómina bisemanal
+const ANCHOR_DATE = new Date(2026, 7, 31); // 31 de Agosto de 2026
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const CYCLE_DAYS = 14;
+
+export const getBaseCycleIndex = () => {
+  const now = new Date();
+  const todayAtMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.floor((todayAtMidnight.getTime() - ANCHOR_DATE.getTime()) / MS_PER_DAY);
+  return Math.floor(diffDays / CYCLE_DAYS);
+};
+
+export const getPeriodRangeByIndex = (cycleIndex: number) => {
+  const currentStart = new Date(ANCHOR_DATE.getTime() + cycleIndex * CYCLE_DAYS * MS_PER_DAY);
+  const currentEnd = new Date(ANCHOR_DATE.getTime() + (cycleIndex * CYCLE_DAYS + 13) * MS_PER_DAY);
+
+  const formatDate = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  return {
+    start: formatDate(currentStart),
+    end: formatDate(currentEnd),
+  };
+};
+
+export const formatPeriodLegend = (startStr: string, endStr: string) => {
+  if (!startStr || !endStr) return "";
+  const s = new Date(startStr + "T00:00:00");
+  const e = new Date(endStr + "T00:00:00");
+  const sMonth = s.toLocaleDateString("en-US", { month: "short" });
+  const eMonth = e.toLocaleDateString("en-US", { month: "short" });
+  const sDay = s.getDate();
+  const eDay = e.getDate();
+  const year = e.getFullYear();
+
+  if (sMonth === eMonth) {
+    return `${sMonth} ${sDay} – ${eDay}, ${year}`;
+  }
+  return `${sMonth} ${sDay} – ${eMonth} ${eDay}, ${year}`;
+};
+
+export const getLocalTodayString = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 </file>
 
@@ -1829,6 +1222,699 @@ const Toast: React.FC<ToastProps> = ({ message, onClose }) => {
 };
 
 export default Toast;
+</file>
+
+<file path="src/components/ToolBoxAuditor.tsx">
+import React, { useState, useEffect } from 'react';
+import { db } from '../firebaseConfig';
+import { collection, getDocs, query, where } from 'firebase/firestore'; // <-- NUEVO: Importar 'where'
+import MapLink from './MapLink';
+
+interface Attendee {
+  workerName: string;
+  signature: string;
+  signedAt: string;
+}
+
+interface ToolboxMeeting {
+  id: string;
+  companyId?: string; // <-- NUEVO: Añadido companyId a la interfaz
+  dateStr: string;
+  jobSite: string;
+  topic: string;
+  hazards: string[];
+  notes?: string;
+  leadId: string;
+  leadName?: string;
+  leadEmail?: string;
+  attendees: Attendee[];
+  createdAt?: any;
+}
+
+// <-- NUEVO: Interfaz para recibir el companyId desde AdminPanel
+interface ToolboxAuditorProps {
+  companyId: string | null;
+}
+
+// <-- MODIFICADO: El componente ahora recibe companyId
+const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
+  const [meetings, setMeetings] = useState<ToolboxMeeting[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedMeeting, setSelectedMeeting] = useState<ToolboxMeeting | null>(null);
+
+  // Filtros de búsqueda
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+  const [leadFilter, setLeadFilter] = useState('all');
+
+  // <-- MODIFICADO: Filtrar por companyId
+  const fetchMeetings = async () => {
+    if (!companyId) return; // Si no hay empresa, no hacemos nada
+
+    setLoading(true);
+    try {
+      // Solo traemos las actas de ESTA empresa
+      const q = query(
+        collection(db, 'toolboxMeetings'), 
+        where('companyId', '==', companyId)
+      );
+      const snapshot = await getDocs(q);
+      
+      const data: ToolboxMeeting[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<ToolboxMeeting, 'id'>),
+      }));
+
+      // Ordenamos las más recientes primero en JavaScript 
+      // (evita tener que crear índices compuestos extra en Firebase)
+      data.sort((a, b) => {
+        const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+        const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+        return timeB - timeA;
+      });
+      
+      setMeetings(data);
+    } catch (err) {
+      console.error('Error fetching toolbox meetings:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // <-- MODIFICADO: Añadir companyId como dependencia del useEffect
+  useEffect(() => {
+    fetchMeetings();
+  }, [companyId]);
+
+  // Lista única de Team Leads que han realizado charlas para el filtro
+  const uniqueLeads = Array.from(
+    new Set(meetings.map((m) => m.leadName || m.leadEmail || 'Unknown'))
+  );
+
+  // Filtrado reactivo multidimensional
+  const filteredMeetings = meetings.filter((m) => {
+    // 1. Filtro por fecha exacta
+    if (dateFilter && m.dateStr !== dateFilter) {
+      return false;
+    }
+
+    // 2. Filtro por Team Lead
+    if (leadFilter !== 'all') {
+      const leadIdentifier = m.leadName || m.leadEmail || 'Unknown';
+      if (leadIdentifier !== leadFilter) return false;
+    }
+
+    // 3. Filtro por texto libre: busca en la obra, tema, notas o si algún firmante coincide
+    if (searchQuery.trim()) {
+      const queryLower = searchQuery.toLowerCase();
+      const matchSite = m.jobSite.toLowerCase().includes(queryLower);
+      const matchTopic = m.topic.toLowerCase().includes(queryLower);
+      const matchNotes = m.notes?.toLowerCase().includes(queryLower) || false;
+      const matchWorker = m.attendees?.some((att) =>
+        att.workerName.toLowerCase().includes(queryLower)
+      );
+
+      return matchSite || matchTopic || matchNotes || matchWorker;
+    }
+
+    return true;
+  });
+
+  return (
+    <div className="space-y-6">
+      {/* Barra de Filtros */}
+      <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="w-full md:flex-1">
+          <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+            Search Site, Topic, or Worker
+          </label>
+          <div className="relative">
+            <span className="absolute left-3.5 top-3 text-gray-400">🔍</span>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Filter by address or worker name..."
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500 focus:bg-white transition-all"
+            />
+          </div>
+        </div>
+
+        <div className="flex w-full md:w-auto gap-3 items-center">
+          <div>
+            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+              Date
+            </label>
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+              Conducted By (Lead)
+            </label>
+            <select
+              value={leadFilter}
+              onChange={(e) => setLeadFilter(e.target.value)}
+              className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500 cursor-pointer"
+            >
+              <option value="all">All Team Leads</option>
+              {uniqueLeads.map((lead, idx) => (
+                <option key={idx} value={lead}>
+                  {lead}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {(searchQuery || dateFilter || leadFilter !== 'all') && (
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setDateFilter('');
+                setLeadFilter('all');
+              }}
+              className="self-end px-3 py-2.5 text-xs font-bold text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Lista de Reuniones */}
+      {loading ? (
+        <div className="bg-white p-12 rounded-2xl shadow-sm text-center text-sm font-semibold text-gray-400">
+          Loading safety compliance records...
+        </div>
+      ) : filteredMeetings.length === 0 ? (
+        <div className="bg-white p-12 rounded-2xl shadow-sm text-center">
+          <p className="text-3xl mb-2">📋</p>
+          <h4 className="text-sm font-bold text-gray-700">No Toolbox Meetings Found</h4>
+          <p className="text-xs text-gray-400 mt-1">
+            {meetings.length === 0
+              ? 'No safety briefings have been submitted yet.'
+              : 'Try adjusting your filters.'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredMeetings.map((meeting) => (
+            <div
+              key={meeting.id}
+              onClick={() => setSelectedMeeting(meeting)}
+              className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 rounded-md border border-purple-200/50">
+                    {meeting.dateStr}
+                  </span>
+                  <span className="text-xs font-bold text-gray-500">
+                    👤 {meeting.leadName || meeting.leadEmail}
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 leading-snug">
+                    {meeting.topic}
+                  </h4>
+                  <div className="mt-1">
+                    <MapLink location={meeting.jobSite} />
+                  </div>
+                </div>
+
+                {/* Tags de Peligros Discutidos */}
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {meeting.hazards.slice(0, 3).map((h, i) => (
+                    <span
+                      key={i}
+                      className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium"
+                    >
+                      {h.split('(')[0].trim()}
+                    </span>
+                  ))}
+                  {meeting.hazards.length > 3 && (
+                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-[10px] font-bold">
+                      +{meeting.hazards.length - 3} more
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Pie de tarjeta con contador de firmas */}
+              <div className="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                  {meeting.attendees?.length || 0} Workers Signed
+                </span>
+                <span className="text-xs font-bold text-purple-600 hover:underline">
+                  View Signatures & Details →
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Modal Detallado de Auditoría e Inspección de Firmas */}
+      {selectedMeeting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 p-6 space-y-6 my-auto animate-fade-in">
+            {/* Header del Modal */}
+            <div className="flex items-start justify-between pb-4 border-b border-gray-100">
+              <div>
+                <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md">
+                  Safety Meeting Report
+                </span>
+                <h3 className="text-lg font-bold text-gray-900 mt-1">
+                  {selectedMeeting.topic}
+                </h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Conducted by <span className="font-bold text-gray-800">{selectedMeeting.leadName || selectedMeeting.leadEmail}</span> on <span className="font-bold text-gray-800">{selectedMeeting.dateStr}</span>
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedMeeting(null)}
+                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Ubicación */}
+            <div>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                Job Site
+              </p>
+              <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+                <MapLink location={selectedMeeting.jobSite} />
+              </div>
+            </div>
+
+            {/* Peligros y Medidas */}
+            <div>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                Hazards & Safety Controls Discussed
+              </p>
+              <div className="space-y-1.5 bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+                {selectedMeeting.hazards.map((h, idx) => (
+                  <div key={idx} className="flex items-center gap-2 text-xs text-gray-700">
+                    <span className="text-emerald-600 font-bold">✓</span>
+                    <span>{h}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Notas específicas */}
+            {selectedMeeting.notes && (
+              <div>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                  Supervisor Notes
+                </p>
+                <div className="p-3 bg-yellow-50/60 rounded-xl border border-yellow-200 text-xs text-yellow-900">
+                  {selectedMeeting.notes}
+                </div>
+              </div>
+            )}
+
+            {/* Firmas Táctiles de los Operarios */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                  Crew Signatures ({selectedMeeting.attendees?.length || 0})
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                {selectedMeeting.attendees?.map((att, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-gray-900 truncate">
+                        {att.workerName}
+                      </p>
+                      <p className="text-[10px] text-gray-400">
+                        Signed at {att.signedAt}
+                      </p>
+                    </div>
+                    <img
+                      src={att.signature}
+                      alt={`Signature of ${att.workerName}`}
+                      className="h-10 w-24 object-contain bg-white border border-gray-200 rounded-lg p-0.5"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Acciones */}
+            <div className="flex justify-end pt-3 border-t border-gray-100">
+              <button
+                onClick={() => setSelectedMeeting(null)}
+                className="px-5 py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                Close Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ToolboxAuditor;
+</file>
+
+<file path="src/components/ToolBoxMeetingModal.tsx">
+import React, { useState } from 'react';
+import { db } from '../firebaseConfig';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import LocationInput from './LocationInput';
+import SignaturePad from './SignaturePad';
+
+interface Attendee {
+  workerName: string;
+  signature: string; // Base64 Data URL
+  signedAt: string;
+}
+
+interface ToolboxMeetingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  currentUser: any;
+  userCompanyId: string | null;
+  showNotification: (msg: string) => void;
+}
+
+const COMMON_HAZARDS = [
+  'PPE Inspection (Hard hat, hi-vis, steel toes, eye protection)',
+  'Demolition Falling Debris & Exclusion Zones',
+  'Silica Dust & Respirator Compliance',
+  'Slips, Trips & Good Housekeeping',
+  'Power Tools & Extension Cord Inspections',
+  'Overhead Hazards & Scaffolding Stability',
+  'Utility Locates (Power, Gas, Water) Verified',
+];
+
+const COMMON_TOPICS = [
+  'Daily Site Safety Orientation & Hazards Review',
+  'Interior Demolition & Structural Precautions',
+  'Dust Suppression & Ventilation Protocols',
+  'Material Handling & Ergonomics',
+  'Emergency Action Plan & Evacuation Routes',
+];
+
+const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
+  isOpen,
+  onClose,
+  currentUser,
+  userCompanyId,
+  showNotification,
+}) => {
+  const [jobSite, setJobSite] = useState('');
+  const [topic, setTopic] = useState(COMMON_TOPICS[0]);
+  const [selectedHazards, setSelectedHazards] = useState<string[]>([
+    COMMON_HAZARDS[0],
+    COMMON_HAZARDS[1],
+  ]);
+  const [notes, setNotes] = useState('');
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const [currentWorkerName, setCurrentWorkerName] = useState('');
+  const [signingWorkerName, setSigningWorkerName] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  if (!isOpen) return null;
+
+  const toggleHazard = (hazard: string) => {
+    setSelectedHazards((prev) =>
+      prev.includes(hazard) ? prev.filter((h) => h !== hazard) : [...prev, hazard]
+    );
+  };
+
+  const handleStartSigning = () => {
+    const cleanName = currentWorkerName.trim();
+    if (!cleanName) {
+      showNotification('Please enter a worker name to sign.');
+      return;
+    }
+    setSigningWorkerName(cleanName);
+  };
+
+  const handleSaveSignature = (signatureDataUrl: string) => {
+    if (!signingWorkerName) return;
+
+    const newAttendee: Attendee = {
+      workerName: signingWorkerName,
+      signature: signatureDataUrl,
+      signedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    setAttendees((prev) => [...prev, newAttendee]);
+    setSigningWorkerName(null);
+    setCurrentWorkerName('');
+  };
+
+  const handleRemoveAttendee = (index: number) => {
+    setAttendees((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!jobSite.trim()) {
+      showNotification('Please provide the job site location.');
+      return;
+    }
+    if (attendees.length === 0) {
+      showNotification('At least one worker must sign the meeting acknowledgment.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+      await addDoc(collection(db, 'toolboxMeetings'), {
+        companyId: userCompanyId,
+        dateStr,
+        jobSite: jobSite.trim(),
+        topic,
+        hazards: selectedHazards,
+        notes: notes.trim(),
+        leadId: currentUser.uid,
+        leadEmail: currentUser.email,
+        leadName: currentUser.displayName || currentUser.email,
+        attendees,
+        createdAt: Timestamp.now(),
+      });
+
+      showNotification('Toolbox Meeting saved successfully!');
+      onClose();
+    } catch (err: any) {
+      showNotification('Error saving Toolbox Meeting: ' + err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6 overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 p-5 sm:p-7 space-y-5 animate-fade-in my-auto">
+        
+        {/* Encabezado */}
+        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+          <div>
+            <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md">
+              Safety Compliance
+            </span>
+            <h3 className="text-lg font-bold text-gray-800 mt-1">
+              Daily Toolbox Talk & Safety Meeting
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Ubicación de la Obra (con autocompletado de Places) */}
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+              Job Site Location
+            </label>
+            <LocationInput
+              value={jobSite}
+              onChange={(val) => setJobSite(val)}
+              placeholder="Search or type site address..."
+              className="p-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+              required
+            />
+          </div>
+
+          {/* Tema de Seguridad */}
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+              Safety Topic
+            </label>
+            <select
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+            >
+              {COMMON_TOPICS.map((t, idx) => (
+                <option key={idx} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Lista de Peligros y Controles */}
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
+              Hazards & Controls Discussed
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
+              {COMMON_HAZARDS.map((h, idx) => {
+                const isChecked = selectedHazards.includes(h);
+                return (
+                  <label
+                    key={idx}
+                    className="flex items-start gap-2 cursor-pointer text-xs font-medium text-gray-700 select-none"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={() => toggleHazard(h)}
+                      className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span>{h}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Notas Adicionales */}
+          <div>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+              Specific Controls & Notes (Optional)
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
+              placeholder="E.g., Water mist active for dust suppression; 2nd floor hole covered and marked..."
+              className="w-full p-3 border border-gray-300 rounded-lg text-xs bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+            />
+          </div>
+
+          {/* Lista y Captura de Firmas */}
+          <div className="pt-3 border-t border-gray-100 space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
+                Crew Signatures ({attendees.length} Signed)
+              </label>
+            </div>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={currentWorkerName}
+                onChange={(e) => setCurrentWorkerName(e.target.value)}
+                placeholder="Worker full name..."
+                className="flex-1 p-2.5 border border-gray-300 rounded-lg text-xs bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleStartSigning}
+                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+              >
+                <span>✍️</span>
+                <span>Sign</span>
+              </button>
+            </div>
+
+            {/* Listado de los que ya firmaron */}
+            {attendees.length > 0 && (
+              <div className="divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden bg-white max-h-48 overflow-y-auto">
+                {attendees.map((att, index) => (
+                  <div key={index} className="p-2.5 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <img
+                        src={att.signature}
+                        alt="Signature"
+                        className="h-7 w-20 object-contain border border-gray-200 rounded bg-gray-50"
+                      />
+                      <div className="truncate">
+                        <p className="text-xs font-bold text-gray-800 truncate">
+                          {att.workerName}
+                        </p>
+                        <p className="text-[10px] text-gray-400">
+                          Signed at {att.signedAt}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveAttendee(index)}
+                      className="text-gray-400 hover:text-red-500 p-1 text-xs font-bold transition-colors cursor-pointer"
+                      title="Remove"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Botones de Envío */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2.5 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm disabled:bg-emerald-400 cursor-pointer disabled:cursor-not-allowed"
+            >
+              {submitting ? 'Saving...' : 'Save & Submit Toolbox Meeting'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Modal flotante de captura de firma */}
+      {signingWorkerName && (
+        <SignaturePad
+          workerName={signingWorkerName}
+          onSave={handleSaveSignature}
+          onCancel={() => setSigningWorkerName(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default ToolboxMeetingModal;
 </file>
 
 <file path="src/components/WorkerCalculator.tsx">
@@ -2629,6 +2715,24 @@ const Calendar: React.FC<CalendarProps> = ({ logs, role = 'worker', onLogUpdated
 export default Calendar;
 </file>
 
+<file path="index.html">
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#8cc641" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>working-platform</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+</file>
+
 <file path="src/App.tsx">
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -2637,6 +2741,7 @@ import { auth, db } from './firebaseConfig';
 import Auth from './components/Auth';
 import Dashboard from './components/Dashboard';
 import AdminPanel from './components/AdminPanel'; 
+import { applyTenantTheme, currentTenant } from './config/tenant.config';
 
 export type UserRole = 'admin' | 'teamlead' | 'worker';
 
@@ -2658,6 +2763,32 @@ function App() {
           if (userDocSnap.exists()) {
             const data = userDocSnap.data();
             
+            // <-- NUEVO BLOQUE: Descargamos la config de su empresa
+            if (data.companyId) {
+              const companyDoc = await getDoc(doc(db, 'companies', data.companyId));
+              if (companyDoc.exists()) {
+                const companyData = companyDoc.data();
+                
+                // Construimos el objeto de configuración con los datos de Firebase
+                const tenantConfig = {
+                  ...currentTenant, // Mantenemos la base
+                  company: {
+                    name: companyData.name || currentTenant.company.name,
+                    shortName: companyData.shortName || currentTenant.company.shortName,
+                    logoUrl: companyData.logoUrl || currentTenant.company.logoUrl,
+                  },
+                  // Si tuvieras colores en Firebase, los inyectarías aquí
+                };
+                
+                // Aplicamos los colores
+                applyTenantTheme(tenantConfig);
+                
+                // Opcional: Actualizamos el título de la pestaña del navegador
+                document.title = companyData.shortName || 'Working Platform';
+              }
+            }
+            // <-- FIN DEL NUEVO BLOQUE
+
             if (currentUser.email === ADMIN_EMAIL || data.role === 'admin') {
               setUserRole('admin');
             } else if (data.role === 'teamlead') {
@@ -2675,6 +2806,7 @@ function App() {
       } else {
         setUser(null);
         setUserRole('worker');
+        applyTenantTheme(currentTenant); // Resetea al tema por defecto si cierra sesión
       }
       setLoading(false);
     });
@@ -2707,24 +2839,6 @@ function App() {
 }
 
 export default App;
-</file>
-
-<file path="index.html">
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#8cc641" />
-    <link rel="manifest" href="/manifest.json" />
-    <title>working-platform</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
 </file>
 
 <file path="src/components/Auth.tsx">
@@ -2841,17 +2955,26 @@ import {
   doc,
   Timestamp,
   where,
+  getDoc, // <-- NUEVO: Importar getDoc
 } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import Toast from "./Toast";
 import PhotoModal from "./PhotoModal";
 import MapLink from "./MapLink";
 import ToolboxAuditor from "./ToolBoxAuditor";
+// <-- NUEVO: Importamos desde payroll.ts
+import { 
+  getBaseCycleIndex, 
+  getPeriodRangeByIndex, 
+  formatPeriodLegend, 
+  getLocalTodayString 
+} from '../utils/payroll';
 
 interface AdminPanelProps {
   user: any;
 }
 
+// ... (El componente InlineEditForm se mantiene igual)
 const InlineEditForm = ({
   workerId,
   dateObj,
@@ -3056,13 +3179,6 @@ const InlineEditForm = ({
   );
 };
 
-const getLocalTodayString = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
 
 const getFirstDayOfMonth = () => {
   const d = new Date();
@@ -3071,64 +3187,10 @@ const getFirstDayOfMonth = () => {
   return d;
 };
 
-// Formateador visual para el rango de la quincena (ej: "Sep 14 – Sep 27, 2026")
-const formatPeriodLegend = (startStr: string, endStr: string) => {
-  if (!startStr || !endStr) return "";
-  const s = new Date(startStr + "T00:00:00");
-  const e = new Date(endStr + "T00:00:00");
-  const sMonth = s.toLocaleDateString("en-US", { month: "short" });
-  const eMonth = e.toLocaleDateString("en-US", { month: "short" });
-  const sDay = s.getDate();
-  const eDay = e.getDate();
-  const year = e.getFullYear();
-
-  if (sMonth === eMonth) {
-    return `${sMonth} ${sDay} – ${eDay}, ${year}`;
-  }
-  return `${sMonth} ${sDay} – ${eMonth} ${eDay}, ${year}`;
-};
-
-// Configuración y cálculo base bisemanal (14 días)
-const ANCHOR_DATE = new Date(2026, 7, 31); // Lunes 31 de agosto de 2026
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const CYCLE_DAYS = 14;
-
-const getBaseCycleIndex = () => {
-  const now = new Date();
-  const todayAtMidnight = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-  );
-  const diffDays = Math.floor(
-    (todayAtMidnight.getTime() - ANCHOR_DATE.getTime()) / MS_PER_DAY,
-  );
-  return Math.floor(diffDays / CYCLE_DAYS);
-};
-
-const getPeriodRangeByIndex = (cycleIndex: number) => {
-  const currentStart = new Date(
-    ANCHOR_DATE.getTime() + cycleIndex * CYCLE_DAYS * MS_PER_DAY,
-  );
-  const currentEnd = new Date(
-    ANCHOR_DATE.getTime() + (cycleIndex * CYCLE_DAYS + 13) * MS_PER_DAY,
-  );
-
-  const formatDate = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  };
-
-  return {
-    start: formatDate(currentStart),
-    end: formatDate(currentEnd),
-  };
-};
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   const [activeTab, setActiveTab] = useState<'payroll' | 'safety'>('payroll');
+  const [adminCompanyId, setAdminCompanyId] = useState<string | null>(null); // <-- NUEVO ESTADO
   const [allLogs, setAllLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -3160,9 +3222,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     setToastMessage(message);
   };
 
-  const loadUsers = async () => {
+  // <-- CAMBIO: Se agrega el companyId al filtro
+  const loadUsers = async (companyId: string) => {
     try {
-      const usersSnapshot = await getDocs(collection(db, "users"));
+      const q = query(collection(db, "users"), where("companyId", "==", companyId)); // <-- CAMBIO
+      const usersSnapshot = await getDocs(q);
       const usersList: any[] = [];
 
       usersSnapshot.forEach((doc) => {
@@ -3183,11 +3247,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     }
   };
 
-  const loadLogs = async (fromDate: Date) => {
+  // <-- CAMBIO: Se agrega el companyId al filtro
+  const loadLogs = async (fromDate: Date, companyId: string) => {
     setLoading(true);
     try {
       const q = query(
         collection(db, "timeLogs"),
+        where("companyId", "==", companyId), // <-- CAMBIO
         where("timestamp", ">=", Timestamp.fromDate(fromDate)),
       );
       const querySnapshot = await getDocs(q);
@@ -3209,22 +3275,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     }
   };
 
+  // <-- CAMBIO: Obtener el companyId antes de cargar datos
   useEffect(() => {
     const initData = async () => {
-      await loadUsers();
-      await loadLogs(getFirstDayOfMonth());
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        const companyId = userDoc.data().companyId;
+        setAdminCompanyId(companyId);
+        
+        if (companyId) {
+          await loadUsers(companyId);
+          await loadLogs(getFirstDayOfMonth(), companyId);
+        }
+      }
     };
     initData();
-  }, []);
+  }, [user]);
 
+  // <-- CAMBIO: Se agrega adminCompanyId como dependencia
   useEffect(() => {
-    if (startDate) {
+    if (startDate && adminCompanyId) {
       const selectedDate = new Date(startDate + "T00:00:00");
       if (selectedDate < oldestLoadedDate) {
-        loadLogs(selectedDate);
+        loadLogs(selectedDate, adminCompanyId);
       }
     }
-  }, [startDate]);
+  }, [startDate, adminCompanyId]);
 
   const handleInlineSubmit = async (
     workerId: string,
@@ -3250,6 +3326,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
         {
           userId: targetWorker.id,
           userEmail: targetWorker.email,
+          companyId: adminCompanyId, // <-- NUEVO: Se inyecta la compañía
           location: data.location,
           locations: data.locations || [data.location],
           checkIn: data.checkIn,
@@ -3264,7 +3341,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
 
       showNotification("Log added successfully!");
       setEditingRowKey(null);
-      loadLogs(oldestLoadedDate);
+      loadLogs(oldestLoadedDate, adminCompanyId!); // <-- CAMBIO: Pasar el companyId
     } catch (error: any) {
       showNotification("Error saving: " + error.message);
     }
@@ -3911,7 +3988,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
         {/* PESTAÑA 2: Charlas de Seguridad (Toolbox Meetings) */}
         {activeTab === 'safety' && (
           <div className="animate-fade-in">
-            <ToolboxAuditor />
+            {/* <-- CAMBIO: Pasar adminCompanyId a ToolboxAuditor */}
+            <ToolboxAuditor companyId={adminCompanyId} />
           </div>
         )}
 
@@ -3951,69 +4029,25 @@ import PhotoEvidenceUploader from './PhotoEvidence';
 import LocationInput from './LocationInput';
 import ToolboxMeetingModal from './ToolBoxMeetingModal';
 
+// <-- NUEVO: Importamos las funciones centralizadas de nómina
+// (Nota: Si tu payroll.ts está en src/config/payroll.ts, cambia '../utils/payroll' por '../config/payroll')
+import { 
+  getBaseCycleIndex, 
+  getPeriodRangeByIndex, 
+  formatPeriodLegend, 
+  getLocalTodayString 
+} from '../utils/payroll';
+
 interface DashboardProps {
   user: any;
   role?: 'worker' | 'teamlead' | string;
 }
 
-// Configuración de nómina bisemanal
-const ANCHOR_DATE = new Date(2026, 7, 31);
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const CYCLE_DAYS = 14;
-
-const getBaseCycleIndex = () => {
-  const now = new Date();
-  const todayAtMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diffDays = Math.floor((todayAtMidnight.getTime() - ANCHOR_DATE.getTime()) / MS_PER_DAY);
-  return Math.floor(diffDays / CYCLE_DAYS);
-};
-
-const getPeriodRangeByIndex = (cycleIndex: number) => {
-  const currentStart = new Date(ANCHOR_DATE.getTime() + cycleIndex * CYCLE_DAYS * MS_PER_DAY);
-  const currentEnd = new Date(ANCHOR_DATE.getTime() + (cycleIndex * CYCLE_DAYS + 13) * MS_PER_DAY);
-
-  const formatDate = (d: Date) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  };
-
-  return {
-    start: formatDate(currentStart),
-    end: formatDate(currentEnd),
-  };
-};
-
-const formatPeriodLegend = (startStr: string, endStr: string) => {
-  if (!startStr || !endStr) return "";
-  const s = new Date(startStr + "T00:00:00");
-  const e = new Date(endStr + "T00:00:00");
-  const sMonth = s.toLocaleDateString("en-US", { month: "short" });
-  const eMonth = e.toLocaleDateString("en-US", { month: "short" });
-  const sDay = s.getDate();
-  const eDay = e.getDate();
-  const year = e.getFullYear();
-
-  if (sMonth === eMonth) {
-    return `${sMonth} ${sDay} – ${eDay}, ${year}`;
-  }
-  return `${sMonth} ${sDay} – ${eMonth} ${eDay}, ${year}`;
-};
-
-const getLocalTodayString = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const day = String(today.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
 const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
   const [userName, setUserName] = useState('');
+  const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
   const [hasLoggedToday, setHasLoggedToday] = useState(false);
   const [myLogs, setMyLogs] = useState<any[]>([]);
-  // const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -4045,13 +4079,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
     setToastMessage(msg);
   };
 
-  // Cargar nombre del usuario
+  // Cargar nombre del usuario y su companyId
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
-          setUserName(userDoc.data().fullName || user.email);
+          const data = userDoc.data();
+          setUserName(data.fullName || user.email);
+          setUserCompanyId(data.companyId || null);
         } else {
           setUserName(user.email);
         }
@@ -4062,13 +4098,16 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
     fetchUserData();
   }, [user]);
 
-  // Consultar registros del trabajador
+  // Consultar registros del trabajador (filtrando estrictamente por usuario y empresa)
   const fetchMyLogs = async () => {
-    // setLoading(true);
+    // <-- CORRECCIÓN 1: Si aún no ha cargado el companyId desde Firebase, esperamos
+    if (!userCompanyId) return;
+
     try {
       const q = query(
         collection(db, 'timeLogs'),
-        where('userId', '==', user.uid)
+        where('userId', '==', user.uid),
+        where('companyId', '==', userCompanyId)
       );
       const querySnapshot = await getDocs(q);
       const logs: any[] = [];
@@ -4096,14 +4135,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
       setHasLoggedToday(foundToday);
     } catch (error: any) {
       showNotification('Error loading logs: ' + error.message);
-    } finally {
-      // setLoading(false);
     }
   };
 
+  // <-- CORRECCIÓN 2: Se ejecuta automáticamente en cuanto userCompanyId termina de cargar
   useEffect(() => {
-    fetchMyLogs();
-  }, [user]);
+    if (userCompanyId) {
+      fetchMyLogs();
+    }
+  }, [user, userCompanyId]);
 
   // Manejo de obras múltiples
   const handleAddLocation = () => {
@@ -4133,6 +4173,13 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
   // Guardar turno del día
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // <-- CORRECCIÓN 3: Bloqueo preventivo si no hay empresa asignada
+    if (!userCompanyId) {
+      showNotification('Error: Your account is not linked to a company.');
+      return;
+    }
+
     const cleanMain = mainLocation.trim();
     const cleanExtras = extraLocations.map((l) => l.trim()).filter(Boolean);
     const cleanHours = totalHours.trim();
@@ -4158,6 +4205,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
       await setDoc(doc(db, 'timeLogs', docId), {
         userId: user.uid,
         userEmail: user.email,
+        companyId: userCompanyId, // <-- CORRECCIÓN 4: Ahora sí guardamos el companyId en Firestore
         location: combinedLocation,
         locations: allLocations,
         checkIn,
@@ -4445,7 +4493,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
                 type="button"
                 onClick={handleNextPeriod}
                 className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
-                title="Next Pay Period"
               >
                 ▶
               </button>
@@ -4551,6 +4598,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
         isOpen={isToolboxOpen}
         onClose={() => setIsToolboxOpen(false)}
         currentUser={user}
+        userCompanyId={userCompanyId}
         showNotification={showNotification}
       />
     </div>
