@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { PenTool, X } from 'lucide-react';
 
 interface SignaturePadProps {
   workerName: string;
@@ -18,7 +19,6 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ workerName, onSave, onCance
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Escala para pantallas de alta densidad (Retina / OLED móviles) para evitar trazos borrosos
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width * ratio;
@@ -52,6 +52,7 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ workerName, onSave, onCance
 
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Evita que propague al fondo
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -67,6 +68,7 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ workerName, onSave, onCance
   const draw = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDrawing) return;
     e.preventDefault();
+    e.stopPropagation();
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -77,8 +79,11 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ workerName, onSave, onCance
     ctx.stroke();
   };
 
-  const stopDrawing = () => {
-    setIsDrawing(false);
+  const stopDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    if (isDrawing) {
+      e.stopPropagation(); // Detiene que el evento cierre las ventanas de atrás
+      setIsDrawing(false);
+    }
   };
 
   const handleClear = () => {
@@ -99,19 +104,42 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ workerName, onSave, onCance
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-gray-100 space-y-4">
-        <div>
-          <h4 className="text-base font-bold text-gray-800">
-            Sign Safety Acknowledgment
-          </h4>
-          <p className="text-xs text-gray-500 mt-0.5">
-            Worker: <span className="font-bold text-blue-600">{workerName}</span>
-          </p>
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fade-in"
+      onClick={(e) => {
+        e.stopPropagation();
+        onCancel();
+      }}
+    >
+      <div 
+        className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4"
+        onClick={(e) => e.stopPropagation()} // Evita cierres accidentales al hacer clic dentro del contenedor
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#FCEEE6] text-[#8B4513] flex items-center justify-center">
+              <PenTool className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-sm font-extrabold text-slate-900">
+                Sign Safety Acknowledgment
+              </h4>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Worker: <span className="font-extrabold text-[#8B4513]">{workerName}</span>
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* touch-none evita que el navegador haga scroll de la página mientras el usuario firma con el dedo */}
-        <div className="border-2 border-dashed border-gray-300 rounded-xl bg-gray-50/50 relative overflow-hidden">
+        {/* touch-none evita que el navegador haga scroll mientras se firma */}
+        <div className="border-2 border-dashed border-slate-200 rounded-2xl bg-[#F4F6F9] relative overflow-hidden">
           <canvas
             ref={canvasRef}
             onMouseDown={startDrawing}
@@ -123,7 +151,7 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ workerName, onSave, onCance
             onTouchEnd={stopDrawing}
             className="w-full h-44 cursor-crosshair touch-none"
           />
-          <div className="absolute bottom-2 left-3 pointer-events-none text-[10px] uppercase font-bold text-gray-400">
+          <div className="absolute bottom-2.5 left-3 pointer-events-none text-[10px] uppercase font-extrabold text-slate-400">
             Sign inside this box ✍️
           </div>
         </div>
@@ -132,7 +160,7 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ workerName, onSave, onCance
           <button
             type="button"
             onClick={handleClear}
-            className="px-3.5 py-2 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+            className="px-4 py-2.5 text-xs font-extrabold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors cursor-pointer"
           >
             Clear
           </button>
@@ -141,7 +169,7 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ workerName, onSave, onCance
             <button
               type="button"
               onClick={onCancel}
-              className="px-3.5 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+              className="px-4 py-2.5 text-xs font-extrabold text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -149,7 +177,7 @@ const SignaturePad: React.FC<SignaturePadProps> = ({ workerName, onSave, onCance
               type="button"
               onClick={handleConfirm}
               disabled={!hasDrawn}
-              className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 rounded-lg transition-colors shadow-xs cursor-pointer disabled:cursor-not-allowed"
+              className="px-5 py-2.5 text-xs font-extrabold text-white bg-[#8B3A0E] hover:bg-[#722f0b] disabled:opacity-50 rounded-2xl transition-colors shadow-xs cursor-pointer disabled:cursor-not-allowed"
             >
               Save Signature
             </button>

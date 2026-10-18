@@ -8,6 +8,19 @@ import {
   doc,
   updateDoc,
 } from 'firebase/firestore';
+import { 
+  ArrowLeft, 
+  MapPin, 
+  ClipboardCheck, 
+  Clock, 
+  ShieldCheck, 
+  Camera, 
+  Save, 
+  Calendar as CalendarIcon, 
+  PenTool, 
+  Plus,
+  FileText
+} from 'lucide-react';
 import type { Project } from './ProjectsManager';
 import PhotoEvidenceUploader from './PhotoEvidence';
 import ToolboxMeetingModal from './ToolBoxMeetingModal';
@@ -99,32 +112,37 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
   const shiftPhotos = projectLogs.flatMap((log) => log.photos || []);
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Barra superior con botón para regresar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-200">
-        <div className="flex items-center gap-3">
+    <div className="space-y-5 animate-fade-in">
+      {/* Cabecera del Expediente de Obra */}
+      <div className="bg-white p-5 rounded-3xl shadow-xs border border-slate-100 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5 min-w-0">
           <button
             type="button"
             onClick={onBack}
-            className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
+            className="w-10 h-10 rounded-2xl bg-[#F4F6F9] hover:bg-[#FCEEE6] text-slate-700 hover:text-[#8B4513] flex items-center justify-center transition-colors cursor-pointer shrink-0 border border-slate-200/60"
+            title="Back to Projects"
           >
-            <span>←</span>
-            <span>Back to Projects</span>
+            <ArrowLeft className="w-4 h-4" />
           </button>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-black text-gray-900">{project.name}</h2>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-base sm:text-lg font-black text-slate-900 truncate">
+                {project.name}
+              </h2>
               <span
-                className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
                   project.status === 'active'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-gray-200 text-gray-600'
+                    ? 'bg-emerald-100/80 text-emerald-800'
+                    : 'bg-slate-200 text-slate-600'
                 }`}
               >
                 {project.status}
               </span>
             </div>
-            <p className="text-xs text-gray-500">📍 {project.address}</p>
+            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5 truncate">
+              <MapPin className="w-3.5 h-3.5 text-[#8B4513] shrink-0" />
+              <span className="truncate">{project.address}</span>
+            </p>
           </div>
         </div>
 
@@ -132,97 +150,127 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
         <button
           type="button"
           onClick={() => setIsToolboxOpen(true)}
-          className="px-4 py-2.5 bg-purple-700 hover:bg-purple-800 text-white rounded-xl text-xs font-black shadow-sm transition-colors cursor-pointer flex items-center gap-2"
+          className="w-full sm:w-auto px-4 py-3 bg-[#8B3A0E] hover:bg-[#722f0b] text-white rounded-2xl text-xs font-extrabold shadow-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
         >
-          <span>📋</span>
-          <span>+ New Project Toolbox Talk</span>
+          <ClipboardCheck className="w-4 h-4" />
+          <span>+ New Toolbox Talk</span>
         </button>
       </div>
 
       {/* Tarjetas de Resumen Rápido del Proyecto */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 bg-blue-50/70 border border-blue-100 rounded-xl">
-          <span className="text-[10px] font-black uppercase tracking-wider text-blue-700">
-            Total Project Hours
-          </span>
-          <p className="text-2xl font-black text-blue-950 mt-0.5">{totalProjectHours}h</p>
-          <p className="text-xs text-blue-600">{projectLogs.length} daily logs recorded</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className="p-4 bg-white border border-slate-100 rounded-3xl shadow-xs flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-[#FCEEE6] text-[#8B4513] flex items-center justify-center shrink-0">
+            <Clock className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+              Total Project Hours
+            </span>
+            <p className="text-xl font-black text-slate-900 mt-0.5">
+              {totalProjectHours} <span className="text-xs font-bold text-slate-400">hrs</span>
+            </p>
+            <p className="text-[11px] text-slate-400 font-medium">
+              {projectLogs.length} daily logs
+            </p>
+          </div>
         </div>
 
-        <div className="p-4 bg-purple-50/70 border border-purple-100 rounded-xl">
-          <span className="text-[10px] font-black uppercase tracking-wider text-purple-700">
-            Safety Briefings
-          </span>
-          <p className="text-2xl font-black text-purple-950 mt-0.5">{projectMeetings.length}</p>
-          <p className="text-xs text-purple-600">Toolbox meetings linked</p>
+        <div className="p-4 bg-white border border-slate-100 rounded-3xl shadow-xs flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-[#FEF3C7] text-[#92400E] flex items-center justify-center shrink-0">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+              Safety Briefings
+            </span>
+            <p className="text-xl font-black text-slate-900 mt-0.5">
+              {projectMeetings.length}
+            </p>
+            <p className="text-[11px] text-slate-400 font-medium">
+              Toolbox talks linked
+            </p>
+          </div>
         </div>
 
-        <div className="p-4 bg-emerald-50/70 border border-emerald-100 rounded-xl">
-          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700">
-            Site Photos & Evidence
-          </span>
-          <p className="text-2xl font-black text-emerald-950 mt-0.5">
-            {projectPhotos.length + shiftPhotos.length}
-          </p>
-          <p className="text-xs text-emerald-600">Accumulated media files</p>
+        <div className="p-4 bg-white border border-slate-100 rounded-3xl shadow-xs flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+            <Camera className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+              Site Evidence
+            </span>
+            <p className="text-xl font-black text-slate-900 mt-0.5">
+              {projectPhotos.length + shiftPhotos.length}
+            </p>
+            <p className="text-[11px] text-slate-400 font-medium">
+              Media files uploaded
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Sub-pestañas del Expediente */}
-      <div className="flex gap-2 p-1 bg-gray-100 rounded-xl w-fit">
+      {/* Sub-pestañas del Expediente (Estilo Píldora) */}
+      <div className="grid grid-cols-3 p-1.5 bg-[#EEF2F6] rounded-2xl gap-1">
         <button
           type="button"
           onClick={() => setActiveSubTab('overview')}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          className={`py-2.5 px-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
             activeSubTab === 'overview'
-              ? 'bg-white text-gray-900 shadow-xs'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-slate-900 shadow-xs'
+              : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          📸 Evidence & Site Notes
+          <Camera className={`w-3.5 h-3.5 shrink-0 ${activeSubTab === 'overview' ? 'text-[#8B4513]' : 'text-slate-400'}`} />
+          <span className="truncate">Evidence & Notes</span>
         </button>
+
         <button
           type="button"
           onClick={() => setActiveSubTab('toolbox')}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          className={`py-2.5 px-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
             activeSubTab === 'toolbox'
-              ? 'bg-white text-purple-900 shadow-xs'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-slate-900 shadow-xs'
+              : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          🛡️ Toolbox Meetings ({projectMeetings.length})
+          <ShieldCheck className={`w-3.5 h-3.5 shrink-0 ${activeSubTab === 'toolbox' ? 'text-[#8B4513]' : 'text-slate-400'}`} />
+          <span className="truncate">Toolbox ({projectMeetings.length})</span>
         </button>
+
         <button
           type="button"
           onClick={() => setActiveSubTab('hours')}
-          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+          className={`py-2.5 px-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
             activeSubTab === 'hours'
-              ? 'bg-white text-blue-900 shadow-xs'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-slate-900 shadow-xs'
+              : 'text-slate-500 hover:text-slate-800'
           }`}
         >
-          ⏱️ Crew Hours ({projectLogs.length})
+          <Clock className={`w-3.5 h-3.5 shrink-0 ${activeSubTab === 'hours' ? 'text-[#8B4513]' : 'text-slate-400'}`} />
+          <span className="truncate">Hours ({projectLogs.length})</span>
         </button>
       </div>
 
       {/* CONTENIDO DE SUB-PESTAÑA 1: Evidencias y Notas del Proyecto */}
       {activeSubTab === 'overview' && (
-        <div className="bg-white p-5 rounded-xl border border-gray-200 space-y-5">
+        <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-100 shadow-xs space-y-5">
           <div>
-            <h4 className="text-sm font-bold text-gray-800 mb-1">
+            <label className="block text-xs font-extrabold text-slate-500 mb-2">
               Project Scope, Permits & Field Notes
-            </h4>
+            </label>
             <textarea
               value={projectNotes}
               onChange={(e) => setProjectNotes(e.target.value)}
               rows={3}
               placeholder="Add important site details, lockbox codes, blueprint links, or progress notes..."
-              className="w-full p-3 border border-gray-200 rounded-lg text-xs bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full p-3.5 border border-slate-200/80 rounded-2xl text-xs bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-medium text-slate-800 transition-all"
             />
           </div>
 
-          <div className="pt-3 border-t border-gray-100">
-            <h4 className="text-sm font-bold text-gray-800 mb-2">
+          <div className="pt-4 border-t border-slate-100">
+            <h4 className="text-xs font-extrabold text-slate-500 mb-3">
               Upload Direct Project Photos / Documents
             </h4>
             <PhotoEvidenceUploader
@@ -237,16 +285,17 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
               type="button"
               onClick={handleSaveProjectEvidence}
               disabled={savingDetails}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+              className="w-full sm:w-auto px-5 py-3 bg-[#8B3A0E] hover:bg-[#722f0b] disabled:opacity-50 text-white rounded-2xl text-xs font-extrabold transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-xs"
             >
-              {savingDetails ? 'Saving...' : '💾 Save Project Folder Changes'}
+              <Save className="w-4 h-4" />
+              <span>{savingDetails ? 'Saving...' : 'Save Project Folder Changes'}</span>
             </button>
           </div>
 
           {/* Galería automática de fotos subidas en los turnos diarios de esta obra */}
           {shiftPhotos.length > 0 && (
-            <div className="pt-4 border-t border-gray-100">
-              <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+            <div className="pt-4 border-t border-slate-100">
+              <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-3">
                 Photos Uploaded via Daily Time Logs ({shiftPhotos.length})
               </h4>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -256,7 +305,7 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block rounded-lg overflow-hidden border border-gray-200 hover:opacity-90 transition-opacity"
+                    className="block rounded-2xl overflow-hidden border border-slate-200 hover:opacity-90 transition-opacity shadow-2xs"
                   >
                     <img src={url} alt="Site shift evidence" className="w-full h-28 object-cover" />
                   </a>
@@ -269,37 +318,48 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
 
       {/* CONTENIDO DE SUB-PESTAÑA 2: Toolbox Meetings del Proyecto */}
       {activeSubTab === 'toolbox' && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-xs text-gray-400">Loading meetings...</div>
+            <div className="p-10 text-center text-xs text-slate-400 font-semibold animate-pulse">
+              Loading meetings...
+            </div>
           ) : projectMeetings.length === 0 ? (
             <div className="p-10 text-center space-y-3">
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-slate-400">
                 No Toolbox Meetings recorded for this project yet.
               </p>
               <button
                 type="button"
                 onClick={() => setIsToolboxOpen(true)}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                className="px-4 py-2.5 bg-[#8B3A0E] hover:bg-[#722f0b] text-white rounded-xl text-xs font-extrabold transition-colors cursor-pointer inline-flex items-center gap-1.5"
               >
-                + Create First Toolbox Talk for {project.name}
+                <Plus className="w-4 h-4" />
+                <span>Create First Toolbox Talk for {project.name}</span>
               </button>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-slate-100">
               {projectMeetings.map((m) => (
-                <div key={m.id} className="p-4 space-y-2 hover:bg-gray-50">
+                <div key={m.id} className="p-5 space-y-2 hover:bg-[#F4F6F9]/50 transition-colors">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-purple-800 bg-purple-50 px-2.5 py-0.5 rounded border border-purple-200">
-                      📅 {m.dateStr}
+                    <span className="text-xs font-extrabold text-[#8B4513] bg-[#FCEEE6] px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+                      <CalendarIcon className="w-3.5 h-3.5" />
+                      <span>{m.dateStr}</span>
                     </span>
-                    <span className="text-xs font-bold text-gray-500">
-                      ✍️ {m.attendees?.length || 0} Crew Signatures
+                    <span className="text-xs font-extrabold text-slate-500 inline-flex items-center gap-1">
+                      <PenTool className="w-3.5 h-3.5 text-[#8B4513]" />
+                      <span>{m.attendees?.length || 0} Crew Signatures</span>
                     </span>
                   </div>
-                  <p className="text-sm font-bold text-gray-900">{m.topic}</p>
-                  {m.notes && <p className="text-xs text-gray-600 italic">"{m.notes}"</p>}
-                  <p className="text-[11px] text-gray-400">Lead: {m.leadName || m.leadEmail}</p>
+                  <p className="text-sm font-extrabold text-slate-900 pt-1">{m.topic}</p>
+                  {m.notes && (
+                    <p className="text-xs text-slate-600 italic bg-[#F4F6F9] p-2.5 rounded-xl">
+                      "{m.notes}"
+                    </p>
+                  )}
+                  <p className="text-[11px] font-semibold text-slate-400">
+                    Lead: {m.leadName || m.leadEmail}
+                  </p>
                 </div>
               ))}
             </div>
@@ -309,30 +369,39 @@ const ProjectDetailView: React.FC<ProjectDetailViewProps> = ({
 
       {/* CONTENIDO DE SUB-PESTAÑA 3: Horas registradas en el Proyecto */}
       {activeSubTab === 'hours' && (
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-xs overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-xs text-gray-400">Loading hours...</div>
+            <div className="p-10 text-center text-xs text-slate-400 font-semibold animate-pulse">
+              Loading hours...
+            </div>
           ) : projectLogs.length === 0 ? (
-            <div className="p-10 text-center text-xs text-gray-400">
+            <div className="p-10 text-center text-xs text-slate-400">
               No worker hours have been logged under this project yet.
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-slate-100">
               {projectLogs.map((log) => (
-                <div key={log.id} className="p-4 flex items-center justify-between gap-4 hover:bg-gray-50">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-gray-900">{log.userEmail}</span>
-                      <span className="text-xs text-gray-400">• {log.dateStr}</span>
+                <div key={log.id} className="p-5 flex items-center justify-between gap-4 hover:bg-[#F4F6F9]/50 transition-colors">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-extrabold text-slate-900 truncate">
+                        {log.userEmail}
+                      </span>
+                      <span className="text-xs font-bold text-[#8B4513] bg-[#FCEEE6] px-2 py-0.5 rounded-full">
+                        {log.dateStr}
+                      </span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Clock: {log.checkIn} - {log.checkOut}
+                    <p className="text-xs text-slate-500 mt-1 font-medium">
+                      Schedule: <strong className="text-slate-700">{log.checkIn} - {log.checkOut}</strong>
                     </p>
                     {log.comments && (
-                      <p className="text-xs text-gray-600 mt-1 italic">"{log.comments}"</p>
+                      <p className="text-xs text-slate-600 mt-1.5 italic flex items-center gap-1">
+                        <FileText className="w-3 h-3 text-slate-400 shrink-0" />
+                        <span>"{log.comments}"</span>
+                      </p>
                     )}
                   </div>
-                  <span className="px-3 py-1 bg-blue-50 text-blue-800 rounded-lg text-sm font-black">
+                  <span className="px-3.5 py-1.5 bg-[#FCEEE6] text-[#8B4513] rounded-2xl text-sm font-black shrink-0">
                     {log.totalHours}h
                   </span>
                 </div>
