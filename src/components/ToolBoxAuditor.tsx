@@ -2,6 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { jsPDF } from 'jspdf';
+import { 
+  Search, 
+  User, 
+  X, 
+  FileDown, 
+  CheckCircle2, 
+  ChevronRight,
+  ClipboardCheck
+} from 'lucide-react';
 import MapLink from './MapLink';
 import { currentTenant } from '../config/tenant.config';
 
@@ -76,7 +85,7 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
     fetchMeetings();
   }, [companyId]);
 
-  // <-- PASO 4.4: Generador de PDF formal para cumplimiento con WorkSafeBC
+  // Generador de PDF formal para cumplimiento con WorkSafeBC
   const handleExportPDF = (meeting: ToolboxMeeting) => {
     const docPdf = new jsPDF({
       orientation: 'portrait',
@@ -88,8 +97,8 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
     const margin = 15;
     let y = 18;
 
-    // Encabezado oscuro corporativo
-    docPdf.setFillColor(17, 24, 39); // gray-900
+    // Encabezado corporativo
+    docPdf.setFillColor(15, 23, 42); // slate-900
     docPdf.rect(0, 0, pageWidth, 32, 'F');
 
     docPdf.setTextColor(255, 255, 255);
@@ -110,11 +119,11 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
     y = 42;
 
     // Caja de Metadatos de la Reunión
-    docPdf.setFillColor(249, 250, 251);
+    docPdf.setFillColor(244, 246, 249);
     docPdf.setDrawColor(229, 231, 235);
     docPdf.roundedRect(margin, y, pageWidth - margin * 2, 28, 2, 2, 'FD');
 
-    docPdf.setTextColor(17, 24, 39);
+    docPdf.setTextColor(15, 23, 42);
     docPdf.setFontSize(9);
 
     docPdf.setFont('helvetica', 'bold');
@@ -147,7 +156,7 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
     // Sección: Peligros y Controles Discutidos
     docPdf.setFont('helvetica', 'bold');
     docPdf.setFontSize(11);
-    docPdf.setTextColor(17, 24, 39);
+    docPdf.setTextColor(15, 23, 42);
     docPdf.text('1. Hazards & Safety Controls Discussed', margin, y);
     y += 6;
 
@@ -167,7 +176,7 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
     if (meeting.notes && meeting.notes.trim() !== '') {
       docPdf.setFont('helvetica', 'bold');
       docPdf.setFontSize(11);
-      docPdf.setTextColor(17, 24, 39);
+      docPdf.setTextColor(15, 23, 42);
       docPdf.text('2. Specific Site Controls & Supervisor Notes', margin, y);
       y += 6;
 
@@ -182,7 +191,7 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
     // Sección: Firmas de los Trabajadores
     docPdf.setFont('helvetica', 'bold');
     docPdf.setFontSize(11);
-    docPdf.setTextColor(17, 24, 39);
+    docPdf.setTextColor(15, 23, 42);
     docPdf.text(
       `3. Crew Attendance & Digital Signatures (${meeting.attendees?.length || 0} Workers)`,
       margin,
@@ -201,7 +210,7 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
     y += 8;
 
     // Cabecera de la tabla de firmas
-    docPdf.setFillColor(243, 244, 246);
+    docPdf.setFillColor(244, 246, 249);
     docPdf.setDrawColor(209, 213, 219);
     docPdf.rect(margin, y, pageWidth - margin * 2, 8, 'FD');
 
@@ -217,7 +226,6 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
     // Filas de cada firmante
     const rowHeight = 16;
     meeting.attendees?.forEach((att, idx) => {
-      // Salto de página automático si se llena la hoja
       if (y + rowHeight > 275) {
         docPdf.addPage();
         y = 20;
@@ -228,7 +236,7 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
 
       docPdf.setFont('helvetica', 'normal');
       docPdf.setFontSize(9.5);
-      docPdf.setTextColor(17, 24, 39);
+      docPdf.setTextColor(15, 23, 42);
       docPdf.text(`${idx + 1}`, margin + 3, y + 9.5);
 
       docPdf.setFont('helvetica', 'bold');
@@ -238,7 +246,6 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
       docPdf.setTextColor(107, 114, 128);
       docPdf.text(att.signedAt || '—', margin + 95, y + 9.5);
 
-      // Incrustar la firma en Base64 PNG
       if (att.signature && att.signature.startsWith('data:image')) {
         try {
           docPdf.addImage(att.signature, 'PNG', margin + 130, y + 1.5, 42, 13);
@@ -250,7 +257,6 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
       y += rowHeight;
     });
 
-    // Pie de página legal
     docPdf.setFont('helvetica', 'normal');
     docPdf.setFontSize(7.5);
     docPdf.setTextColor(156, 163, 175);
@@ -268,12 +274,10 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
     docPdf.save(`Toolbox_Meeting_${meeting.dateStr}_${safeSiteName}.pdf`);
   };
 
-  // Lista única de Team Leads que han realizado charlas para el filtro
   const uniqueLeads = Array.from(
     new Set(meetings.map((m) => m.leadName || m.leadEmail || 'Unknown'))
   );
 
-  // Filtrado reactivo multidimensional
   const filteredMeetings = meetings.filter((m) => {
     if (dateFilter && m.dateStr !== dateFilter) {
       return false;
@@ -300,46 +304,46 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
   });
 
   return (
-    <div className="space-y-6">
-      {/* Barra de Filtros */}
-      <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between">
+    <div className="space-y-5 animate-fade-in">
+      {/* Barra de Filtros Estilizada */}
+      <div className="bg-white p-5 rounded-3xl shadow-xs border border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="w-full md:flex-1">
-          <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+          <label className="block text-xs font-bold text-slate-500 mb-1.5">
             Search Site, Topic, or Worker
           </label>
           <div className="relative">
-            <span className="absolute left-3.5 top-3 text-gray-400">🔍</span>
+            <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter by address or worker name..."
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500 focus:bg-white transition-all"
+              className="w-full pl-10 pr-4 py-3 bg-[#F4F6F9] border border-slate-200/80 rounded-2xl text-xs sm:text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#8B4513] font-medium transition-all text-slate-900"
             />
           </div>
         </div>
 
-        <div className="flex w-full md:w-auto gap-3 items-center">
+        <div className="flex w-full md:w-auto gap-3 items-end flex-wrap">
           <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-slate-500 mb-1.5">
               Date
             </label>
             <input
               type="date"
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500"
+              className="px-3.5 py-3 bg-[#F4F6F9] border border-slate-200/80 rounded-2xl text-xs sm:text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#8B4513] font-medium text-slate-800"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-slate-500 mb-1.5">
               Conducted By (Lead)
             </label>
             <select
               value={leadFilter}
               onChange={(e) => setLeadFilter(e.target.value)}
-              className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-purple-500 cursor-pointer"
+              className="px-3.5 py-3 bg-[#F4F6F9] border border-slate-200/80 rounded-2xl text-xs sm:text-sm outline-none focus:bg-white focus:ring-2 focus:ring-[#8B4513] font-medium text-slate-800 cursor-pointer"
             >
               <option value="all">All Team Leads</option>
               {uniqueLeads.map((lead, idx) => (
@@ -357,7 +361,7 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
                 setDateFilter('');
                 setLeadFilter('all');
               }}
-              className="self-end px-3 py-2.5 text-xs font-bold text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
+              className="px-4 py-3 text-xs font-extrabold text-slate-500 hover:text-red-600 transition-colors cursor-pointer"
             >
               Clear
             </button>
@@ -367,14 +371,14 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
 
       {/* Lista de Reuniones */}
       {loading ? (
-        <div className="bg-white p-12 rounded-2xl shadow-sm text-center text-sm font-semibold text-gray-400">
+        <div className="bg-white p-12 rounded-3xl shadow-xs text-center text-xs font-semibold text-slate-400 animate-pulse">
           Loading safety compliance records...
         </div>
       ) : filteredMeetings.length === 0 ? (
-        <div className="bg-white p-12 rounded-2xl shadow-sm text-center">
-          <p className="text-3xl mb-2">📋</p>
-          <h4 className="text-sm font-bold text-gray-700">No Toolbox Meetings Found</h4>
-          <p className="text-xs text-gray-400 mt-1">
+        <div className="bg-white p-12 rounded-3xl shadow-xs text-center border border-slate-100">
+          <ClipboardCheck className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+          <h4 className="text-sm font-extrabold text-slate-800">No Toolbox Meetings Found</h4>
+          <p className="text-xs text-slate-400 mt-1">
             {meetings.length === 0
               ? 'No safety briefings have been submitted yet.'
               : 'Try adjusting your filters.'}
@@ -386,25 +390,26 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
             <div
               key={meeting.id}
               onClick={() => setSelectedMeeting(meeting)}
-              className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:border-purple-300 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+              className="bg-white p-5 rounded-3xl shadow-xs border border-slate-100 hover:border-[#8B4513]/40 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 rounded-md border border-purple-200/50">
+                  <span className="px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider bg-[#FCEEE6] text-[#8B4513] rounded-full">
                     {meeting.dateStr}
                   </span>
-                  <span className="text-xs font-bold text-gray-500">
-                    👤 {meeting.leadName || meeting.leadEmail}
+                  <span className="text-xs font-bold text-slate-500 flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{meeting.leadName || meeting.leadEmail}</span>
                   </span>
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-bold text-gray-900 leading-snug">
+                  <h4 className="text-sm font-extrabold text-slate-900 leading-snug">
                     {meeting.topic}
                   </h4>
                   <div className="mt-1 space-y-1">
                     {meeting.projectName && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200">
                         🏗️ {meeting.projectName}
                       </span>
                     )}
@@ -417,13 +422,13 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
                   {meeting.hazards.slice(0, 3).map((h, i) => (
                     <span
                       key={i}
-                      className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-medium"
+                      className="px-2.5 py-1 bg-[#F4F6F9] text-slate-600 rounded-xl text-[10px] font-bold"
                     >
                       {h.split('(')[0].trim()}
                     </span>
                   ))}
                   {meeting.hazards.length > 3 && (
-                    <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-[10px] font-bold">
+                    <span className="px-2.5 py-1 bg-[#F4F6F9] text-slate-400 rounded-xl text-[10px] font-black">
                       +{meeting.hazards.length - 3} more
                     </span>
                   )}
@@ -431,13 +436,14 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
               </div>
 
               {/* Pie de tarjeta con contador de firmas */}
-              <div className="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-xs font-extrabold text-emerald-800 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
                   {meeting.attendees?.length || 0} Workers Signed
                 </span>
-                <span className="text-xs font-bold text-purple-600 hover:underline">
-                  View Signatures & Details →
+                <span className="text-xs font-extrabold text-[#8B4513] hover:underline flex items-center gap-0.5">
+                  <span>View Signatures & Details</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </div>
@@ -447,48 +453,55 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
 
       {/* Modal Detallado de Auditoría e Inspección de Firmas */}
       {selectedMeeting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 p-6 space-y-6 my-auto animate-fade-in">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto animate-fade-in"
+          onClick={() => setSelectedMeeting(null)}
+        >
+          <div 
+            className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 p-6 space-y-5 my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header del Modal */}
-            <div className="flex items-start justify-between pb-4 border-b border-gray-100">
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100">
               <div>
-                <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md">
+                <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-[#FCEEE6] text-[#8B4513] rounded-full">
                   Safety Meeting Report
                 </span>
-                <h3 className="text-lg font-bold text-gray-900 mt-1">
+                <h3 className="text-base sm:text-lg font-black text-slate-900 mt-1.5">
                   {selectedMeeting.topic}
                 </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Conducted by <span className="font-bold text-gray-800">{selectedMeeting.leadName || selectedMeeting.leadEmail}</span> on <span className="font-bold text-gray-800">{selectedMeeting.dateStr}</span>
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                  Conducted by <span className="font-extrabold text-slate-800">{selectedMeeting.leadName || selectedMeeting.leadEmail}</span> on <span className="font-extrabold text-slate-800">{selectedMeeting.dateStr}</span>
                 </p>
               </div>
               <button
                 onClick={() => setSelectedMeeting(null)}
-                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                title="Close"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Ubicación */}
             <div>
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+              <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
                 Job Site
               </p>
-              <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="p-3.5 bg-[#F4F6F9] rounded-2xl border border-slate-200/80">
                 <MapLink location={selectedMeeting.jobSite} />
               </div>
             </div>
 
             {/* Peligros y Medidas */}
             <div>
-              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+              <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
                 Hazards & Safety Controls Discussed
               </p>
-              <div className="space-y-1.5 bg-gray-50 p-3.5 rounded-xl border border-gray-200">
+              <div className="space-y-1.5 bg-[#F4F6F9] p-4 rounded-2xl border border-slate-200/80">
                 {selectedMeeting.hazards.map((h, idx) => (
-                  <div key={idx} className="flex items-center gap-2 text-xs text-gray-700">
-                    <span className="text-emerald-600 font-bold">✓</span>
+                  <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-slate-700">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>{h}</span>
                   </div>
                 ))}
@@ -498,10 +511,10 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
             {/* Notas específicas */}
             {selectedMeeting.notes && (
               <div>
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">
                   Supervisor Notes
                 </p>
-                <div className="p-3 bg-yellow-50/60 rounded-xl border border-yellow-200 text-xs text-yellow-900">
+                <div className="p-3.5 bg-[#FEF3C7]/60 rounded-2xl border border-[#FEF3C7] text-xs font-medium text-amber-950">
                   {selectedMeeting.notes}
                 </div>
               </div>
@@ -510,7 +523,7 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
             {/* Firmas Táctiles de los Operarios */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
                   Crew Signatures ({selectedMeeting.attendees?.length || 0})
                 </p>
               </div>
@@ -519,20 +532,20 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
                 {selectedMeeting.attendees?.map((att, idx) => (
                   <div
                     key={idx}
-                    className="p-3 bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-between gap-3"
+                    className="p-3.5 bg-[#F4F6F9] border border-slate-200/80 rounded-2xl flex items-center justify-between gap-3"
                   >
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-gray-900 truncate">
+                      <p className="text-xs font-extrabold text-slate-900 truncate">
                         {att.workerName}
                       </p>
-                      <p className="text-[10px] text-gray-400">
+                      <p className="text-[10px] font-semibold text-slate-400">
                         Signed at {att.signedAt}
                       </p>
                     </div>
                     <img
                       src={att.signature}
                       alt={`Signature of ${att.workerName}`}
-                      className="h-10 w-24 object-contain bg-white border border-gray-200 rounded-lg p-0.5"
+                      className="h-9 w-24 object-contain bg-white border border-slate-200 rounded-xl p-1 shadow-2xs"
                     />
                   </div>
                 ))}
@@ -540,20 +553,20 @@ const ToolboxAuditor: React.FC<ToolboxAuditorProps> = ({ companyId }) => {
             </div>
 
             {/* Acciones: Botón Export to PDF + Cerrar */}
-            <div className="flex items-center justify-between gap-3 pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => handleExportPDF(selectedMeeting)}
-                className="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl transition-colors cursor-pointer flex items-center gap-2 shadow-sm"
+                className="px-4 py-3 bg-[#8B3A0E] hover:bg-[#722f0b] text-white text-xs font-extrabold rounded-2xl transition-colors cursor-pointer flex items-center gap-2 shadow-xs"
               >
-                <span>📄</span>
+                <FileDown className="w-4 h-4" />
                 <span>Export to PDF (WorkSafeBC)</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setSelectedMeeting(null)}
-                className="px-5 py-2.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                className="px-5 py-3 bg-slate-900 hover:bg-black text-white text-xs font-extrabold rounded-2xl transition-colors cursor-pointer"
               >
                 Close Report
               </button>
