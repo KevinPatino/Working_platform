@@ -56,6 +56,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
   const [myLogs, setMyLogs] = useState<any[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [loadingLogs, setLoadingLogs] = useState(true); // <-- Estado de carga inicial para evitar parpadeo
 
   // Formulario diario de horas
   const [mainLocation, setMainLocation] = useState('');
@@ -136,7 +137,10 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
 
   // Consultar registros del trabajador
   const fetchMyLogs = async () => {
-    if (!userCompanyId) return;
+    if (!userCompanyId) {
+      setLoadingLogs(false);
+      return;
+    }
 
     try {
       const q = query(
@@ -174,6 +178,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
       setTodayLoggedHours(hoursToday);
     } catch (error: any) {
       showNotification('Error loading logs: ' + error.message);
+    } finally {
+      setLoadingLogs(false); // <-- Termina el estado de carga
     }
   };
 
@@ -401,7 +407,17 @@ const Dashboard: React.FC<DashboardProps> = ({ user, role = 'worker' }) => {
             <h2 className="text-lg font-extrabold text-slate-900">Daily Log</h2>
           </div>
 
-          {hasLoggedToday ? (
+          {loadingLogs ? (
+            <div className="space-y-4 animate-pulse py-3">
+              <div className="h-11 bg-[#F4F6F9] rounded-2xl w-full"></div>
+              <div className="h-12 bg-[#F4F6F9] rounded-2xl w-full"></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="h-16 bg-[#F4F6F9] rounded-2xl"></div>
+                <div className="h-16 bg-[#F4F6F9] rounded-2xl"></div>
+              </div>
+              <div className="h-14 bg-[#F4F6F9] rounded-2xl w-full"></div>
+            </div>
+          ) : hasLoggedToday ? (
             <div className="p-5 bg-emerald-50/80 border border-emerald-200 rounded-2xl text-emerald-900 flex items-center gap-3">
               <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
               <div>
