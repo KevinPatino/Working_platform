@@ -16,20 +16,33 @@ import {
   getAuth, 
   createUserWithEmailAndPassword 
 } from "firebase/auth";
+import {
+  Clock,
+  ShieldCheck,
+  Building2,
+  Users,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  UserPlus,
+  X,
+  Check,
+} from "lucide-react";
+
 import Toast from "./Toast";
 import PhotoModal from "./PhotoModal";
 import MapLink from "./MapLink";
 import ToolboxAuditor from "./ToolBoxAuditor";
 import ProjectsManager from "./ProjectsManager";
 import LocationInput from "./LocationInput";
+import Header from "./Header";
+
 import { 
   getBaseCycleIndex, 
   getPeriodRangeByIndex, 
   formatPeriodLegend, 
   getLocalTodayString 
 } from '../utils/payroll';
-
-import Header from "./Header";
 
 interface AdminPanelProps {
   user: any;
@@ -91,36 +104,36 @@ const InlineEditForm = ({
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-3 rounded-xl border border-blue-100 shadow-sm animate-fade-in w-full items-start">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs animate-fade-in w-full items-start">
       <div className="flex flex-col gap-1.5">
-        <label className="text-[10px] uppercase font-bold text-gray-400">
+        <label className="text-[10px] uppercase font-extrabold text-slate-400">
           Location
         </label>
         <LocationInput
           value={location}
           onChange={(val) => setLocation(val)}
-          className="p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors bg-white"
+          className="p-3 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#8B4513] focus:ring-2 focus:ring-[#8B4513]/20 transition-all bg-[#F4F6F9] font-semibold text-slate-900"
           placeholder="Primary job site"
           required
         />
 
         {extraLocations.map((extraLoc, index) => (
-          <div key={index} className="flex gap-1 animate-fade-in">
+          <div key={index} className="flex gap-1.5 animate-fade-in items-center">
             <LocationInput
               value={extraLoc}
               onChange={(val) => handleExtraLocationChange(index, val)}
               placeholder={`Additional job site ${index + 2}`}
               wrapperClassName="flex-1"
-              className="p-2 border border-blue-200 bg-blue-50/30 rounded-lg text-xs outline-none focus:border-blue-500"
+              className="p-3 border border-slate-200 bg-[#F4F6F9] rounded-xl text-xs outline-none focus:border-[#8B4513] font-semibold text-slate-900"
               required
             />
             <button
               type="button"
               onClick={() => handleRemoveExtraLocation(index)}
-              className="px-2 py-1 bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-600 rounded text-xs font-bold transition-colors cursor-pointer"
+              className="p-2 bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-600 rounded-xl text-xs font-bold transition-colors cursor-pointer"
               title="Remove site"
             >
-              ✕
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         ))}
@@ -129,7 +142,7 @@ const InlineEditForm = ({
           <button
             type="button"
             onClick={handleAddLocation}
-            className="text-[11px] font-bold text-blue-600 hover:text-blue-800 transition-colors text-left cursor-pointer mt-0.5"
+            className="text-[11px] font-extrabold text-[#8B4513] hover:text-[#722f0b] transition-colors text-left cursor-pointer mt-0.5"
           >
             + Add another job site
           </button>
@@ -138,32 +151,32 @@ const InlineEditForm = ({
 
       <div className="flex gap-2">
         <div className="flex-1">
-          <label className="text-[10px] uppercase font-bold text-gray-400">
+          <label className="text-[10px] uppercase font-extrabold text-slate-400">
             Check In
           </label>
           <input
             type="time"
             value={checkIn}
             onChange={(e) => setCheckIn(e.target.value)}
-            className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            className="w-full p-3 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#8B4513] transition-all bg-[#F4F6F9] font-bold text-slate-900"
           />
         </div>
         <div className="flex-1">
-          <label className="text-[10px] uppercase font-bold text-gray-400">
+          <label className="text-[10px] uppercase font-extrabold text-slate-400">
             Check Out
           </label>
           <input
             type="time"
             value={checkOut}
             onChange={(e) => setCheckOut(e.target.value)}
-            className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            className="w-full p-3 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#8B4513] transition-all bg-[#F4F6F9] font-bold text-slate-900"
           />
         </div>
       </div>
 
       <div className="flex gap-2">
-        <div className="w-16">
-          <label className="text-[10px] uppercase font-bold text-gray-400">
+        <div className="w-20">
+          <label className="text-[10px] uppercase font-extrabold text-slate-400">
             Hrs
           </label>
           <input
@@ -171,66 +184,42 @@ const InlineEditForm = ({
             step="0.5"
             value={totalHours}
             onChange={(e) => setTotalHours(e.target.value)}
-            className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            className="w-full p-3 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#8B4513] transition-all bg-[#F4F6F9] font-black text-[#8B4513]"
             placeholder="0"
           />
         </div>
         <div className="flex-1">
-          <label className="text-[10px] uppercase font-bold text-gray-400">
+          <label className="text-[10px] uppercase font-extrabold text-slate-400">
             Note
           </label>
           <input
             type="text"
             value={comments}
             onChange={(e) => setComments(e.target.value)}
-            className="w-full p-2.5 border border-gray-200 rounded-lg text-xs outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+            className="w-full p-3 border border-slate-200 rounded-xl text-xs outline-none focus:border-[#8B4513] transition-all bg-[#F4F6F9] font-medium text-slate-800"
             placeholder="Optional"
           />
         </div>
       </div>
 
-      <div className="flex gap-2 items-center justify-end md:mt-4">
+      <div className="flex gap-2 items-center justify-end md:mt-5">
         <button
           onClick={onCancel}
-          className="p-2.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
+          className="p-3 bg-slate-100 text-slate-500 rounded-xl hover:bg-red-50 hover:text-red-600 transition-colors cursor-pointer"
           title="Cancel"
         >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <X className="w-4 h-4" />
         </button>
         <button
           onClick={handleSave}
           disabled={isSubmitting}
-          className="p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400 shadow-sm cursor-pointer disabled:cursor-not-allowed"
+          className="p-3 bg-[#8B3A0E] text-white rounded-xl hover:bg-[#722f0b] transition-colors disabled:opacity-50 shadow-xs cursor-pointer disabled:cursor-not-allowed"
           title="Save"
         >
           {isSubmitting ? (
             <span className="text-xs font-bold px-1">...</span>
           ) : (
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="3"
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
+            <Check className="w-4 h-4" />
           )}
         </button>
       </div>
@@ -546,82 +535,91 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   const isPeriodActive = Boolean(endDate && endDate !== startDate);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8 relative">
+    <div className="min-h-screen bg-[#F4F6F9] text-slate-900 pb-12 relative">
       {toastMessage && (
         <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
       )}
 
-      <div className="max-w-6xl mx-auto space-y-6">
-        
-        {/* Cabecera Principal */}
-        <Header 
-          userName={'Wester Trades'}  
-          role="admin"                       
-          onLogout={handleLogout} 
-        />
+      {/* Cabecera Principal Estandarizada */}
+      <Header 
+        userName="Wester Trades"  
+        role="admin"                       
+        onLogout={handleLogout} 
+      />
 
-        {/* Selector de Pestañas: Nómina, Seguridad y Equipo */}
-        <div className="flex flex-wrap gap-2 p-1 bg-gray-200/80 rounded-xl w-fit">
+      <div className="max-w-6xl mx-auto px-4 pt-6 space-y-6">
+        
+        {/* Selector de Pestañas Estilo Píldora */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 p-1.5 bg-[#EEF2F6] rounded-2xl gap-1">
           <button
             type="button"
             onClick={() => setActiveTab('payroll')}
-            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'payroll'
-                ? 'bg-white text-gray-900 shadow-xs'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            ⏱️ Hours & Payroll
+            <Clock className={`w-3.5 h-3.5 ${activeTab === 'payroll' ? 'text-[#8B4513]' : 'text-slate-400'}`} />
+            <span>Hours & Payroll</span>
           </button>
+
           <button
             type="button"
             onClick={() => setActiveTab('safety')}
-            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'safety'
-                ? 'bg-white text-purple-900 shadow-xs'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            🛡️ Safety & Toolbox Meetings
+            <ShieldCheck className={`w-3.5 h-3.5 ${activeTab === 'safety' ? 'text-[#8B4513]' : 'text-slate-400'}`} />
+            <span>Safety Briefings</span>
           </button>
+
           <button
             type="button"
             onClick={() => setActiveTab('projects')}
-            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
-              activeTab === 'projects' ? 'bg-white text-blue-900 shadow-xs' : 'text-gray-600 hover:text-gray-900'
+            className={`py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              activeTab === 'projects'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            🏗️ Projects
+            <Building2 className={`w-3.5 h-3.5 ${activeTab === 'projects' ? 'text-[#8B4513]' : 'text-slate-400'}`} />
+            <span>Projects</span>
           </button>
+
           <button
             type="button"
             onClick={() => setActiveTab('team')}
-            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+            className={`py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               activeTab === 'team'
-                ? 'bg-white text-blue-900 shadow-xs'
-                : 'text-gray-600 hover:text-gray-900'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
             }`}
           >
-            👥 Team / Employees ({allRegisteredUsers.length})
+            <Users className={`w-3.5 h-3.5 ${activeTab === 'team' ? 'text-[#8B4513]' : 'text-slate-400'}`} />
+            <span>Team ({allRegisteredUsers.length})</span>
           </button>
         </div>
 
         {/* PESTAÑA 1: Horas y Nómina */}
         {activeTab === 'payroll' && (
-          <div className="space-y-6 animate-fade-in">
-            <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 space-y-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-gray-100">
+          <div className="space-y-5 animate-fade-in">
+            <div className="bg-white p-5 rounded-3xl shadow-xs border border-slate-100 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                  <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">
                     Quick View:
                   </span>
                   <button
                     type="button"
                     onClick={handleSelectToday}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors cursor-pointer ${
+                    className={`px-3.5 py-1.5 text-xs font-extrabold rounded-xl border transition-colors cursor-pointer ${
                       isTodayActive
-                        ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                        : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                        ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                        : "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
                     }`}
                   >
                     📍 Today
@@ -629,21 +627,21 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-1">
+                  <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider mr-1">
                     Pay Periods:
                   </span>
 
                   <button
                     type="button"
                     onClick={handlePrevPeriod}
-                    className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+                    className="w-8 h-8 flex items-center justify-center bg-[#F4F6F9] text-slate-700 hover:bg-[#FCEEE6] hover:text-[#8B4513] rounded-xl border border-slate-200/60 transition-colors cursor-pointer"
                     title="Previous Pay Period"
                   >
-                    ◀
+                    <ChevronLeft className="w-4 h-4" />
                   </button>
 
                   {isPeriodActive && (
-                    <span className="text-xs font-extrabold text-purple-900 bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200 tracking-wide shadow-xs">
+                    <span className="text-xs font-extrabold text-[#8B4513] bg-[#FCEEE6] px-3 py-1.5 rounded-xl border border-[#8B4513]/20 tracking-wide">
                       📅 {formatPeriodLegend(startDate, endDate)}
                     </span>
                   )}
@@ -651,7 +649,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                   <button
                     type="button"
                     onClick={handleSelectPeriodToPay}
-                    className="px-3 py-1.5 text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition-colors cursor-pointer"
+                    className="px-3.5 py-1.5 text-xs font-extrabold text-[#8B4513] bg-[#FCEEE6] hover:bg-[#f7decb] rounded-xl transition-colors cursor-pointer"
                   >
                     💰 Period to Pay
                   </button>
@@ -659,7 +657,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                   <button
                     type="button"
                     onClick={handleSelectCurrentPeriod}
-                    className="px-3 py-1.5 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg transition-colors cursor-pointer"
+                    className="px-3.5 py-1.5 text-xs font-extrabold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
                   >
                     📅 Current Period
                   </button>
@@ -667,17 +665,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                   <button
                     type="button"
                     onClick={handleNextPeriod}
-                    className="px-2.5 py-1.5 text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg transition-colors cursor-pointer"
+                    className="w-8 h-8 flex items-center justify-center bg-[#F4F6F9] text-slate-700 hover:bg-[#FCEEE6] hover:text-[#8B4513] rounded-xl border border-slate-200/60 transition-colors cursor-pointer"
                     title="Next Pay Period"
                   >
-                    ▶
+                    <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
-              <div className="flex flex-col md:flex-row gap-4 items-end">
-                <div className="flex-1 w-full">
-                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3.5 items-end">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">
                     Worker
                   </label>
                   <select
@@ -686,7 +684,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                       setSelectedUser(e.target.value);
                       setExpandedRangeUserId(null);
                     }}
-                    className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                    className="w-full p-3.5 border border-slate-200 rounded-2xl text-xs sm:text-sm bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-semibold cursor-pointer"
                   >
                     <option value="All">All workers</option>
                     {allRegisteredUsers.map((worker) => (
@@ -697,44 +695,44 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                   </select>
                 </div>
 
-                <div className="flex-1 w-full">
-                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">
                     Specific Day / From
                   </label>
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full p-3.5 border border-slate-200 rounded-2xl text-xs sm:text-sm bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-semibold text-slate-800"
                   />
                 </div>
-                <div className="flex-1 w-full">
-                  <label className="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-wider">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">
                     To (Optional)
                   </label>
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full p-3 border rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full p-3.5 border border-slate-200 rounded-2xl text-xs sm:text-sm bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-semibold text-slate-800"
                   />
                 </div>
                 <button
                   onClick={handleClearFilters}
-                  className="w-full md:w-auto px-6 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+                  className="w-full py-3.5 text-xs font-extrabold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-colors cursor-pointer"
                 >
-                  Clear
+                  Clear Filters
                 </button>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-xs border border-slate-100 overflow-hidden">
               {!startDate && (
                 <div className="p-12 text-center flex flex-col items-center">
-                  <h3 className="text-lg font-bold text-gray-700">
+                  <h3 className="text-lg font-bold text-slate-700">
                     Select a date
                   </h3>
-                  <p className="text-sm text-gray-500 mt-1 max-w-md">
+                  <p className="text-xs text-slate-400 mt-1 max-w-md">
                     Choose a 'From' date to view the details for that period.
                   </p>
                 </div>
@@ -742,7 +740,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
 
               {startDate && (
                 <div>
-                  <div className="p-4 bg-purple-50 border-b border-purple-100 text-purple-800 text-sm font-bold flex justify-between items-center">
+                  <div className="p-4 bg-[#FCEEE6] border-b border-[#8B4513]/10 text-[#8B4513] text-xs font-extrabold flex justify-between items-center">
                     <span>
                       Report:{" "}
                       {new Date(startDate + "T00:00:00").toLocaleDateString(
@@ -752,19 +750,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                         ? ` to ${new Date(endDate + "T23:59:59").toLocaleDateString("en-US")}`
                         : ""}
                     </span>
-                    <span className="bg-purple-200 text-purple-900 px-3 py-1 rounded-full text-xs">
+                    <span className="bg-white text-[#8B4513] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-2xs">
                       Active Data
                     </span>
                   </div>
 
                   {loading ? (
-                    <div className="p-12 text-center text-gray-400 animate-pulse">
+                    <div className="p-12 text-center text-slate-400 text-xs font-semibold animate-pulse">
                       Querying Database...
                     </div>
                   ) : (
                     <>
-                      {/* VISTA MÓVIL: Tarjetas apiladas sin scroll horizontal */}
-                      <div className="block md:hidden divide-y divide-gray-100">
+                      {/* VISTA MÓVIL: Tarjetas apiladas */}
+                      <div className="block md:hidden divide-y divide-slate-100">
                         {displayedUsers.map((worker) => {
                           const effectiveEndDate = endDate ? endDate : startDate;
                           const start = new Date(startDate + "T00:00:00").getTime();
@@ -796,31 +794,29 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                 className="flex justify-between items-center cursor-pointer"
                               >
                                 <div>
-                                  <p className="font-bold text-gray-900 text-sm">{worker.fullName}</p>
+                                  <p className="font-extrabold text-slate-900 text-sm">{worker.fullName}</p>
                                   <div className="flex items-center gap-2 mt-0.5">
-                                    <p className="text-xs text-purple-600 font-medium">
+                                    <p className="text-xs text-slate-500 font-medium">
                                       {userLogsInRange.length} of {datesInRange.length} days
                                     </p>
                                     {totalWorkerPhotos > 0 && (
-                                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-[#8B4513] bg-[#FCEEE6] px-2.5 py-0.5 rounded-full">
                                         📷 {totalWorkerPhotos}
                                       </span>
                                     )}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                  <span className={`text-lg font-black ${totalWorkerHours > 0 ? "text-purple-600" : "text-gray-300"}`}>
+                                  <span className={`text-lg font-black ${totalWorkerHours > 0 ? "text-[#8B4513]" : "text-slate-300"}`}>
                                     {totalWorkerHours}h
                                   </span>
-                                  <span className="text-gray-400 text-xs" style={{ transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>
-                                    ▼
-                                  </span>
+                                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
                                 </div>
                               </div>
 
                               {isExpanded && (
-                                <div className="pt-3 border-t border-purple-100 space-y-2 bg-purple-50/40 p-3 rounded-xl">
-                                  <h4 className="text-xs font-bold text-purple-900 uppercase tracking-wide">Detailed Daily Log</h4>
+                                <div className="pt-3 border-t border-slate-100 space-y-2.5 bg-[#F4F6F9] p-3.5 rounded-2xl">
+                                  <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wide">Detailed Daily Log</h4>
                                   {datesInRange.map((dateObj, index) => {
                                     const logsForDay = userLogsInRange.filter((log) => {
                                       const logDate = log.timestamp.toDate();
@@ -837,14 +833,16 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
 
                                     if (logsForDay.length > 0) {
                                       return logsForDay.map((log) => (
-                                        <div key={log.id} className="bg-white p-3 rounded-lg border border-purple-100 shadow-xs space-y-1.5">
+                                        <div key={log.id} className="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-2">
                                           <div className="flex justify-between items-center text-xs">
-                                            <span className="font-bold text-gray-700">
+                                            <span className="font-extrabold text-slate-800">
                                               {dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                                             </span>
-                                            <span className="font-extrabold text-purple-700">{log.totalHours}h</span>
+                                            <span className="font-black text-[#8B4513] bg-[#FCEEE6] px-2 py-0.5 rounded-full">
+                                              {log.totalHours}h
+                                            </span>
                                           </div>
-                                          <div className="text-xs text-gray-600 space-y-1">
+                                          <div className="text-xs text-slate-600 space-y-1">
                                             {log.locations && Array.isArray(log.locations) && log.locations.length > 0 ? (
                                               log.locations.map((loc: string, idx: number) => (
                                                 <MapLink key={idx} location={loc} />
@@ -853,8 +851,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                               <MapLink location={log.location} />
                                             )}
                                           </div>
-                                          <div className="flex justify-between items-center text-[11px] text-gray-500 pt-1 border-t border-gray-100">
-                                            <span>🕒 {log.checkIn} - {log.checkOut}</span>
+                                          <div className="flex justify-between items-center text-[11px] text-slate-500 pt-1.5 border-t border-slate-100">
+                                            <span className="font-medium">🕒 {log.checkIn} - {log.checkOut}</span>
                                             {log.photos && log.photos.length > 0 && (
                                               <button
                                                 type="button"
@@ -862,7 +860,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                   setActiveEvidencePhotos(log.photos);
                                                   setEvidenceModalTitle(`Evidence: ${worker.fullName}`);
                                                 }}
-                                                className="text-blue-600 font-bold underline"
+                                                className="text-[#8B4513] font-bold underline"
                                               >
                                                 📷 {log.photos.length} photos
                                               </button>
@@ -872,8 +870,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                       ));
                                     } else if (isEditingThisRow) {
                                       return (
-                                        <div key={`mob-edit-${index}`} className="bg-blue-50 p-3 rounded-lg border border-blue-200 space-y-2">
-                                          <span className="text-xs font-bold text-blue-800">
+                                        <div key={`mob-edit-${index}`} className="bg-white p-3.5 rounded-2xl border border-slate-200 space-y-2">
+                                          <span className="text-xs font-extrabold text-slate-800">
                                             Add Hours for {dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                           </span>
                                           <InlineEditForm
@@ -887,13 +885,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                       );
                                     } else {
                                       return (
-                                        <div key={`mob-missing-${index}`} className="flex justify-between items-center bg-white p-2.5 rounded-lg border border-red-100 text-xs">
-                                          <span className={`font-medium ${isWeekend ? "text-yellow-700" : "text-red-600"}`}>
+                                        <div key={`mob-missing-${index}`} className="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-200/80 text-xs">
+                                          <span className={`font-medium ${isWeekend ? "text-amber-700" : "text-red-600"}`}>
                                             {dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} (No Log)
                                           </span>
                                           <button
                                             onClick={() => setEditingRowKey(rowKey)}
-                                            className="px-2.5 py-1 bg-red-50 text-red-600 font-bold rounded hover:bg-red-100"
+                                            className="px-3 py-1 bg-red-50 text-red-600 font-extrabold rounded-xl hover:bg-red-100"
                                           >
                                             + Add
                                           </button>
@@ -908,10 +906,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                         })}
                       </div>
 
-                      {/* VISTA ESCRITORIO: Tabla clásica */}
+                      {/* VISTA ESCRITORIO: Tabla clásica estilizada */}
                       <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-left">
-                          <thead className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider border-b">
+                          <thead className="bg-[#F4F6F9] text-xs font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-100">
                             <tr>
                               <th className="p-4">Worker</th>
                               <th className="p-4 text-center">
@@ -920,7 +918,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                               <th className="p-4 text-right">Details</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-gray-100">
+                          <tbody className="divide-y divide-slate-100">
                             {displayedUsers.map((worker) => {
                               const effectiveEndDate = endDate ? endDate : startDate;
                               const start = new Date(
@@ -961,19 +959,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                 <React.Fragment key={worker.id}>
                                   <tr
                                     onClick={() => toggleRangeRow(worker.id)}
-                                    className="transition-colors hover:bg-purple-50/50 cursor-pointer"
+                                    className="transition-colors hover:bg-[#F4F6F9]/60 cursor-pointer"
                                   >
                                     <td className="p-4">
-                                      <p className="font-bold text-gray-800 text-sm">
+                                      <p className="font-extrabold text-slate-900 text-sm">
                                         {worker.fullName}
                                       </p>
                                       <div className="flex items-center gap-2 mt-0.5">
-                                        <p className="text-xs text-purple-600">
+                                        <p className="text-xs text-slate-500 font-medium">
                                           {userLogsInRange.length} of{" "}
                                           {datesInRange.length} days
                                         </p>
                                         {totalWorkerPhotos > 0 && (
-                                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                          <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-[#8B4513] bg-[#FCEEE6] px-2.5 py-0.5 rounded-full">
                                             📷 {totalWorkerPhotos}
                                           </span>
                                         )}
@@ -981,53 +979,50 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                     </td>
                                     <td className="p-4 text-center">
                                       <span
-                                        className={`text-xl font-black ${totalWorkerHours > 0 ? "text-purple-600" : "text-gray-300"}`}
+                                        className={`text-xl font-black ${totalWorkerHours > 0 ? "text-[#8B4513]" : "text-slate-300"}`}
                                       >
                                         {totalWorkerHours}h
                                       </span>
                                     </td>
                                     <td className="p-4 text-right">
-                                      <button
-                                        className="text-gray-400 hover:text-purple-600 transition-transform duration-200 cursor-pointer"
-                                        style={{
-                                          transform: isExpanded
-                                            ? "rotate(180deg)"
-                                            : "rotate(0deg)",
-                                        }}
-                                      >
-                                        ▼
-                                      </button>
+                                      <ChevronDown
+                                        className={`w-4 h-4 text-slate-400 inline-block transition-transform duration-200 ${
+                                          isExpanded
+                                            ? "rotate-180"
+                                            : "rotate-0"
+                                        }`}
+                                      />
                                     </td>
                                   </tr>
 
                                   {isExpanded && (
-                                    <tr className="bg-purple-50/30 border-b border-purple-100">
+                                    <tr className="bg-[#F4F6F9] border-b border-slate-200/60">
                                       <td colSpan={3} className="p-0">
-                                        <div className="p-4 md:p-6 shadow-inner">
-                                          <h4 className="text-sm font-bold text-purple-800 mb-3">
+                                        <div className="p-5 md:p-6 shadow-inner">
+                                          <h4 className="text-xs font-extrabold text-slate-700 uppercase tracking-wide mb-3">
                                             Detailed View
                                           </h4>
-                                          <div className="overflow-x-auto rounded-lg border border-purple-100">
+                                          <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white">
                                             <table className="w-full text-left text-sm bg-white">
-                                              <thead className="bg-purple-50 text-xs font-bold text-purple-600 uppercase border-b border-purple-100">
+                                              <thead className="bg-[#F4F6F9] text-xs font-extrabold text-slate-400 uppercase border-b border-slate-200/60">
                                                 <tr>
-                                                  <th className="p-3">Date</th>
-                                                  <th className="p-3">Status</th>
-                                                  <th className="p-3">
+                                                  <th className="p-3.5">Date</th>
+                                                  <th className="p-3.5">Status</th>
+                                                  <th className="p-3.5">
                                                     Location / Job Site
                                                   </th>
-                                                  <th className="p-3 text-center">
+                                                  <th className="p-3.5 text-center">
                                                     Schedule
                                                   </th>
-                                                  <th className="p-3 text-center">
+                                                  <th className="p-3.5 text-center">
                                                     Hours
                                                   </th>
-                                                  <th className="p-3 text-center">
+                                                  <th className="p-3.5 text-center">
                                                     Evidence
                                                   </th>
                                                 </tr>
                                               </thead>
-                                              <tbody className="divide-y divide-purple-50">
+                                              <tbody className="divide-y divide-slate-100">
                                                 {datesInRange.map(
                                                   (dateObj, index) => {
                                                     const logsForDay =
@@ -1063,11 +1058,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                         return (
                                                           <tr
                                                             key={log.id}
-                                                            className="hover:bg-gray-50"
+                                                            className="hover:bg-slate-50 transition-colors"
                                                           >
-                                                            <td className="p-3">
+                                                            <td className="p-3.5">
                                                               <span
-                                                                className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-gray-700"}`}
+                                                                className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-amber-100 text-amber-800" : "text-slate-700 font-semibold"}`}
                                                               >
                                                                 {dateObj.toLocaleDateString(
                                                                   "en-US",
@@ -1079,26 +1074,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                                 )}
                                                               </span>
                                                             </td>
-                                                            <td className="p-3">
-                                                              <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded-full">
+                                                            <td className="p-3.5">
+                                                              <span className="text-xs font-extrabold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full">
                                                                 Worked
                                                               </span>
                                                             </td>
-                                                            <td className="p-3 text-gray-700">
+                                                            <td className="p-3.5 text-slate-700">
                                                               <MapLink
                                                                 location={
                                                                   log.location
                                                                 }
                                                               />
                                                             </td>
-                                                            <td className="p-3 text-center text-gray-600">
+                                                            <td className="p-3.5 text-center text-slate-600 font-medium">
                                                               {log.checkIn} -{" "}
                                                               {log.checkOut}
                                                             </td>
-                                                            <td className="p-3 text-center font-bold text-purple-700">
+                                                            <td className="p-3.5 text-center font-black text-[#8B4513]">
                                                               {log.totalHours}h
                                                             </td>
-                                                            <td className="p-3 text-center">
+                                                            <td className="p-3.5 text-center">
                                                               {hasPhotos ? (
                                                                 <button
                                                                   type="button"
@@ -1111,7 +1106,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                                       `Evidence: ${worker.fullName} • ${dateObj.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}`,
                                                                     );
                                                                   }}
-                                                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs"
+                                                                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FCEEE6] text-[#8B4513] hover:bg-[#f7decb] border border-[#8B4513]/20 rounded-xl text-xs font-extrabold transition-colors cursor-pointer"
                                                                   title="View site photos"
                                                                 >
                                                                   <span>📷</span>
@@ -1123,7 +1118,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                                   </span>
                                                                 </button>
                                                               ) : (
-                                                                <span className="text-gray-300 text-xs">
+                                                                <span className="text-slate-300 text-xs">
                                                                   —
                                                                 </span>
                                                               )}
@@ -1135,10 +1130,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                       return (
                                                         <tr
                                                           key={`edit-${index}`}
-                                                          className="bg-blue-50/50"
+                                                          className="bg-[#F4F6F9]"
                                                         >
-                                                          <td className="p-3 align-top">
-                                                            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-blue-200 text-blue-800">
+                                                          <td className="p-3.5 align-top">
+                                                            <span className="inline-block px-3 py-1 rounded-full text-xs font-extrabold bg-slate-200 text-slate-700">
                                                               {dateObj.toLocaleDateString(
                                                                 "en-US",
                                                                 {
@@ -1151,7 +1146,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                           </td>
                                                           <td
                                                             colSpan={5}
-                                                            className="p-3"
+                                                            className="p-3.5"
                                                           >
                                                             <InlineEditForm
                                                               workerId={worker.id}
@@ -1173,11 +1168,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                       return (
                                                         <tr
                                                           key={`missing-${index}`}
-                                                          className="bg-red-50/40 hover:bg-red-50 transition-colors group"
+                                                          className="bg-red-50/30 hover:bg-red-50 transition-colors group"
                                                         >
-                                                          <td className="p-3">
+                                                          <td className="p-3.5">
                                                             <span
-                                                              className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${isWeekend ? "bg-yellow-200 text-yellow-800 shadow-sm" : "text-red-800"}`}
+                                                              className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${isWeekend ? "bg-amber-100 text-amber-800" : "text-red-700 bg-red-100"}`}
                                                             >
                                                               {dateObj.toLocaleDateString(
                                                                 "en-US",
@@ -1189,38 +1184,26 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                                                               )}
                                                             </span>
                                                           </td>
-                                                          <td className="p-3">
-                                                            <span className="text-xs font-bold text-red-700 bg-red-100 px-2 py-1 rounded-full">
+                                                          <td className="p-3.5">
+                                                            <span className="text-xs font-extrabold text-red-700 bg-red-100 px-2.5 py-1 rounded-full">
                                                               No Log
                                                             </span>
                                                           </td>
                                                           <td
-                                                            className="p-3 text-red-400 italic"
+                                                            className="p-3.5 text-slate-400 italic"
                                                             colSpan={3}
                                                           ></td>
-                                                          <td className="p-3 text-center">
+                                                          <td className="p-3.5 text-center">
                                                             <button
                                                               onClick={() =>
                                                                 setEditingRowKey(
                                                                   rowKey,
                                                                 )
                                                               }
-                                                              className="p-1.5 bg-white border border-red-200 text-red-500 rounded hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 shadow-sm cursor-pointer"
+                                                              className="px-3 py-1 bg-white border border-red-200 text-red-600 rounded-xl hover:bg-[#FCEEE6] hover:border-[#8B4513] transition-colors font-extrabold text-xs shadow-2xs cursor-pointer"
                                                               title="Add missing hours"
                                                             >
-                                                              <svg
-                                                                className="w-4 h-4"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                viewBox="0 0 24 24"
-                                                              >
-                                                                <path
-                                                                  strokeLinecap="round"
-                                                                  strokeLinejoin="round"
-                                                                  strokeWidth="2"
-                                                                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                                                                />
-                                                              </svg>
+                                                              + Add
                                                             </button>
                                                           </td>
                                                         </tr>
@@ -1242,7 +1225,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                               <tr>
                                 <td
                                   colSpan={3}
-                                  className="p-8 text-center text-gray-500"
+                                  className="p-8 text-center text-slate-400 text-xs"
                                 >
                                   No workers found.
                                 </td>
@@ -1279,19 +1262,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
 
         {/* PESTAÑA 3: Gestión de Equipo y Alta de Trabajadores */}
         {activeTab === 'team' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-fade-in">
             
-            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 h-fit">
-              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 rounded-md border border-blue-200">
+            <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-100 h-fit">
+              <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-[#FCEEE6] text-[#8B4513] rounded-full">
                 Onboarding
               </span>
-              <h3 className="text-base font-bold text-gray-800 mt-1 mb-4">
+              <h3 className="text-base font-extrabold text-slate-900 mt-1 mb-4">
                 Register New Employee
               </h3>
 
               <form onSubmit={handleCreateWorker} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">
                     Full Name
                   </label>
                   <input
@@ -1299,13 +1282,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                     value={newWorkerName}
                     onChange={(e) => setNewWorkerName(e.target.value)}
                     placeholder="e.g. John Doe"
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full p-3.5 border border-slate-200/80 rounded-2xl text-xs sm:text-sm bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-semibold text-slate-900"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">
                     Email Address
                   </label>
                   <input
@@ -1313,19 +1296,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                     value={newWorkerEmail}
                     onChange={(e) => setNewWorkerEmail(e.target.value)}
                     placeholder="worker@company.com"
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full p-3.5 border border-slate-200/80 rounded-2xl text-xs sm:text-sm bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-semibold text-slate-900"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">
                     Role
                   </label>
                   <select
                     value={newWorkerRole}
                     onChange={(e) => setNewWorkerRole(e.target.value as "worker" | "teamlead")}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+                    className="w-full p-3.5 border border-slate-200/80 rounded-2xl text-xs sm:text-sm bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-semibold text-slate-950 cursor-pointer"
                   >
                     <option value="worker">Worker (Field Operatives)</option>
                     <option value="teamlead">Team Lead (Photos & Toolbox Talks)</option>
@@ -1333,7 +1316,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+                  <label className="block text-xs font-bold text-slate-500 mb-1.5">
                     Temporary Password
                   </label>
                   <input
@@ -1342,10 +1325,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                     onChange={(e) => setNewWorkerPassword(e.target.value)}
                     placeholder="Min. 6 characters"
                     minLength={6}
-                    className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none font-mono"
+                    className="w-full p-3.5 border border-slate-200/80 rounded-2xl text-xs sm:text-sm bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-mono font-bold text-slate-900"
                     required
                   />
-                  <p className="text-[11px] text-gray-400 mt-1">
+                  <p className="text-[11px] text-slate-400 mt-1 font-medium">
                     Share this password with the worker so they can log in.
                   </p>
                 </div>
@@ -1353,53 +1336,54 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                 <button
                   type="submit"
                   disabled={creatingWorker}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors shadow-sm cursor-pointer disabled:cursor-not-allowed"
+                  className="w-full py-4 bg-[#8B3A0E] hover:bg-[#722f0b] disabled:opacity-50 text-white rounded-2xl text-xs font-extrabold uppercase tracking-wider transition-colors shadow-xs cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
                 >
-                  {creatingWorker ? "Creating Account..." : "+ Add Employee to Company"}
+                  <UserPlus className="w-4 h-4" />
+                  <span>{creatingWorker ? "Creating Account..." : "Add Employee to Company"}</span>
                 </button>
               </form>
             </div>
 
-            <div className="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden h-fit">
-              <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+            <div className="lg:col-span-2 bg-white rounded-3xl shadow-xs border border-slate-100 overflow-hidden h-fit">
+              <div className="p-5 bg-white border-b border-slate-100 flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-gray-800">
+                  <h3 className="text-sm font-extrabold text-slate-900">
                     Active Company Roster
                   </h3>
-                  <p className="text-xs text-gray-400">
-                    Company ID: <span className="font-mono font-semibold text-gray-600">{adminCompanyId || "Loading..."}</span>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Company ID: <span className="font-mono font-extrabold text-slate-600">{adminCompanyId || "Loading..."}</span>
                   </p>
                 </div>
-                <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-200">
+                <span className="px-3.5 py-1 bg-[#FCEEE6] text-[#8B4513] rounded-full text-xs font-extrabold">
                   {allRegisteredUsers.length} Employees
                 </span>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-gray-50/60 text-[11px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
+                  <thead className="bg-[#F4F6F9] text-[11px] font-extrabold text-slate-400 uppercase tracking-wider border-b border-slate-100">
                     <tr>
                       <th className="p-4">Name</th>
                       <th className="p-4">Email</th>
                       <th className="p-4 text-center">Role</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-slate-100">
                     {allRegisteredUsers.map((worker) => (
-                      <tr key={worker.id} className="hover:bg-gray-50/80 transition-colors">
-                        <td className="p-4 font-bold text-gray-800">
+                      <tr key={worker.id} className="hover:bg-[#F4F6F9]/50 transition-colors">
+                        <td className="p-4 font-extrabold text-slate-900">
                           {worker.fullName}
                         </td>
-                        <td className="p-4 text-gray-500 text-xs">
+                        <td className="p-4 text-slate-500 text-xs font-medium">
                           {worker.email}
                         </td>
                         <td className="p-4 text-center">
                           {worker.role === "teamlead" ? (
-                            <span className="px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md border border-purple-200 whitespace-nowrap">
+                            <span className="px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider bg-[#FEF3C7] text-[#92400E] rounded-full inline-block">
                               Team Lead
                             </span>
                           ) : (
-                            <span className="px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 rounded-md border border-emerald-200 whitespace-nowrap">
+                            <span className="px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100/80 text-emerald-800 rounded-full inline-block">
                               Worker
                             </span>
                           )}
@@ -1409,7 +1393,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
 
                     {allRegisteredUsers.length === 0 && (
                       <tr>
-                        <td colSpan={3} className="p-8 text-center text-gray-400 text-xs">
+                        <td colSpan={3} className="p-10 text-center text-slate-400 text-xs font-medium">
                           No employees registered under this company yet.
                         </td>
                       </tr>
@@ -1434,4 +1418,4 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   );
 };
 
-export default AdminPanel;  
+export default AdminPanel;

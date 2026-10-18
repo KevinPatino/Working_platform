@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebaseConfig';
 import { compressImage } from '../utils/imageCompressor';
+import { Camera, X, Loader2 } from 'lucide-react';
 
 interface PhotoEvidenceUploaderProps {
-  docId: string; // Identificador del turno diario (ej: uid_2026-10-10)
-  photos: string[]; // Lista actual de URLs de fotos
+  docId: string;
+  photos: string[];
   onPhotosChange: (updatedUrls: string[]) => void;
 }
 
@@ -29,20 +30,14 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-
-        // 1. Compresión en el cliente
         const compressedBlob = await compressImage(file, 1200, 0.75);
-
-        // 2. Definir ruta en Firebase Storage: evidences/{docId}/{timestamp}_{nombre}
         const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
         const storageRef = ref(storage, `evidences/${docId}/${fileName}`);
 
-        // 3. Subir el Blob comprimido
         const snapshot = await uploadBytes(storageRef, compressedBlob, {
           contentType: 'image/jpeg',
         });
 
-        // 4. Obtener URL de descarga
         const downloadUrl = await getDownloadURL(snapshot.ref);
         uploadedUrls.push(downloadUrl);
       }
@@ -53,7 +48,6 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
       setErrorMessage('Failed to upload one or more images. Check connection.');
     } finally {
       setUploading(false);
-      // Limpiar input para permitir subir la misma foto si se desea
       e.target.value = '';
     }
   };
@@ -65,10 +59,10 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">
+        <label className="block text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
           Job Site Evidence (Photos)
         </label>
-        <span className="text-[11px] text-gray-400 font-medium">
+        <span className="text-[11px] text-slate-400 font-bold">
           {photos.length} uploaded
         </span>
       </div>
@@ -79,7 +73,7 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
           {photos.map((url, idx) => (
             <div
               key={idx}
-              className="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50 shadow-xs"
+              className="relative group aspect-square rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-2xs"
             >
               <img
                 src={url}
@@ -90,10 +84,10 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
               <button
                 type="button"
                 onClick={() => handleRemovePhoto(url)}
-                className="absolute top-1 right-1 bg-red-600/90 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold hover:bg-red-700 transition-colors shadow-sm cursor-pointer"
+                className="absolute top-1.5 right-1.5 bg-slate-900/75 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
                 title="Remove photo"
               >
-                ✕
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
           ))}
@@ -103,10 +97,10 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
       {/* Botón de subida y cámara */}
       <div>
         <label
-          className={`flex items-center justify-center gap-2 p-3 border-2 border-dashed rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+          className={`flex items-center justify-center gap-2 p-3.5 border-2 border-dashed rounded-2xl text-xs font-extrabold transition-all cursor-pointer ${
             uploading
-              ? 'border-gray-300 bg-gray-50 text-gray-400 cursor-not-allowed'
-              : 'border-blue-300 bg-blue-50/50 hover:bg-blue-50 text-blue-700 hover:border-blue-400'
+              ? 'border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed'
+              : 'border-[#8B4513]/30 bg-[#FCEEE6]/50 hover:bg-[#FCEEE6] text-[#8B4513] hover:border-[#8B4513]/60'
           }`}
         >
           <input
@@ -120,12 +114,12 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
           />
           {uploading ? (
             <>
-              <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <Loader2 className="w-4 h-4 text-[#8B4513] animate-spin" />
               <span>Compressing & Uploading...</span>
             </>
           ) : (
             <>
-              <span className="text-base">📷</span>
+              <Camera className="w-4 h-4 text-[#8B4513]" />
               <span>Take Photo or Upload Evidence</span>
             </>
           )}

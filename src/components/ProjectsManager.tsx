@@ -10,6 +10,14 @@ import {
   doc, 
   Timestamp 
 } from 'firebase/firestore';
+import { 
+  MapPin, 
+  FolderOpen, 
+  Plus, 
+  CheckCircle2, 
+  RotateCcw, 
+  Building2 
+} from 'lucide-react';
 import LocationInput from './LocationInput';
 import ProjectDetailView from './ProjectDetailView';
 
@@ -148,21 +156,24 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="space-y-5 animate-fade-in">
+      <div className="grid grid-cols-1 gap-5">
         
-        {/* Formulario para Crear Nuevo Proyecto */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 h-fit">
-          <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 rounded-md border border-blue-200">
-            Site Management
-          </span>
-          <h3 className="text-base font-bold text-gray-800 mt-1 mb-4">
+        {/* Tarjeta 1: Formulario para Crear Nuevo Proyecto */}
+        <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-100">
+          <div className="flex items-center justify-between mb-3">
+            <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-[#FCEEE6] text-[#8B4513] rounded-full">
+              Site Management
+            </span>
+          </div>
+
+          <h3 className="text-base font-extrabold text-slate-900 mb-4">
             Create New Project / Obra
           </h3>
 
           <form onSubmit={handleCreateProject} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-500 mb-1.5">
                 Project Name
               </label>
               <input
@@ -170,20 +181,20 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 placeholder="e.g. Torre Central - Fase 2"
-                className="w-full p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full p-3.5 border border-slate-200/80 rounded-2xl text-sm bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-semibold text-slate-900 transition-all"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-500 mb-1.5">
                 Project Official Address
               </label>
               <LocationInput
                 value={projectAddress}
                 onChange={(val) => setProjectAddress(val)}
                 placeholder="Search job site address..."
-                className="p-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+                className="w-full p-3.5 border border-slate-200/80 rounded-2xl text-sm bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-semibold text-slate-900 transition-all"
                 required
               />
             </div>
@@ -191,80 +202,95 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors shadow-sm cursor-pointer disabled:cursor-not-allowed"
+              className="w-full py-3.5 bg-[#8B3A0E] hover:bg-[#722f0b] disabled:opacity-50 text-white rounded-2xl text-xs font-extrabold uppercase tracking-wider transition-colors shadow-xs cursor-pointer disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             >
-              {submitting ? 'Creating Project...' : '+ Create Active Project'}
+              <Plus className="w-4 h-4" />
+              <span>{submitting ? 'Creating Project...' : 'Create Active Project'}</span>
             </button>
           </form>
         </div>
 
-        {/* Listado de Proyectos de la Empresa */}
-        <div className="lg:col-span-2 bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden h-fit">
-          <div className="p-4 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-800">
-              Company Projects Roster
-            </h3>
-            <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold border border-blue-200">
-              {projects.length} Total Projects
+        {/* Tarjeta 2: Listado de Proyectos de la Empresa */}
+        <div className="bg-white rounded-3xl shadow-xs border border-slate-100 overflow-hidden">
+          <div className="px-5 py-4 bg-white border-b border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-[#8B4513]" />
+              <h3 className="text-sm font-extrabold text-slate-900">
+                Company Projects Roster
+              </h3>
+            </div>
+            <span className="px-3 py-1 bg-[#FCEEE6] text-[#8B4513] rounded-full text-xs font-extrabold">
+              {projects.length} {projects.length === 1 ? 'Project' : 'Projects'}
             </span>
           </div>
 
           {loading ? (
-            <div className="p-12 text-center text-gray-400 text-xs">
+            <div className="p-10 text-center text-slate-400 text-xs font-semibold animate-pulse">
               Loading projects...
             </div>
           ) : projects.length === 0 ? (
-            <div className="p-12 text-center text-gray-400 text-xs">
-              No projects created yet. Use the form on the left to add one.
+            <div className="p-10 text-center text-slate-400 text-xs">
+              No projects created yet. Use the form above to add your first job site.
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-slate-100">
               {projects.map((proj) => (
                 <div
                   key={proj.id}
-                  className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-gray-50/80 transition-colors"
+                  className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#F4F6F9]/50 transition-colors"
                 >
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-gray-900 text-sm truncate">
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <h4 className="font-extrabold text-slate-900 text-base truncate">
                         {proj.name}
                       </h4>
                       {proj.status === 'active' ? (
-                        <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[10px] font-black uppercase tracking-wider">
+                        <span className="px-2.5 py-0.5 bg-emerald-100/80 text-emerald-800 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
                           Active
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 bg-gray-200 text-gray-600 rounded text-[10px] font-black uppercase tracking-wider">
+                        <span className="px-2.5 py-0.5 bg-slate-200 text-slate-600 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
                           Completed
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 truncate">
-                      📍 {proj.address}
+                    <p className="text-xs text-slate-500 flex items-center gap-1.5 truncate">
+                      <MapPin className="w-3.5 h-3.5 text-[#8B4513] shrink-0" />
+                      <span className="truncate">{proj.address}</span>
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0 pt-1 sm:pt-0">
                     {/* Botón para entrar al expediente del proyecto */}
                     <button
                       type="button"
                       onClick={() => setSelectedProject(proj)}
-                      className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      className="flex-1 sm:flex-initial justify-center px-4 py-2.5 bg-[#8B3A0E] hover:bg-[#722f0b] text-white rounded-xl text-xs font-extrabold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
                     >
-                      <span>📂</span>
+                      <FolderOpen className="w-3.5 h-3.5" />
                       <span>Open Project</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => handleToggleStatus(proj.id, proj.status)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                      className={`px-3.5 py-2.5 rounded-xl text-xs font-extrabold transition-colors cursor-pointer flex items-center gap-1.5 ${
                         proj.status === 'active'
-                          ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                          ? 'bg-[#EEF2F6] text-slate-700 hover:bg-red-50 hover:text-red-700'
                           : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                       }`}
                     >
-                      {proj.status === 'active' ? 'Mark Completed' : 'Reactivate'}
+                      {proj.status === 'active' ? (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Mark Completed</span>
+                        </>
+                      ) : (
+                        <>
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          <span>Reactivate</span>
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebaseConfig';
 import { collection, addDoc, Timestamp, query, where, getDocs } from 'firebase/firestore';
+import { 
+  ClipboardCheck, 
+  X, 
+  MapPin, 
+  Navigation, 
+  ChevronDown, 
+  PenTool, 
+  CheckSquare, 
+  Square,
+  Building2,
+  ShieldAlert
+} from 'lucide-react';
 import LocationInput from './LocationInput';
 import SignaturePad from './SignaturePad';
 
@@ -16,7 +28,6 @@ interface ToolboxMeetingModalProps {
   currentUser: any;
   userCompanyId: string | null;
   showNotification: (msg: string) => void;
-  // NUEVO: Si se abre desde dentro de un proyecto específico, viene preasignado
   defaultProject?: {
     id: string;
     name: string;
@@ -163,7 +174,6 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
       const today = new Date();
       const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-      // Identificar nombre del proyecto
       const projectObj = defaultProject || projectsList.find((p) => p.id === selectedProjectId);
 
       await addDoc(collection(db, 'toolboxMeetings'), {
@@ -183,7 +193,6 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
       });
 
       showNotification('Toolbox Meeting saved successfully!');
-      // Reiniciar campos
       setAttendees([]);
       setNotes('');
       if (onMeetingSaved) onMeetingSaved();
@@ -196,77 +205,107 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6 overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-100 p-5 sm:p-7 space-y-5 animate-fade-in my-auto">
-        
-        {/* Encabezado */}
-        <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-          <div>
-            <span className="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 rounded-md">
-              Safety Compliance
-            </span>
-            <h3 className="text-lg font-bold text-gray-800 mt-1">
-              Daily Toolbox Talk & Safety Meeting
-            </h3>
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-3 sm:p-6 overflow-y-auto animate-fade-in"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-[#F4F6F9] rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl border border-slate-200 flex flex-col my-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Cabecera Fija del Modal */}
+        <div className="bg-white px-5 py-4 border-b border-slate-200/80 flex items-center justify-between sticky top-0 z-10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-[#FCEEE6] text-[#8B4513] flex items-center justify-center shrink-0">
+              <ClipboardCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-extrabold text-slate-900">
+                  Daily Toolbox Talk
+                </h3>
+                <span className="px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider bg-[#FEF3C7] text-[#92400E] rounded-full">
+                  Safety First
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">
+                Safety briefing & crew signature acknowledgment
+              </p>
+            </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+            title="Close"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Cuerpo con Scroll */}
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 overflow-y-auto space-y-5">
           
-          {/* Ubicación de la Obra: Fija si viene de un proyecto, o Selector Híbrido */}
-          <div>
+          {/* Tarjeta 1: Ubicación y Tema */}
+          <div className="bg-white p-5 rounded-3xl shadow-xs border border-slate-100 space-y-4">
             {defaultProject ? (
-              <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-xl space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
-                  🏗️ Linked to Active Project
-                </span>
-                <p className="text-sm font-bold text-gray-900 mt-1">{defaultProject.name}</p>
-                <p className="text-xs text-gray-600">📍 {defaultProject.address}</p>
+              <div className="p-4 bg-[#FCEEE6]/60 border border-[#8B4513]/20 rounded-2xl flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white text-[#8B4513] flex items-center justify-center shrink-0 shadow-2xs">
+                  <Building2 className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#8B4513] block">
+                    Linked to Active Project
+                  </span>
+                  <p className="text-sm font-extrabold text-slate-900 truncate mt-0.5">
+                    {defaultProject.name}
+                  </p>
+                  <p className="text-xs text-slate-500 truncate mt-0.5">
+                    {defaultProject.address}
+                  </p>
+                </div>
               </div>
             ) : (
-              <div>
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    Job Site Location
-                  </label>
-                  <div className="flex gap-1.5 p-1 bg-gray-100 rounded-lg">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLocationType('address');
-                        setSelectedProjectId('');
-                        setJobSite('');
-                      }}
-                      className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                        locationType === 'address'
-                          ? 'bg-white text-gray-900 shadow-xs'
-                          : 'text-gray-500 hover:text-gray-800'
-                      }`}
-                    >
-                      📍 Custom Address
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setLocationType('project');
-                        setJobSite('');
-                      }}
-                      className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all cursor-pointer ${
-                        locationType === 'project'
-                          ? 'bg-white text-blue-900 shadow-xs'
-                          : 'text-gray-500 hover:text-gray-800'
-                      }`}
-                    >
-                      🏗️ Active Project ({projectsList.length})
-                    </button>
-                  </div>
+              <div className="space-y-3">
+                <label className="block text-xs font-bold text-slate-500">
+                  Job Site Location
+                </label>
+
+                {/* Píldora Conmutador: 1° Custom Address | 2° Active Project */}
+                <div className="grid grid-cols-2 p-1.5 bg-[#EEF2F6] rounded-2xl">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLocationType('address');
+                      setSelectedProjectId('');
+                      setJobSite('');
+                    }}
+                    className={`py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      locationType === 'address'
+                        ? 'bg-white text-slate-900 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <Navigation className={`w-3.5 h-3.5 ${locationType === 'address' ? 'text-[#8B4513]' : 'text-slate-400'}`} />
+                    <span>Custom Address</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLocationType('project');
+                      setSelectedProjectId('');
+                      setJobSite('');
+                    }}
+                    className={`py-2 px-3 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                      locationType === 'project'
+                        ? 'bg-white text-slate-900 shadow-xs'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    <MapPin className={`w-3.5 h-3.5 ${locationType === 'project' ? 'text-[#8B4513]' : 'text-slate-400'}`} />
+                    <span>Active Project ({projectsList.length})</span>
+                  </button>
                 </div>
 
                 {locationType === 'address' ? (
@@ -274,11 +313,23 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
                     value={jobSite}
                     onChange={(val) => setJobSite(val)}
                     placeholder="Search or type site address..."
-                    className="p-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                    className="w-full p-3.5 border border-slate-200 rounded-2xl text-sm bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-semibold"
                     required
                   />
                 ) : (
-                  <div className="space-y-2">
+                  <div className="relative bg-[#F4F6F9] hover:bg-[#edf1f5] transition-colors rounded-2xl p-3.5 border border-slate-200/80 flex items-center gap-3 cursor-pointer">
+                    <MapPin className="w-5 h-5 text-[#8B4513] shrink-0 pointer-events-none" />
+                    <div className="flex-1 min-w-0 pointer-events-none">
+                      <p className="text-xs font-extrabold text-slate-900 truncate">
+                        {selectedProjectId
+                          ? projectsList.find((p) => p.id === selectedProjectId)?.name
+                          : 'Select an Active Project'}
+                      </p>
+                      <p className="text-xs text-slate-500 truncate mt-0.5">
+                        {jobSite || 'Click here to choose from list'}
+                      </p>
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-slate-400 shrink-0 pointer-events-none" />
                     <select
                       value={selectedProjectId}
                       onChange={(e) => {
@@ -287,7 +338,7 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
                         const found = projectsList.find((p) => p.id === projId);
                         setJobSite(found ? found.address : '');
                       }}
-                      className="w-full p-3 border border-blue-200 rounded-lg text-sm bg-blue-50/30 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none font-medium text-gray-800"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       required
                     >
                       <option value="">-- Select an Active Project --</option>
@@ -297,81 +348,92 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
                         </option>
                       ))}
                     </select>
-                    {selectedProjectId && jobSite && (
-                      <p className="text-xs text-blue-800 bg-blue-50 p-2 rounded-lg border border-blue-100">
-                        📍 <strong>Site Address:</strong> {jobSite}
-                      </p>
-                    )}
                   </div>
                 )}
               </div>
             )}
-          </div>
 
-          {/* Tema de Seguridad */}
-          <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-              Safety Topic
-            </label>
-            <select
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg text-sm bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
-            >
-              {COMMON_TOPICS.map((t, idx) => (
-                <option key={idx} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Lista de Peligros y Controles */}
-          <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1.5">
-              Hazards & Controls Discussed
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
-              {COMMON_HAZARDS.map((h, idx) => {
-                const isChecked = selectedHazards.includes(h);
-                return (
-                  <label
-                    key={idx}
-                    className="flex items-start gap-2 cursor-pointer text-xs font-medium text-gray-700 select-none"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => toggleHazard(h)}
-                      className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
-                    />
-                    <span>{h}</span>
-                  </label>
-                );
-              })}
+            {/* Tema de Seguridad */}
+            <div>
+              <label className="block text-xs font-bold text-slate-500 mb-1.5">
+                Safety Topic
+              </label>
+              <div className="relative">
+                <select
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  className="w-full p-3.5 pr-9 border border-slate-200/80 rounded-2xl text-xs sm:text-sm font-extrabold text-slate-800 bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none appearance-none cursor-pointer"
+                >
+                  {COMMON_TOPICS.map((t, idx) => (
+                    <option key={idx} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              </div>
             </div>
           </div>
 
-          {/* Notas Adicionales */}
-          <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">
-              Specific Controls & Notes (Optional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-              placeholder="E.g., Water mist active for dust suppression; 2nd floor hole covered and marked..."
-              className="w-full p-3 border border-gray-300 rounded-lg text-xs bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-            />
+          {/* Tarjeta 2: Peligros y Notas */}
+          <div className="bg-white p-5 rounded-3xl shadow-xs border border-slate-100 space-y-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2.5">
+                <ShieldAlert className="w-4 h-4 text-[#8B4513]" />
+                <label className="text-xs font-extrabold text-slate-800">
+                  Hazards & Controls Discussed
+                </label>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {COMMON_HAZARDS.map((h, idx) => {
+                  const isChecked = selectedHazards.includes(h);
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => toggleHazard(h)}
+                      className={`p-3 rounded-2xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
+                        isChecked
+                          ? 'bg-[#FCEEE6]/60 border-[#8B4513]/40 text-slate-900 font-bold'
+                          : 'bg-[#F4F6F9] border-slate-200/60 text-slate-600 font-medium hover:bg-slate-100'
+                      }`}
+                    >
+                      {isChecked ? (
+                        <CheckSquare className="w-4 h-4 text-[#8B4513] shrink-0 mt-0.5" />
+                      ) : (
+                        <Square className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+                      )}
+                      <span className="text-xs leading-snug">{h}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 mb-1.5">
+                Specific Controls & Notes (Optional)
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+                placeholder="E.g., Water mist active for dust suppression; 2nd floor hole covered and marked..."
+                className="w-full p-3.5 border border-slate-200/80 rounded-2xl text-xs bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none resize-none font-medium"
+              />
+            </div>
           </div>
 
-          {/* Lista y Captura de Firmas */}
-          <div className="pt-3 border-t border-gray-100 space-y-3">
+          {/* Tarjeta 3: Captura de Firmas de la Cuadrilla */}
+          <div className="bg-white p-5 rounded-3xl shadow-xs border border-slate-100 space-y-3.5">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">
-                Crew Signatures ({attendees.length} Signed)
+              <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+                <PenTool className="w-4 h-4 text-[#8B4513]" />
+                <span>Crew Signatures</span>
               </label>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#FCEEE6] text-[#8B4513] text-[11px] font-extrabold">
+                {attendees.length} Signed
+              </span>
             </div>
 
             <div className="flex gap-2">
@@ -380,34 +442,34 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
                 value={currentWorkerName}
                 onChange={(e) => setCurrentWorkerName(e.target.value)}
                 placeholder="Worker full name..."
-                className="flex-1 p-2.5 border border-gray-300 rounded-lg text-xs bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                className="flex-1 p-3 border border-slate-200/80 rounded-2xl text-xs bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-semibold"
               />
               <button
                 type="button"
                 onClick={handleStartSigning}
-                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shadow-xs"
+                className="px-4 py-3 bg-[#8B3A0E] hover:bg-[#722f0b] text-white rounded-2xl text-xs font-extrabold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0"
               >
-                <span>✍️</span>
+                <PenTool className="w-3.5 h-3.5" />
                 <span>Sign</span>
               </button>
             </div>
 
             {/* Listado de los que ya firmaron */}
             {attendees.length > 0 && (
-              <div className="divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden bg-white max-h-48 overflow-y-auto">
+              <div className="divide-y divide-slate-100 border border-slate-200/70 rounded-2xl overflow-hidden bg-[#F4F6F9] max-h-48 overflow-y-auto">
                 {attendees.map((att, index) => (
-                  <div key={index} className="p-2.5 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
+                  <div key={index} className="p-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
                       <img
                         src={att.signature}
                         alt="Signature"
-                        className="h-7 w-20 object-contain border border-gray-200 rounded bg-gray-50"
+                        className="h-8 w-20 object-contain border border-slate-200 rounded-xl bg-white p-0.5"
                       />
                       <div className="truncate">
-                        <p className="text-xs font-bold text-gray-800 truncate">
+                        <p className="text-xs font-extrabold text-slate-900 truncate">
                           {att.workerName}
                         </p>
-                        <p className="text-[10px] text-gray-400">
+                        <p className="text-[10px] font-semibold text-slate-400">
                           Signed at {att.signedAt}
                         </p>
                       </div>
@@ -415,10 +477,10 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
                     <button
                       type="button"
                       onClick={() => handleRemoveAttendee(index)}
-                      className="text-gray-400 hover:text-red-500 p-1 text-xs font-bold transition-colors cursor-pointer"
+                      className="w-7 h-7 rounded-full bg-white text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors cursor-pointer border border-slate-200/60"
                       title="Remove"
                     >
-                      ✕
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ))}
@@ -426,19 +488,19 @@ const ToolboxMeetingModal: React.FC<ToolboxMeetingModalProps> = ({
             )}
           </div>
 
-          {/* Botones de Envío */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+          {/* Botones de Acción del Modal */}
+          <div className="flex items-center justify-end gap-3 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+              className="px-4 py-3 rounded-2xl text-xs font-extrabold text-slate-500 hover:bg-slate-200/60 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors shadow-sm disabled:bg-emerald-400 cursor-pointer disabled:cursor-not-allowed"
+              className="flex-1 sm:flex-initial px-6 py-3.5 bg-[#8B3A0E] hover:bg-[#722f0b] text-white rounded-2xl text-xs font-extrabold transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
             >
               {submitting ? 'Saving...' : 'Save & Submit Toolbox Meeting'}
             </button>
