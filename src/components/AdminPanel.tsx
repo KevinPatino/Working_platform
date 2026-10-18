@@ -27,7 +27,9 @@ import {
   UserPlus,
   X,
   Check,
+  Download,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 
 import Toast from "./Toast";
 import PhotoModal from "./PhotoModal";
@@ -36,6 +38,7 @@ import ToolboxAuditor from "./ToolBoxAuditor";
 import ProjectsManager from "./ProjectsManager";
 import LocationInput from "./LocationInput";
 import Header from "./Header";
+import ExportExcelModal from "./ExportExcelModal";
 
 import { 
   getBaseCycleIndex, 
@@ -250,6 +253,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
     null,
   );
   const [editingRowKey, setEditingRowKey] = useState<string | null>(null);
+
+  // Estado para controlar el Modal de Exportación Avanzada
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const [activeCycleIndex, setActiveCycleIndex] =
     useState<number>(getBaseCycleIndex());
@@ -473,6 +479,125 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
   const displayedUsers = [...filteredUsers].sort((a, b) =>
     a.fullName.localeCompare(b.fullName),
   );
+
+  // Función ejecutada desde el modal de exportación para generar el archivo Excel (.xlsx)
+  const handleExecuteExportExcel = ({ startDate: expStart, endDate: expEnd, selectedUser: expUser, selectedProject: expProj }: any) => {
+    if (!expStart) {
+      showNotification("Please select a start date for the export.");
+      return;
+    }
+
+    const effectiveEndDate = expEnd ? expEnd : expStart;
+    const startMs = new Date(expStart + "T00:00:00").getTime();
+    const endMs = new Date(effectiveEndDate + "T23:59:59").getTime();
+    const datesInRange = getDatesInRange(expStart, effectiveEndDate);
+
+    const targetWorkers =
+      expUser === "All"
+        ? allRegisteredUsers
+        : allRegisteredUsers.filter((w) => w.id === expUser);
+
+    const summaryRows: any[] = [];
+    const detailedRows: any[] = [];
+    let grandTotalHours = 0;
+
+    targetWorkers.forEach((worker) => {
+      const userLogsInRange = allLogs.filter((log) => {
+        if (!log.timestamp || log.userId !== worker.id) return false;
+        const logTime = log.timestamp.toDate().getTime();
+        
+        if (logTime < startMs || logTime > endMs) return false;
+        if (expProj !== "All" && log.projectId !== expProj) return false;
+
+        return true;
+      });
+
+      userLogsInRange.sort(
+        (a, b) => a.timestamp.toDate().getTime() - b.timestamp.toDate().getTime()
+      );
+
+      const totalWorkerHours = userLogsInRange.reduce(
+        (sum, log) => sum + (Number(log.totalHours) || 0),
+        0
+      );
+
+      grandTotalHours += totalWorkerHours;
+
+      summaryRows.push({
+        "Worker Name": worker.fullName,
+        "Email": worker.email,
+        "Role": worker.role === "teamlead" ? "Team Lead" : "Worker",
+        "Period Start": expStart,
+        "Period End": effectiveEndDate,
+        "Days Logged": userLogsInRange.length,
+        "Total Days in Period": datesInRange.length,
+        "Total Accumulated Hours": totalWorkerHours,
+      });
+
+      userLogsInRange.forEach((log) => {
+        const logDateObj = log.timestamp.toDate();
+        const y = logDateObj.getFullYear();
+        const m = String(logDateObj.getMonth() + 1).padStart(2, "0");
+        const d = String(logDateObj.getDate()).padStart(2, "0");
+        const formattedDate = log.dateStr || `${y}-${m}-${d}`;
+        const dayName = logDateObj.toLocaleDateString("en-US", { weekday: "short" });
+
+        detailedRows.push({
+          "Worker Name": worker.fullName,
+          "Role": worker.role === "teamlead" ? "Team Lead" : "Worker",
+          "Date": formattedDate,
+          "Day": dayName,
+          "Project": log.projectName || "Custom Address",
+          "Location / Job Site": log.location || "",
+          "Check In": log.checkIn || "",
+          "Check Out": log.checkOut || "",
+          "Hours Worked": Number(log.totalHours) || 0,
+          "Field Notes": log.comments || "",
+        });
+      });
+    });
+
+    summaryRows.push({
+      "Worker Name": "GRAND TOTAL",
+      "Email": "",
+      "Role": "",
+      "Period Start": expStart,
+      "Period End": effectiveEndDate,
+      "Days Logged": "",
+      "Total Days in Period": "",
+      "Total Accumulated Hours": grandTotalHours,
+    });
+
+    const workbook = XLSX.utils.book_new();
+
+    const summarySheet = XLSX.utils.json_to_sheet(summaryRows);
+    summarySheet["!cols"] = [
+      { wch: 25 }, { wch: 28 }, { wch: 14 }, { wch: 14 },
+      { wch: 14 }, { wch: 14 }, { wch: 20 }, { wch: 24 },
+    ];
+    XLSX.utils.book_append_sheet(workbook, summarySheet, "Payroll Summary");
+
+    const detailedSheet = XLSX.utils.json_to_sheet(
+      detailedRows.length > 0
+        ? detailedRows
+        : [{ Message: "No shifts found matching the selected filters." }]
+    );
+    detailedSheet["!cols"] = [
+      { wch: 25 }, { wch: 14 }, { wch: 14 }, { wch: 10 },
+      { wch: 22 }, { wch: 38 }, { wch: 12 }, { wch: 12 },
+      { wch: 15 }, { wch: 30 },
+    ];
+    XLSX.utils.book_append_sheet(workbook, detailedSheet, "Detailed Daily Logs");
+
+    const fileName =
+      expEnd && expEnd !== expStart
+        ? `Payroll_Report_${expStart}_to_${expEnd}.xlsx`
+        : `Payroll_Report_${expStart}.xlsx`;
+
+    XLSX.writeFile(workbook, fileName);
+    setIsExportModalOpen(false);
+    showNotification("Custom Excel report downloaded successfully!");
+  };
 
   const handleSelectToday = () => {
     setStartDate(getLocalTodayString());
@@ -740,7 +865,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
 
               {startDate && (
                 <div>
-                  <div className="p-4 bg-[#FCEEE6] border-b border-[#8B4513]/10 text-[#8B4513] text-xs font-extrabold flex justify-between items-center">
+                  <div className="p-4 bg-[#FCEEE6] border-b border-[#8B4513]/10 text-[#8B4513] text-xs font-extrabold flex flex-wrap justify-between items-center gap-3">
                     <span>
                       Report:{" "}
                       {new Date(startDate + "T00:00:00").toLocaleDateString(
@@ -750,9 +875,22 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
                         ? ` to ${new Date(endDate + "T23:59:59").toLocaleDateString("en-US")}`
                         : ""}
                     </span>
-                    <span className="bg-white text-[#8B4513] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-2xs">
-                      Active Data
-                    </span>
+
+                    <div className="flex items-center gap-2">
+                      <span className="bg-white text-[#8B4513] px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-2xs">
+                        Active Data
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsExportModalOpen(true)}
+                        disabled={loading}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-xl text-xs font-extrabold transition-colors shadow-xs cursor-pointer"
+                        title="Open Export Options"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Export Excel</span>
+                      </button>
+                    </div>
                   </div>
 
                   {loading ? (
@@ -1413,6 +1551,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ user }) => {
         onClose={() => setActiveEvidencePhotos(null)}
         photos={activeEvidencePhotos || []}
         title={evidenceModalTitle}
+      />
+
+      {/* Modal Independiente de Exportación a Excel */}
+      <ExportExcelModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        adminCompanyId={adminCompanyId}
+        allRegisteredUsers={allRegisteredUsers}
+        initialStartDate={startDate}
+        initialEndDate={endDate}
+        initialSelectedUser={selectedUser}
+        onExport={handleExecuteExportExcel}
       />
     </div>
   );
