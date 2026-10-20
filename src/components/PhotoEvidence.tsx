@@ -3,6 +3,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebaseConfig';
 import { compressImage } from '../utils/imageCompressor';
 import { Camera, X, Loader2 } from 'lucide-react';
+import PhotoModal from './PhotoModal';
 
 interface PhotoEvidenceUploaderProps {
   docId: string;
@@ -17,6 +18,7 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
 }) => {
   const [uploading, setUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -67,23 +69,27 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
         </span>
       </div>
 
-      {/* Galería de miniaturas */}
+      {/* Galería de miniaturas (Clic para abrir PhotoModal) */}
       {photos.length > 0 && (
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
           {photos.map((url, idx) => (
             <div
               key={idx}
-              className="relative group aspect-square rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-2xs"
+              onClick={() => setIsModalOpen(true)}
+              className="relative group aspect-square rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-2xs cursor-pointer"
             >
               <img
                 src={url}
                 alt={`Evidence ${idx + 1}`}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                 loading="lazy"
               />
               <button
                 type="button"
-                onClick={() => handleRemovePhoto(url)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemovePhoto(url);
+                }}
                 className="absolute top-1.5 right-1.5 bg-slate-900/75 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors shadow-xs cursor-pointer"
                 title="Remove photo"
               >
@@ -94,7 +100,7 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
         </div>
       )}
 
-      {/* Botón de subida y cámara */}
+      {/* Botón de subida (Permite Cámara o Galería en móvil) */}
       <div>
         <label
           className={`flex items-center justify-center gap-2 p-3.5 border-2 border-dashed rounded-2xl text-xs font-extrabold transition-all cursor-pointer ${
@@ -107,7 +113,6 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
             type="file"
             accept="image/*"
             multiple
-            capture="environment"
             disabled={uploading}
             onChange={handleFileChange}
             className="hidden"
@@ -120,7 +125,7 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
           ) : (
             <>
               <Camera className="w-4 h-4 text-[#8B4513]" />
-              <span>Take Photo or Upload Evidence</span>
+              <span>Take Photo or Upload from Gallery</span>
             </>
           )}
         </label>
@@ -129,6 +134,13 @@ const PhotoEvidenceUploader: React.FC<PhotoEvidenceUploaderProps> = ({
       {errorMessage && (
         <p className="text-xs text-red-600 font-semibold mt-1">{errorMessage}</p>
       )}
+
+      <PhotoModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        photos={photos}
+        title="Job Site Evidence"
+      />
     </div>
   );
 };

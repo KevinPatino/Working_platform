@@ -16,7 +16,8 @@ import {
   Plus, 
   CheckCircle2, 
   RotateCcw, 
-  Building2 
+  Building2,
+  Layers
 } from 'lucide-react';
 import LocationInput from './LocationInput';
 import ProjectDetailView from './ProjectDetailView';
@@ -25,6 +26,37 @@ interface ProjectsManagerProps {
   companyId: string | null;
   currentUser: any;
   showNotification: (msg: string) => void;
+  onOpenProject?: (project: Project) => void;
+}
+
+export interface UnitPhoto {
+  id: string;
+  url: string;
+  note: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
+export interface UnitTask {
+  id: string;
+  title: string;
+  assignedToIds: string[];
+  assignedToNames: string[];
+  referencePhotoUrl?: string;
+  status: 'pending' | 'completed';
+  completionPhotoUrl?: string;
+  completionNote?: string;
+  completedBy?: string;
+  completedAt?: string;
+  createdAt: string;
+}
+
+export interface ProjectUnit {
+  id: string;
+  name: string;
+  notes?: string;
+  photos: UnitPhoto[];
+  tasks: UnitTask[];
 }
 
 export interface Project {
@@ -37,20 +69,20 @@ export interface Project {
   createdAt?: any;
   photos?: string[];
   notes?: string;
+  units?: ProjectUnit[];
 }
 
 const ProjectsManager: React.FC<ProjectsManagerProps> = ({
   companyId,
   currentUser,
   showNotification,
+  onOpenProject,
 }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Estado para abrir el expediente de un proyecto específico
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  // Formulario de nuevo proyecto
   const [projectName, setProjectName] = useState('');
   const [projectAddress, setProjectAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -76,6 +108,10 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
       });
 
       setProjects(list);
+      if (selectedProject) {
+        const updatedSelected = list.find((p) => p.id === selectedProject.id);
+        if (updatedSelected) setSelectedProject(updatedSelected);
+      }
     } catch (err: any) {
       console.error('Error loading projects:', err);
       showNotification('Error loading projects: ' + err.message);
@@ -104,7 +140,7 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
 
     setSubmitting(true);
     try {
-      await addDoc(collection(db, 'projects'), {
+      const docRef = await addDoc(collection(db, 'projects'), {
         companyId,
         name: cleanName,
         address: cleanAddress,
@@ -113,12 +149,27 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
         createdAt: Timestamp.now(),
         photos: [],
         notes: '',
+        units: [],
       });
 
       showNotification('Project created successfully!');
       setProjectName('');
       setProjectAddress('');
       await fetchProjects();
+
+      if (onOpenProject) {
+        onOpenProject({
+          id: docRef.id,
+          companyId,
+          name: cleanName,
+          address: cleanAddress,
+          status: 'active',
+          createdBy: currentUser.uid,
+          photos: [],
+          notes: '',
+          units: [],
+        });
+      }
     } catch (err: any) {
       showNotification('Error creating project: ' + err.message);
     } finally {
@@ -139,8 +190,7 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
     }
   };
 
-  // Si el usuario hizo clic en "Open Project", mostramos la vista de detalle de esa obra
-  if (selectedProject) {
+  if (selectedProject && !onOpenProject) {
     return (
       <ProjectDetailView
         project={selectedProject}
@@ -159,7 +209,7 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
     <div className="space-y-5 animate-fade-in">
       <div className="grid grid-cols-1 gap-5">
         
-        {/* Tarjeta 1: Formulario para Crear Nuevo Proyecto */}
+        {/* Formulario para Crear Nuevo Proyecto */}
         <div className="bg-white p-5 sm:p-6 rounded-3xl shadow-xs border border-slate-100">
           <div className="flex items-center justify-between mb-3">
             <span className="px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-[#FCEEE6] text-[#8B4513] rounded-full">
@@ -168,19 +218,19 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
           </div>
 
           <h3 className="text-base font-extrabold text-slate-900 mb-4">
-            Create New Project / Obra
+            Create New Project / Obra General
           </h3>
 
           <form onSubmit={handleCreateProject} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-slate-500 mb-1.5">
-                Project Name
+                Project / Building Name
               </label>
               <input
                 type="text"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                placeholder="e.g. Torre Central - Fase 2"
+                placeholder="e.g. Richmond Residential Complex"
                 className="w-full p-3.5 border border-slate-200/80 rounded-2xl text-sm bg-[#F4F6F9] focus:bg-white focus:ring-2 focus:ring-[#8B4513] outline-none font-semibold text-slate-900 transition-all"
                 required
               />
@@ -210,7 +260,7 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
           </form>
         </div>
 
-        {/* Tarjeta 2: Listado de Proyectos de la Empresa */}
+        {/* Listado de Proyectos de la Empresa */}
         <div className="bg-white rounded-3xl shadow-xs border border-slate-100 overflow-hidden">
           <div className="px-5 py-4 bg-white border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -234,67 +284,81 @@ const ProjectsManager: React.FC<ProjectsManagerProps> = ({
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
-              {projects.map((proj) => (
-                <div
-                  key={proj.id}
-                  className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#F4F6F9]/50 transition-colors"
-                >
-                  <div className="space-y-1.5 min-w-0">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <h4 className="font-extrabold text-slate-900 text-base truncate">
-                        {proj.name}
-                      </h4>
-                      {proj.status === 'active' ? (
-                        <span className="px-2.5 py-0.5 bg-emerald-100/80 text-emerald-800 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
-                          Active
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-0.5 bg-slate-200 text-slate-600 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
-                          Completed
-                        </span>
-                      )}
+              {projects.map((proj) => {
+                const unitsCount = proj.units?.length || 0;
+                return (
+                  <div
+                    key={proj.id}
+                    className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[#F4F6F9]/50 transition-colors"
+                  >
+                    <div className="space-y-1.5 min-w-0">
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <h4 className="font-extrabold text-slate-900 text-base truncate">
+                          {proj.name}
+                        </h4>
+                        {proj.status === 'active' ? (
+                          <span className="px-2.5 py-0.5 bg-emerald-100/80 text-emerald-800 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-0.5 bg-slate-200 text-slate-600 rounded-full text-[10px] font-extrabold uppercase tracking-wider">
+                            Completed
+                          </span>
+                        )}
+                        {unitsCount > 0 && (
+                          <span className="px-2.5 py-0.5 bg-[#FCEEE6] text-[#8B4513] rounded-full text-[10px] font-extrabold inline-flex items-center gap-1">
+                            <Layers className="w-3 h-3" />
+                            {unitsCount} {unitsCount === 1 ? 'Unit' : 'Units'}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 flex items-center gap-1.5 truncate">
+                        <MapPin className="w-3.5 h-3.5 text-[#8B4513] shrink-0" />
+                        <span className="truncate">{proj.address}</span>
+                      </p>
                     </div>
-                    <p className="text-xs text-slate-500 flex items-center gap-1.5 truncate">
-                      <MapPin className="w-3.5 h-3.5 text-[#8B4513] shrink-0" />
-                      <span className="truncate">{proj.address}</span>
-                    </p>
-                  </div>
 
-                  <div className="flex items-center gap-2 shrink-0 pt-1 sm:pt-0">
-                    {/* Botón para entrar al expediente del proyecto */}
-                    <button
-                      type="button"
-                      onClick={() => setSelectedProject(proj)}
-                      className="flex-1 sm:flex-initial justify-center px-4 py-2.5 bg-[#8B3A0E] hover:bg-[#722f0b] text-white rounded-xl text-xs font-extrabold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
-                    >
-                      <FolderOpen className="w-3.5 h-3.5" />
-                      <span>Open Project</span>
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0 pt-1 sm:pt-0">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (onOpenProject) {
+                            onOpenProject(proj);
+                          } else {
+                            setSelectedProject(proj);
+                          }
+                        }}
+                        className="flex-1 sm:flex-initial justify-center px-4 py-2.5 bg-[#8B3A0E] hover:bg-[#722f0b] text-white rounded-xl text-xs font-extrabold transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      >
+                        <FolderOpen className="w-3.5 h-3.5" />
+                        <span>Open Project</span>
+                      </button>
 
-                    <button
-                      type="button"
-                      onClick={() => handleToggleStatus(proj.id, proj.status)}
-                      className={`px-3.5 py-2.5 rounded-xl text-xs font-extrabold transition-colors cursor-pointer flex items-center gap-1.5 ${
-                        proj.status === 'active'
-                          ? 'bg-[#EEF2F6] text-slate-700 hover:bg-red-50 hover:text-red-700'
-                          : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                      }`}
-                    >
-                      {proj.status === 'active' ? (
-                        <>
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Mark Completed</span>
-                        </>
-                      ) : (
-                        <>
-                          <RotateCcw className="w-3.5 h-3.5" />
-                          <span>Reactivate</span>
-                        </>
-                      )}
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleStatus(proj.id, proj.status)}
+                        className={`px-3.5 py-2.5 rounded-xl text-xs font-extrabold transition-colors cursor-pointer flex items-center gap-1.5 ${
+                          proj.status === 'active'
+                            ? 'bg-[#EEF2F6] text-slate-700 hover:bg-red-50 hover:text-red-700'
+                            : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                        }`}
+                      >
+                        {proj.status === 'active' ? (
+                          <>
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <span>Mark Completed</span>
+                          </>
+                        ) : (
+                          <>
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Reactivate</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

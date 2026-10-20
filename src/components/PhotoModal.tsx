@@ -1,23 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { X, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 
 interface PhotoModalProps {
   isOpen: boolean;
   onClose: () => void;
   photos: string[];
-  title?: string;
+  titles?: string[]; // <-- NUEVO: Arreglo opcional con el título/etiqueta de cada foto
+  title?: string;    // Título general por defecto
+  initialIndex?: number;
 }
 
 const PhotoModal: React.FC<PhotoModalProps> = ({
   isOpen,
   onClose,
   photos,
+  titles,
   title = 'Site Evidence',
+  initialIndex = 0,
 }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+
+  // Cada vez que se abra el modal, asegurarnos de sincronizar el índice inicial
+  useEffect(() => {
+    setCurrentIndex(initialIndex);
+  }, [initialIndex, isOpen]);
 
   if (!isOpen || photos.length === 0) return null;
 
   const currentPhoto = photos[currentIndex];
+  // Determina el título actual: si hay arreglo de titles, usa el de la foto actual; si no, usa el título general
+  const currentTitle = titles && titles[currentIndex] ? titles[currentIndex] : title;
 
   const handleNext = () => {
     setCurrentIndex((prev) => (prev + 1) % photos.length);
@@ -28,31 +40,36 @@ const PhotoModal: React.FC<PhotoModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 animate-fade-in">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 backdrop-blur-xs p-4 animate-fade-in"
+      onClick={onClose}
+    >
       <div 
-        className="bg-gray-900 border border-gray-800 rounded-2xl max-w-3xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+        className="bg-white border border-slate-200 rounded-3xl max-w-3xl w-full overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Cabecera del modal */}
-        <div className="flex justify-between items-center px-5 py-4 border-b border-gray-800 text-white">
-          <div>
-            <h3 className="font-bold text-base">{title}</h3>
-            <p className="text-xs text-gray-400">
+        {/* Cabecera del modal (Estilo limpio UI) */}
+        <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-white">
+          <div className="min-w-0 pr-4">
+            <h3 className="font-extrabold text-sm sm:text-base text-slate-900 truncate">
+              {currentTitle}
+            </h3>
+            <p className="text-xs text-slate-400 font-semibold mt-0.5">
               Photo {currentIndex + 1} of {photos.length}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-white text-lg font-bold p-1 rounded-lg transition-colors cursor-pointer"
+            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
             title="Close"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Visor principal de la imagen */}
-        <div className="relative flex-1 bg-black flex items-center justify-center min-h-[320px] max-h-[60vh] overflow-hidden select-none">
+        <div className="relative flex-1 bg-slate-950 flex items-center justify-center min-h-[320px] max-h-[60vh] overflow-hidden select-none">
           <img
             src={currentPhoto}
             alt={`Evidence ${currentIndex + 1}`}
@@ -64,35 +81,35 @@ const PhotoModal: React.FC<PhotoModalProps> = ({
               <button
                 type="button"
                 onClick={handlePrev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 bg-gray-900/70 hover:bg-gray-900 text-white p-2.5 rounded-full transition-colors cursor-pointer"
+                className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-800 p-2.5 rounded-full shadow-md transition-colors cursor-pointer"
                 title="Previous photo"
               >
-                ◀
+                <ChevronLeft className="w-5 h-5" />
               </button>
               <button
                 type="button"
                 onClick={handleNext}
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-gray-900/70 hover:bg-gray-900 text-white p-2.5 rounded-full transition-colors cursor-pointer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-slate-800 p-2.5 rounded-full shadow-md transition-colors cursor-pointer"
                 title="Next photo"
               >
-                ▶
+                <ChevronRight className="w-5 h-5" />
               </button>
             </>
           )}
         </div>
 
-        {/* Pie con miniaturas y botón de ver en pestaña nueva */}
-        <div className="p-4 border-t border-gray-800 flex items-center justify-between gap-4 bg-gray-900/90">
-          <div className="flex gap-2 overflow-x-auto py-1">
+        {/* Pie con miniaturas y botón de abrir tamaño real */}
+        <div className="p-4 border-t border-slate-100 flex items-center justify-between gap-4 bg-[#F4F6F9]">
+          <div className="flex gap-2 overflow-x-auto py-1 max-w-[70%] sm:max-w-[80%]">
             {photos.map((url, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => setCurrentIndex(idx)}
-                className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                className={`w-12 h-12 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer shadow-2xs ${
                   idx === currentIndex
-                    ? 'border-blue-500 scale-105 shadow-md'
-                    : 'border-transparent opacity-60 hover:opacity-100'
+                    ? 'border-[#8B4513] scale-105 ring-2 ring-[#8B4513]/20'
+                    : 'border-slate-200 opacity-60 hover:opacity-100'
                 }`}
               >
                 <img
@@ -108,9 +125,10 @@ const PhotoModal: React.FC<PhotoModalProps> = ({
             href={currentPhoto}
             target="_blank"
             rel="noopener noreferrer"
-            className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold rounded-lg shrink-0 transition-colors"
+            className="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#8B4513] text-xs font-extrabold rounded-xl border border-slate-200/80 shrink-0 transition-colors shadow-2xs inline-flex items-center gap-1.5"
           >
-            Open Full Size ↗
+            <span>Full Size</span>
+            <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
       </div>
